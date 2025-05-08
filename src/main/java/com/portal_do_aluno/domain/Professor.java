@@ -1,12 +1,15 @@
 package com.portal_do_aluno.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
+@Getter
+@Setter
+@AllArgsConstructor
 @Entity
 @Table(name = "professores")
 public class Professor extends Usuario {
