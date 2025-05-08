@@ -12,7 +12,11 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "professores")
-public class Professor extends Usuario {
+public class Professor {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @Column(unique = true)
     private String siape;
 
@@ -20,4 +24,8 @@ public class Professor extends Usuario {
 
     @OneToMany(mappedBy = "professor")
     private List<Turma> turmas;
+
+    @OneToOne
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
 }
