@@ -31,7 +31,11 @@ public class Turma {
     @JoinColumn(name = "professor_id")
     private Professor professor;
 
-    @ManyToMany(mappedBy = "turmas")
+    @ManyToMany
+    @JoinTable(
+            name = "alunos_turmas",
+            joinColumns = @JoinColumn(name = "turma_id"),
+            inverseJoinColumns = @JoinColumn(name = "aluno_id"))
     private List<Aluno> alunos;
 
     private LocalTime horario;

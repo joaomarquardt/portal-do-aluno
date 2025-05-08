@@ -27,12 +27,7 @@ public class Aluno {
     @JoinColumn(name = "curso_id", nullable = false)
     private Curso curso;
 
-    @ManyToMany
-    @JoinTable(
-            name = "alunos_turmas",
-            joinColumns = @JoinColumn(name = "aluno_id"),
-            inverseJoinColumns = @JoinColumn(name = "turma_id")
-    )
+    @ManyToMany(mappedBy = "alunos")
     private List<Turma> turmas;
     private boolean matriculado;
 

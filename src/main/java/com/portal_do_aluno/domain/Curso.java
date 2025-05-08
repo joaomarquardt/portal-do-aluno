@@ -22,12 +22,7 @@ public class Curso {
     private String turno;
     private String departamento;
 
-    @ManyToMany
-    @JoinTable(
-            name = "cursos_disciplinas",
-            joinColumns = @JoinColumn(name = "curso_id"),
-            inverseJoinColumns = @JoinColumn(name = "disciplina_id")
-    )
+    @ManyToMany(mappedBy = "cursos")
     private List<Disciplina> disciplinas;
 
     @OneToMany(mappedBy = "curso")

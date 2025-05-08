@@ -24,13 +24,18 @@ public class Disciplina {
 
     @ManyToMany
     @JoinTable(
-            name = "disciplinas_pre_requisitos",
+            name = "pre_requisitos",
             joinColumns = @JoinColumn(name = "disciplina_id"),
             inverseJoinColumns = @JoinColumn(name = "pre_requisito_id")
     )
     private List<Disciplina> preRequisitos;
 
-    @ManyToMany(mappedBy = "disciplinas")
+    @ManyToMany
+    @JoinTable(
+            name = "disciplinas_cursos",
+            joinColumns = @JoinColumn(name = "curso_id"),
+            inverseJoinColumns = @JoinColumn(name = "disciplina_id")
+    )
     private List<Curso> cursos;
 
     private int periodo;
