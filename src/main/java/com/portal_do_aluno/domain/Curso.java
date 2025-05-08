@@ -18,7 +18,7 @@ public class Curso {
     private Long id;
     private String nome;
     private String tipo;
-    private int duracaoAnos;
+    private int anosDuracao;
     private String turno;
     private String departamento;
 

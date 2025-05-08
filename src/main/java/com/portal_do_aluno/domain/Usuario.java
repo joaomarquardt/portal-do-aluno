@@ -19,7 +19,7 @@ public class Usuario {
     @Column(unique = true)
     private String cpf;
 
-    private String email;
+    private String emailPessoal;
     private String emailInstitucional;
     private String telefone;
     private String senha;

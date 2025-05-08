@@ -18,4 +18,5 @@ public class Comunicado {
     private Long id;
     private String titulo;
     private String mensagem;
+    private LocalDateTime dataPublicacao;
 }
