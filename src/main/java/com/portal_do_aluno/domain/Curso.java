@@ -3,6 +3,7 @@ package com.portal_do_aluno.domain;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "cursos")
 public class Curso {
@@ -35,4 +37,15 @@ public class Curso {
             inverseJoinColumns = @JoinColumn(name = "professor_id")
     )
     private List<Professor> professores;
+
+    public Curso(String nome, String tipo, int anosDuracao, String turno, String departamento, List<Disciplina> disciplinas, List<Aluno> alunos, List<Professor> professores) {
+        this.nome = nome;
+        this.tipo = tipo;
+        this.anosDuracao = anosDuracao;
+        this.turno = turno;
+        this.departamento = departamento;
+        this.disciplinas = disciplinas;
+        this.alunos = alunos;
+        this.professores = professores;
+    }
 }
