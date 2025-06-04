@@ -1,7 +1,9 @@
 package com.portal_do_aluno.mappers;
 
 import com.portal_do_aluno.domain.Disciplina;
-import com.portal_do_aluno.dtos.DisciplinaDTO;
+import com.portal_do_aluno.dtos.requests.CreateDisciplinaRequestDTO;
+import com.portal_do_aluno.dtos.requests.UpdateDisciplinaRequestDTO;
+import com.portal_do_aluno.dtos.responses.DisciplinaResponseDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -13,14 +15,12 @@ import java.util.List;
 public interface DisciplinaMapper {
     DisciplinaMapper INSTANCE = Mappers.getMapper(DisciplinaMapper.class);
 
-    DisciplinaDTO toDTO(Disciplina entity);
+    DisciplinaResponseDTO toResponseDTO(Disciplina entity);
 
-    Disciplina toEntity(DisciplinaDTO dto);
+    Disciplina toEntity(CreateDisciplinaRequestDTO dto);
 
-    List<DisciplinaDTO> toDTOList(List<Disciplina> entities);
-
-    List<Disciplina> toEntityList(List<DisciplinaDTO> dtos);
+    List<DisciplinaResponseDTO> toDTOResponseList(List<Disciplina> entities);
 
     @Mapping(target = "id", ignore = true)
-    void updateEntityFromDTO(DisciplinaDTO dto, @MappingTarget Disciplina entity);
+    void updateEntityFromDTO(UpdateDisciplinaRequestDTO dto, @MappingTarget Disciplina entity);
 }

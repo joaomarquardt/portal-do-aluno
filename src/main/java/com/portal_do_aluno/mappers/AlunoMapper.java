@@ -1,7 +1,9 @@
 package com.portal_do_aluno.mappers;
 
 import com.portal_do_aluno.domain.Aluno;
-import com.portal_do_aluno.dtos.AlunoDTO;
+import com.portal_do_aluno.dtos.requests.CreateAlunoRequestDTO;
+import com.portal_do_aluno.dtos.requests.UpdateAlunoRequestDTO;
+import com.portal_do_aluno.dtos.responses.AlunoResponseDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -13,14 +15,12 @@ import java.util.List;
 public interface AlunoMapper {
     AlunoMapper INSTANCE = Mappers.getMapper(AlunoMapper.class);
 
-    AlunoDTO toDTO(Aluno entity);
+    AlunoResponseDTO toResponseDTO(Aluno entity);
 
-    Aluno toEntity(AlunoDTO dto);
+    Aluno toEntity(CreateAlunoRequestDTO dto);
 
-    List<AlunoDTO> toDTOList(List<Aluno> entities);
-
-    List<Aluno> toEntityList(List<AlunoDTO> dtos);
+    List<AlunoResponseDTO> toDTOResponseList(List<Aluno> entities);
 
     @Mapping(target = "id", ignore = true)
-    void updateEntityFromDTO(AlunoDTO dto, @MappingTarget Aluno entity);
+    void updateEntityFromDTO(UpdateAlunoRequestDTO dto, @MappingTarget Aluno entity);
 }

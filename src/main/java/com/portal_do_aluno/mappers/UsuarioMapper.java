@@ -1,7 +1,9 @@
 package com.portal_do_aluno.mappers;
 
 import com.portal_do_aluno.domain.Usuario;
-import com.portal_do_aluno.dtos.UsuarioDTO;
+import com.portal_do_aluno.dtos.requests.CreateUsuarioRequestDTO;
+import com.portal_do_aluno.dtos.requests.UpdateUsuarioRequestDTO;
+import com.portal_do_aluno.dtos.responses.UsuarioResponseDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -13,14 +15,12 @@ import java.util.List;
 public interface UsuarioMapper {
     UsuarioMapper INSTANCE = Mappers.getMapper(UsuarioMapper.class);
 
-    UsuarioDTO toDTO(Usuario entity);
+    UsuarioResponseDTO toResponseDTO(Usuario entity);
 
-    Usuario toEntity(UsuarioDTO dto);
+    Usuario toEntity(CreateUsuarioRequestDTO dto);
 
-    List<UsuarioDTO> toDTOList(List<Usuario> entities);
-
-    List<Usuario> toEntityList(List<UsuarioDTO> dtos);
+    List<UsuarioResponseDTO> toDTOResponseList(List<Usuario> entities);
 
     @Mapping(target = "id", ignore = true)
-    void updateEntityFromDTO(UsuarioDTO dto, @MappingTarget Usuario entity);
+    void updateEntityFromDTO(UpdateUsuarioRequestDTO dto, @MappingTarget Usuario entity);
 }

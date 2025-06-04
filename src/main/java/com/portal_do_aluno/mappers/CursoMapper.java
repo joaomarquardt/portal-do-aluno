@@ -1,7 +1,9 @@
 package com.portal_do_aluno.mappers;
 
 import com.portal_do_aluno.domain.Curso;
-import com.portal_do_aluno.dtos.CursoDTO;
+import com.portal_do_aluno.dtos.requests.CreateCursoRequestDTO;
+import com.portal_do_aluno.dtos.requests.UpdateCursoRequestDTO;
+import com.portal_do_aluno.dtos.responses.CursoResponseDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -13,14 +15,12 @@ import java.util.List;
 public interface CursoMapper {
     CursoMapper INSTANCE = Mappers.getMapper(CursoMapper.class);
 
-    CursoDTO toDTO(Curso entity);
+    CursoResponseDTO toResponseDTO(Curso entity);
 
-    Curso toEntity(CursoDTO dto);
+    Curso toEntity(CreateCursoRequestDTO dto);
 
-    List<CursoDTO> toDTOList(List<Curso> entities);
-
-    List<Curso> toEntityList(List<CursoDTO> dtos);
+    List<CursoResponseDTO> toDTOResponseList(List<Curso> entities);
 
     @Mapping(target = "id", ignore = true)
-    void updateEntityFromDTO(CursoDTO dto, @MappingTarget Curso entity);
+    void updateEntityFromDTO(UpdateCursoRequestDTO dto, @MappingTarget Curso entity);
 }

@@ -1,7 +1,9 @@
 package com.portal_do_aluno.mappers;
 
 import com.portal_do_aluno.domain.Turma;
-import com.portal_do_aluno.dtos.TurmaDTO;
+import com.portal_do_aluno.dtos.requests.CreateTurmaRequestDTO;
+import com.portal_do_aluno.dtos.requests.UpdateTurmaRequestDTO;
+import com.portal_do_aluno.dtos.responses.TurmaResponseDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -13,14 +15,12 @@ import java.util.List;
 public interface TurmaMapper {
     TurmaMapper INSTANCE = Mappers.getMapper(TurmaMapper.class);
 
-    TurmaDTO toDTO(Turma entity);
+    TurmaResponseDTO toResponseDTO(Turma entity);
 
-    Turma toEntity(TurmaDTO dto);
+    Turma toEntity(CreateTurmaRequestDTO dto);
 
-    List<TurmaDTO> toDTOList(List<Turma> entities);
-
-    List<Turma> toEntityList(List<TurmaDTO> dtos);
+    List<TurmaResponseDTO> toDTOResponseList(List<Turma> entities);
 
     @Mapping(target = "id", ignore = true)
-    void updateEntityFromDTO(TurmaDTO dto, @MappingTarget Turma entity);
+    void updateEntityFromDTO(UpdateTurmaRequestDTO dto, @MappingTarget Turma entity);
 }

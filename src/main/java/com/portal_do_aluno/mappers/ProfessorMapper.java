@@ -1,7 +1,9 @@
 package com.portal_do_aluno.mappers;
 
 import com.portal_do_aluno.domain.Professor;
-import com.portal_do_aluno.dtos.ProfessorDTO;
+import com.portal_do_aluno.dtos.requests.CreateProfessorRequestDTO;
+import com.portal_do_aluno.dtos.requests.UpdateProfessorRequestDTO;
+import com.portal_do_aluno.dtos.responses.ProfessorResponseDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -13,14 +15,14 @@ import java.util.List;
 public interface ProfessorMapper {
     ProfessorMapper INSTANCE = Mappers.getMapper(ProfessorMapper.class);
 
-    ProfessorDTO toDTO(Professor entity);
+    ProfessorResponseDTO toResponseDTO(Professor entity);
 
-    Professor toEntity(ProfessorDTO dto);
+    Professor toEntity(CreateProfessorRequestDTO dto);
 
-    List<ProfessorDTO> toDTOList(List<Professor> entities);
+    Professor toResponseEntity(ProfessorResponseDTO dto);
 
-    List<Professor> toEntityList(List<ProfessorDTO> dtos);
+    List<ProfessorResponseDTO> toDTOResponseList(List<Professor> entities);
 
     @Mapping(target = "id", ignore = true)
-    void updateEntityFromDTO(ProfessorDTO dto, @MappingTarget Professor entity);
+    void updateEntityFromDTO(UpdateProfessorRequestDTO dto, @MappingTarget Professor entity);
 }
