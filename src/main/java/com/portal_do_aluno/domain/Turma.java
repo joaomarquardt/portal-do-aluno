@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalTime;
 import java.util.List;
 
 @Getter
@@ -40,9 +39,9 @@ public class Turma {
             inverseJoinColumns = @JoinColumn(name = "aluno_id"))
     private List<Aluno> alunos;
 
-    private LocalTime horario;
+    private String horario;
 
-    public Turma(String codigo, String periodo, Disciplina disciplina, Professor professor, List<Aluno> alunos, LocalTime horario) {
+    public Turma(String codigo, String periodo, Disciplina disciplina, Professor professor, List<Aluno> alunos, String horario) {
         this.codigo = codigo;
         this.periodo = periodo;
         this.disciplina = disciplina;
