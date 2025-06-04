@@ -1,7 +1,8 @@
 package com.portal_do_aluno.controllers;
 
-import com.portal_do_aluno.domain.Curso;
-import com.portal_do_aluno.dtos.CursoDTO;
+import com.portal_do_aluno.dtos.requests.CreateCursoRequestDTO;
+import com.portal_do_aluno.dtos.requests.UpdateCursoRequestDTO;
+import com.portal_do_aluno.dtos.responses.CursoResponseDTO;
 import com.portal_do_aluno.services.CursoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,26 +18,26 @@ public class CursoController {
     private CursoService service;
 
     @GetMapping
-    public ResponseEntity<List<CursoDTO>> findAll() {
-        List<CursoDTO> cursosDTO = service.findAll();
+    public ResponseEntity<List<CursoResponseDTO>> findAll() {
+        List<CursoResponseDTO> cursosDTO = service.findAll();
         return new ResponseEntity<>(cursosDTO, HttpStatus.OK);
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<CursoDTO> findById(@PathVariable(value = "id") Long id) {
-        CursoDTO cursoDTO = service.findById(id);
+    public ResponseEntity<CursoResponseDTO> findById(@PathVariable(value = "id") Long id) {
+        CursoResponseDTO cursoDTO = service.findById(id);
         return new ResponseEntity<>(cursoDTO, HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<CursoDTO> create(@RequestBody CursoDTO cursoDTO) {
-        CursoDTO cursoCriadoDTO = service.create(cursoDTO);
+    public ResponseEntity<CursoResponseDTO> create(@RequestBody CreateCursoRequestDTO cursoDTO) {
+        CursoResponseDTO cursoCriadoDTO = service.create(cursoDTO);
         return new ResponseEntity<>(cursoCriadoDTO, HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<CursoDTO> update(@PathVariable(value = "id") Long id, @RequestBody CursoDTO cursoDTO) {
-        CursoDTO cursoAtualizadoDTO = service.update(id, cursoDTO);
+    public ResponseEntity<CursoResponseDTO> update(@PathVariable(value = "id") Long id, @RequestBody UpdateCursoRequestDTO cursoDTO) {
+        CursoResponseDTO cursoAtualizadoDTO = service.update(id, cursoDTO);
         return new ResponseEntity<>(cursoAtualizadoDTO, HttpStatus.OK);
     }
 

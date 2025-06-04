@@ -1,7 +1,8 @@
 package com.portal_do_aluno.controllers;
 
-import com.portal_do_aluno.domain.Disciplina;
-import com.portal_do_aluno.dtos.DisciplinaDTO;
+import com.portal_do_aluno.dtos.requests.CreateDisciplinaRequestDTO;
+import com.portal_do_aluno.dtos.requests.UpdateDisciplinaRequestDTO;
+import com.portal_do_aluno.dtos.responses.DisciplinaResponseDTO;
 import com.portal_do_aluno.services.DisciplinaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,26 +18,26 @@ public class DisciplinaController {
     private DisciplinaService service;
 
     @GetMapping
-    public ResponseEntity<List<DisciplinaDTO>> findAll() {
-        List<DisciplinaDTO> disciplinasDTO = service.findAll();
+    public ResponseEntity<List<DisciplinaResponseDTO>> findAll() {
+        List<DisciplinaResponseDTO> disciplinasDTO = service.findAll();
         return new ResponseEntity<>(disciplinasDTO, HttpStatus.OK);
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<DisciplinaDTO> findById(@PathVariable(value = "id") Long id) {
-        DisciplinaDTO disciplinaDTO = service.findById(id);
+    public ResponseEntity<DisciplinaResponseDTO> findById(@PathVariable(value = "id") Long id) {
+        DisciplinaResponseDTO disciplinaDTO = service.findById(id);
         return new ResponseEntity<>(disciplinaDTO, HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<DisciplinaDTO> create(@RequestBody DisciplinaDTO disciplinaDTO) {
-        DisciplinaDTO disciplinaCriadoDTO = service.create(disciplinaDTO);
+    public ResponseEntity<DisciplinaResponseDTO> create(@RequestBody CreateDisciplinaRequestDTO disciplinaDTO) {
+        DisciplinaResponseDTO disciplinaCriadoDTO = service.create(disciplinaDTO);
         return new ResponseEntity<>(disciplinaCriadoDTO, HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<DisciplinaDTO> update(@PathVariable(value = "id") Long id, @RequestBody DisciplinaDTO disciplinaDTO) {
-        DisciplinaDTO disciplinaAtualizadoDTO = service.update(id, disciplinaDTO);
+    public ResponseEntity<DisciplinaResponseDTO> update(@PathVariable(value = "id") Long id, @RequestBody UpdateDisciplinaRequestDTO disciplinaDTO) {
+        DisciplinaResponseDTO disciplinaAtualizadoDTO = service.update(id, disciplinaDTO);
         return new ResponseEntity<>(disciplinaAtualizadoDTO, HttpStatus.OK);
     }
 
