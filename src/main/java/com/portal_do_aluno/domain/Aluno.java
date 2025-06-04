@@ -22,7 +22,7 @@ public class Aluno {
     @Column(unique = true)
     private String matricula;
 
-    private int periodoAtual;
+    private int periodoAtual = 1;
     private String periodoIngresso;
 
     @ManyToOne
@@ -31,7 +31,7 @@ public class Aluno {
 
     @ManyToMany(mappedBy = "alunos")
     private List<Turma> turmas;
-    private boolean matriculado;
+    private boolean matriculado = true;
 
     @OneToOne
     @JoinColumn(name = "usuario_id")

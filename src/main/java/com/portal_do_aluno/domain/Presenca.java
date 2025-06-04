@@ -17,7 +17,7 @@ public class Presenca {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private int numeroPresencas;
+    private int numeroPresencas = 0;
 
     @ManyToOne
     @JoinColumn(name = "aluno_id")
