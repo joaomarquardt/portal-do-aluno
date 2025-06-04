@@ -15,7 +15,13 @@ import java.util.List;
 @Service
 public class AlunoService {
     @Autowired
-    private AlunoRepository repository;
+    private AlunoRepository alunoRepository;
+
+    @Autowired
+    private PeriodoLetivoService periodoLetivoService;
+
+    @Autowired
+    private CursoService cursoService;
 
     @Autowired
     private AlunoMapper mapper;
@@ -38,7 +44,13 @@ public class AlunoService {
     }
 
     public AlunoResponseDTO create(CreateAlunoRequestDTO alunoDTO) {
-        Aluno entidadeCriada = alunoRepository.save(mapper.toEntity(alunoDTO));
+        Aluno entidade = mapper.toEntity(alunoDTO);
+        entidade.setPeriodoAtual(1);
+        String periodoLetivo = periodoLetivoService.getAcademicTerm();
+        entidade.setPeriodoIngresso(periodoLetivo);
+        entidade.setCurso(cursoService.findByIdOrThrowEntity(alunoDTO.cursoID()));
+        entidade.setMatricula(generateRegistration(entidade, periodoLetivo));
+        Aluno entidadeCriada = alunoRepository.save(entidade);
         return mapper.toResponseDTO(entidadeCriada);
     }
 
@@ -50,6 +62,14 @@ public class AlunoService {
     }
 
     public void delete(Long id) {
-        repository.deleteById(id);
+        alunoRepository.deleteById(id);
+    }
+
+    public String generateRegistration(Aluno aluno, String periodoLetivo) {
+        String anoAtual = periodoLetivo.substring(0, 4);
+        String periodoAtual = periodoLetivo.substring(5);
+        String codigoCurso = String.format("%03d", aluno.getCurso().getId());
+        String posicaoMatricula = String.format("%03d", alunoRepository.countByCursoAndPeriodoIngresso(aluno.getCurso(), aluno.getPeriodoIngresso()) + 1);
+        return anoAtual + periodoAtual + codigoCurso + posicaoMatricula;
     }
 }
