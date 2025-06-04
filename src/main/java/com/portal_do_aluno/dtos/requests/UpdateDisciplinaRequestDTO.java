@@ -1,7 +1,6 @@
-package com.portal_do_aluno.dtos;
+package com.portal_do_aluno.dtos.requests;
 
-public record DisciplinaDTO(
-        String codigo,
+public record UpdateDisciplinaRequestDTO(
         String nome,
         int periodo,
         int vagasTotais,

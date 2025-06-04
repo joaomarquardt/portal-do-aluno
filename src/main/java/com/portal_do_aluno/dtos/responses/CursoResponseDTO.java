@@ -1,6 +1,6 @@
-package com.portal_do_aluno.dtos;
+package com.portal_do_aluno.dtos.responses;
 
-public record CursoDTO(
+public record CursoResponseDTO(
         String nome,
         String tipo,
         int anosDuracao,
