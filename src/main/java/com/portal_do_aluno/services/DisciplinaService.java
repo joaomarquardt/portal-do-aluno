@@ -1,7 +1,9 @@
 package com.portal_do_aluno.services;
 
 import com.portal_do_aluno.domain.Disciplina;
-import com.portal_do_aluno.dtos.DisciplinaDTO;
+import com.portal_do_aluno.dtos.requests.CreateDisciplinaRequestDTO;
+import com.portal_do_aluno.dtos.requests.UpdateDisciplinaRequestDTO;
+import com.portal_do_aluno.dtos.responses.DisciplinaResponseDTO;
 import com.portal_do_aluno.mappers.DisciplinaMapper;
 import com.portal_do_aluno.repositories.DisciplinaRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,25 +20,25 @@ public class DisciplinaService {
     @Autowired
     private DisciplinaMapper mapper;
 
-    public List<DisciplinaDTO> findAll() {
-        return mapper.toDTOList(repository.findAll());
+    public List<DisciplinaResponseDTO> findAll() {
+        return mapper.toDTOResponseList(repository.findAll());
     }
 
-    public DisciplinaDTO findById(Long id) {
+    public DisciplinaResponseDTO findById(Long id) {
         Disciplina entidade = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Disciplina não encontrado!"));
-        return mapper.toDTO(entidade);
+        return mapper.toResponseDTO(entidade);
     }
 
-    public DisciplinaDTO create(DisciplinaDTO alunoDTO) {
+    public DisciplinaResponseDTO create(CreateDisciplinaRequestDTO alunoDTO) {
         Disciplina entidadeCriada = repository.save(mapper.toEntity(alunoDTO));
-        return mapper.toDTO(entidadeCriada);
+        return mapper.toResponseDTO(entidadeCriada);
     }
 
-    public DisciplinaDTO update(Long id, DisciplinaDTO alunoDTO) {
+    public DisciplinaResponseDTO update(Long id, UpdateDisciplinaRequestDTO alunoDTO) {
         Disciplina entidade = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Disciplina não encontrado!"));
         mapper.updateEntityFromDTO(alunoDTO, entidade);
         entidade = repository.save(entidade);
-        return mapper.toDTO(entidade);
+        return mapper.toResponseDTO(entidade);
     }
 
     public void delete(Long id) {

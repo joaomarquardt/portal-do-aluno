@@ -1,7 +1,9 @@
 package com.portal_do_aluno.services;
 
 import com.portal_do_aluno.domain.Curso;
-import com.portal_do_aluno.dtos.CursoDTO;
+import com.portal_do_aluno.dtos.requests.CreateCursoRequestDTO;
+import com.portal_do_aluno.dtos.requests.UpdateCursoRequestDTO;
+import com.portal_do_aluno.dtos.responses.CursoResponseDTO;
 import com.portal_do_aluno.mappers.CursoMapper;
 import com.portal_do_aluno.repositories.CursoRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,25 +20,29 @@ public class CursoService {
     @Autowired
     private CursoMapper mapper;
 
-    public List<CursoDTO> findAll() {
-        return mapper.toDTOList(repository.findAll());
+    public List<CursoResponseDTO> findAll() {
+        return mapper.toDTOResponseList(repository.findAll());
     }
 
-    public CursoDTO findById(Long id) {
-        Curso entidade = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Curso não encontrado!"));
-        return mapper.toDTO(entidade);
+    public CursoResponseDTO findById(Long id) {
+        Curso entidade = findByIdOrThrowEntity(id);
+        return mapper.toResponseDTO(entidade);
     }
 
-    public CursoDTO create(CursoDTO alunoDTO) {
+    public Curso findByIdOrThrowEntity(Long id) {
+        return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Curso não encontrado!"));
+    }
+
+    public CursoResponseDTO create(CreateCursoRequestDTO alunoDTO) {
         Curso entidadeCriada = repository.save(mapper.toEntity(alunoDTO));
-        return mapper.toDTO(entidadeCriada);
+        return mapper.toResponseDTO(entidadeCriada);
     }
 
-    public CursoDTO update(Long id, CursoDTO alunoDTO) {
+    public CursoResponseDTO update(Long id, UpdateCursoRequestDTO alunoDTO) {
         Curso entidade = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Curso não encontrado!"));
         mapper.updateEntityFromDTO(alunoDTO, entidade);
         entidade = repository.save(entidade);
-        return mapper.toDTO(entidade);
+        return mapper.toResponseDTO(entidade);
     }
 
     public void delete(Long id) {

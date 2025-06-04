@@ -1,7 +1,9 @@
 package com.portal_do_aluno.services;
 
-import com.portal_do_aluno.domain.Aluno;
-import com.portal_do_aluno.dtos.AlunoDTO;
+import com.portal_do_aluno.domain.*;
+import com.portal_do_aluno.dtos.requests.CreateAlunoRequestDTO;
+import com.portal_do_aluno.dtos.requests.UpdateAlunoRequestDTO;
+import com.portal_do_aluno.dtos.responses.AlunoResponseDTO;
 import com.portal_do_aluno.mappers.AlunoMapper;
 import com.portal_do_aluno.repositories.AlunoRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,25 +20,33 @@ public class AlunoService {
     @Autowired
     private AlunoMapper mapper;
 
-    public List<AlunoDTO> findAll() {
-        return mapper.toDTOList(repository.findAll());
+    public List<AlunoResponseDTO> findAll() {
+        return mapper.toDTOResponseList(alunoRepository.findAll());
     }
 
-    public AlunoDTO findById(Long id) {
-        Aluno entidade = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado!"));
-        return mapper.toDTO(entidade);
+    public AlunoResponseDTO findById(Long id) {
+        Aluno entidade = findByIdOrThrowEntity(id);
+        return mapper.toResponseDTO(entidade);
     }
 
-    public AlunoDTO create(AlunoDTO alunoDTO) {
-        Aluno entidadeCriada = repository.save(mapper.toEntity(alunoDTO));
-        return mapper.toDTO(entidadeCriada);
+    public Aluno findByIdOrThrowEntity(Long id) {
+        return alunoRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado!"));
     }
 
-    public AlunoDTO update(Long id, AlunoDTO alunoDTO) {
-        Aluno entidade = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado!"));
+    public Aluno findByMatriculaOrThrowEntity(String matricula) {
+        return alunoRepository.findByMatricula(matricula).orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado!"));
+    }
+
+    public AlunoResponseDTO create(CreateAlunoRequestDTO alunoDTO) {
+        Aluno entidadeCriada = alunoRepository.save(mapper.toEntity(alunoDTO));
+        return mapper.toResponseDTO(entidadeCriada);
+    }
+
+    public AlunoResponseDTO update(Long id, UpdateAlunoRequestDTO alunoDTO) {
+        Aluno entidade = alunoRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado!"));
         mapper.updateEntityFromDTO(alunoDTO, entidade);
-        entidade = repository.save(entidade);
-        return mapper.toDTO(entidade);
+        entidade = alunoRepository.save(entidade);
+        return mapper.toResponseDTO(entidade);
     }
 
     public void delete(Long id) {

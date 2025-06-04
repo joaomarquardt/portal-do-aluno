@@ -1,7 +1,9 @@
 package com.portal_do_aluno.services;
 
 import com.portal_do_aluno.domain.Comunicado;
-import com.portal_do_aluno.dtos.ComunicadoDTO;
+import com.portal_do_aluno.dtos.requests.CreateComunicadoRequestDTO;
+import com.portal_do_aluno.dtos.requests.UpdateComunicadoRequestDTO;
+import com.portal_do_aluno.dtos.responses.ComunicadoResponseDTO;
 import com.portal_do_aluno.mappers.ComunicadoMapper;
 import com.portal_do_aluno.repositories.ComunicadoRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,25 +20,25 @@ public class ComunicadoService {
     @Autowired
     private ComunicadoMapper mapper;
 
-    public List<ComunicadoDTO> findAll() {
-        return mapper.toDTOList(repository.findAll());
+    public List<ComunicadoResponseDTO> findAll() {
+        return mapper.toDTOResponseList(repository.findAll());
     }
 
-    public ComunicadoDTO findById(Long id) {
+    public ComunicadoResponseDTO findById(Long id) {
         Comunicado entidade = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Comunicado não encontrado!"));
-        return mapper.toDTO(entidade);
+        return mapper.toResponseDTO(entidade);
     }
 
-    public ComunicadoDTO create(ComunicadoDTO alunoDTO) {
-        Comunicado entidadeCriada = repository.save(mapper.toEntity(alunoDTO));
-        return mapper.toDTO(entidadeCriada);
+    public  ComunicadoResponseDTO create(CreateComunicadoRequestDTO comunicadoDTO) {
+        Comunicado entidadeCriada = repository.save(mapper.toEntity(comunicadoDTO));
+        return mapper.toResponseDTO(entidadeCriada);
     }
 
-    public ComunicadoDTO update(Long id, ComunicadoDTO alunoDTO) {
+    public ComunicadoResponseDTO update(Long id, UpdateComunicadoRequestDTO comunicadoDTO) {
         Comunicado entidade = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Comunicado não encontrado!"));
-        mapper.updateEntityFromDTO(alunoDTO, entidade);
+        mapper.updateEntityFromDTO(comunicadoDTO, entidade);
         entidade = repository.save(entidade);
-        return mapper.toDTO(entidade);
+        return mapper.toResponseDTO(entidade);
     }
 
     public void delete(Long id) {

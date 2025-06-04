@@ -1,7 +1,9 @@
 package com.portal_do_aluno.services;
 
 import com.portal_do_aluno.domain.Usuario;
-import com.portal_do_aluno.dtos.UsuarioDTO;
+import com.portal_do_aluno.dtos.requests.CreateUsuarioRequestDTO;
+import com.portal_do_aluno.dtos.requests.UpdateUsuarioRequestDTO;
+import com.portal_do_aluno.dtos.responses.UsuarioResponseDTO;
 import com.portal_do_aluno.mappers.UsuarioMapper;
 import com.portal_do_aluno.repositories.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,25 +20,25 @@ public class UsuarioService {
     @Autowired
     private UsuarioMapper mapper;
 
-    public List<UsuarioDTO> findAll() {
-        return mapper.toDTOList(repository.findAll());
+    public List<UsuarioResponseDTO> findAll() {
+        return mapper.toDTOResponseList(repository.findAll());
     }
 
-    public UsuarioDTO findById(Long id) {
+    public UsuarioResponseDTO findById(Long id) {
         Usuario entidade = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Usuario não encontrado!"));
-        return mapper.toDTO(entidade);
+        return mapper.toResponseDTO(entidade);
     }
 
-    public UsuarioDTO create(UsuarioDTO usuarioDTO) {
+    public UsuarioResponseDTO create(CreateUsuarioRequestDTO usuarioDTO) {
         Usuario entidadeCriada = repository.save(mapper.toEntity(usuarioDTO));
-        return mapper.toDTO(entidadeCriada);
+        return mapper.toResponseDTO(entidadeCriada);
     }
 
-    public UsuarioDTO update(Long id, UsuarioDTO usuarioDTO) {
+    public UsuarioResponseDTO update(Long id, UpdateUsuarioRequestDTO usuarioDTO) {
         Usuario entidade = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Usuario não encontrado!"));
         mapper.updateEntityFromDTO(usuarioDTO, entidade);
         entidade = repository.save(entidade);
-        return mapper.toDTO(entidade);
+        return mapper.toResponseDTO(entidade);
     }
 
     public void delete(Long id) {

@@ -1,7 +1,9 @@
 package com.portal_do_aluno.services;
 
 import com.portal_do_aluno.domain.Turma;
-import com.portal_do_aluno.dtos.TurmaDTO;
+import com.portal_do_aluno.dtos.requests.CreateTurmaRequestDTO;
+import com.portal_do_aluno.dtos.requests.UpdateTurmaRequestDTO;
+import com.portal_do_aluno.dtos.responses.TurmaResponseDTO;
 import com.portal_do_aluno.mappers.TurmaMapper;
 import com.portal_do_aluno.repositories.TurmaRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,25 +20,25 @@ public class TurmaService {
     @Autowired
     private TurmaMapper mapper;
 
-    public List<TurmaDTO> findAll() {
-        return mapper.toDTOList(repository.findAll());
+    public List<TurmaResponseDTO> findAll() {
+        return mapper.toDTOResponseList(repository.findAll());
     }
 
-    public TurmaDTO findById(Long id) {
+    public TurmaResponseDTO findById(Long id) {
         Turma entidade = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Turma não encontrado!"));
-        return mapper.toDTO(entidade);
+        return mapper.toResponseDTO(entidade);
     }
 
-    public TurmaDTO create(TurmaDTO turmaDTO) {
+    public TurmaResponseDTO create(CreateTurmaRequestDTO turmaDTO) {
         Turma entidadeCriada = repository.save(mapper.toEntity(turmaDTO));
-        return mapper.toDTO(entidadeCriada);
+        return mapper.toResponseDTO(entidadeCriada);
     }
 
-    public TurmaDTO update(Long id, TurmaDTO turmaDTO) {
+    public TurmaResponseDTO update(Long id, UpdateTurmaRequestDTO turmaDTO) {
         Turma entidade = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Turma não encontrado!"));
         mapper.updateEntityFromDTO(turmaDTO, entidade);
         entidade = repository.save(entidade);
-        return mapper.toDTO(entidade);
+        return mapper.toResponseDTO(entidade);
     }
 
     public void delete(Long id) {
