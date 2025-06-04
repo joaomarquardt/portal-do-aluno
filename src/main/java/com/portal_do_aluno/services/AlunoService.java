@@ -4,8 +4,12 @@ import com.portal_do_aluno.domain.*;
 import com.portal_do_aluno.dtos.requests.CreateAlunoRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateAlunoRequestDTO;
 import com.portal_do_aluno.dtos.responses.AlunoResponseDTO;
+import com.portal_do_aluno.dtos.responses.DesempenhoResponseDTO;
+import com.portal_do_aluno.dtos.responses.TurmaDesempenhoResponseDTO;
 import com.portal_do_aluno.mappers.AlunoMapper;
 import com.portal_do_aluno.repositories.AlunoRepository;
+import com.portal_do_aluno.repositories.MediaRepository;
+import com.portal_do_aluno.repositories.PresencaRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +26,12 @@ public class AlunoService {
 
     @Autowired
     private CursoService cursoService;
+
+    @Autowired
+    private PresencaRepository presencaRepository;
+
+    @Autowired
+    private MediaRepository mediaRepository;
 
     @Autowired
     private AlunoMapper mapper;
@@ -71,5 +81,23 @@ public class AlunoService {
         String codigoCurso = String.format("%03d", aluno.getCurso().getId());
         String posicaoMatricula = String.format("%03d", alunoRepository.countByCursoAndPeriodoIngresso(aluno.getCurso(), aluno.getPeriodoIngresso()) + 1);
         return anoAtual + periodoAtual + codigoCurso + posicaoMatricula;
+    }
+
+    public List<DesempenhoResponseDTO> getSchoolPerformance(Long id) {
+        Aluno aluno = alunoRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado!"));
+        return aluno.getTurmas().stream()
+                .map(
+                        turma -> {
+                            Media media = mediaRepository.findByAlunoAndTurma(aluno, turma).orElseThrow(() -> new EntityNotFoundException("Não há média registrada para o aluno nesta turma!"));
+                            Presenca presenca = presencaRepository.findByAlunoAndTurma(aluno, turma).orElseThrow(() -> new EntityNotFoundException("Não há presença registrada para o aluno nesta turma!"));
+                            TurmaDesempenhoResponseDTO turmaDesempenhoResponseDTO = new TurmaDesempenhoResponseDTO(
+                                    turma.getCodigo(),
+                                    turma.getDisciplina().getNome(),
+                                    turma.getPeriodo()
+                            );
+                            return new DesempenhoResponseDTO(turmaDesempenhoResponseDTO, media.getValor(), presenca.getNumeroPresencas());
+                        }
+                )
+                .toList();
     }
 }

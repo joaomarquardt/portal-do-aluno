@@ -3,6 +3,7 @@ package com.portal_do_aluno.controllers;
 import com.portal_do_aluno.dtos.requests.CreateAlunoRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateAlunoRequestDTO;
 import com.portal_do_aluno.dtos.responses.AlunoResponseDTO;
+import com.portal_do_aluno.dtos.responses.DesempenhoResponseDTO;
 import com.portal_do_aluno.services.AlunoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -45,5 +46,11 @@ public class AlunoController {
     public ResponseEntity<Void> delete(@PathVariable(value = "id") Long id) {
         service.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping(value = "/{id}/desempenho")
+    public ResponseEntity<List<DesempenhoResponseDTO>> getSchoolPerformance(@PathVariable(value = "id") Long id) {
+        List<DesempenhoResponseDTO> desempenhosDTO = service.getSchoolPerformance(id);
+        return new ResponseEntity<>(desempenhosDTO, HttpStatus.OK);
     }
 }
