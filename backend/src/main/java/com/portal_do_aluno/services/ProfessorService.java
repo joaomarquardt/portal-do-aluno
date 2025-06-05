@@ -1,6 +1,5 @@
 package com.portal_do_aluno.services;
 
-import com.portal_do_aluno.domain.Aluno;
 import com.portal_do_aluno.domain.Professor;
 import com.portal_do_aluno.dtos.requests.CreateProfessorRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateProfessorRequestDTO;
