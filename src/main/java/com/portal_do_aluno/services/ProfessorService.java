@@ -1,5 +1,6 @@
 package com.portal_do_aluno.services;
 
+import com.portal_do_aluno.domain.Aluno;
 import com.portal_do_aluno.domain.Professor;
 import com.portal_do_aluno.dtos.requests.CreateProfessorRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateProfessorRequestDTO;
@@ -27,6 +28,10 @@ public class ProfessorService {
     public ProfessorResponseDTO findById(Long id) {
         Professor entidade = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Professor não encontrado!"));
         return mapper.toResponseDTO(entidade);
+    }
+
+    public Professor findBySiapeOrThrowEntity(String siape) {
+        return repository.findBySiape(siape).orElseThrow(() -> new EntityNotFoundException("Professor não encontrado!"));
     }
 
     public ProfessorResponseDTO create(CreateProfessorRequestDTO professorDTO) {

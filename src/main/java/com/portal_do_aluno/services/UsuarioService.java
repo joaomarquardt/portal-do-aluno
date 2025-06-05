@@ -1,6 +1,7 @@
 package com.portal_do_aluno.services;
 
 import com.portal_do_aluno.domain.Aluno;
+import com.portal_do_aluno.domain.Professor;
 import com.portal_do_aluno.domain.Usuario;
 import com.portal_do_aluno.dtos.requests.CreateUsuarioRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateUsuarioRequestDTO;
@@ -56,7 +57,8 @@ public class UsuarioService {
         }
         if (usuarioDTO.professor() != null) {
             ProfessorResponseDTO professorCriado = professorService.create(usuarioDTO.professor());
-            entidade.setProfessor(professorMapper.toResponseEntity(professorCriado));
+            Professor professor = professorService.findBySiapeOrThrowEntity(professorCriado.siape());
+            entidade.setProfessor(professor);
             entidade.getProfessor().setUsuario(entidade);
         }
         Usuario entidadeCriada = repository.save(entidade);
