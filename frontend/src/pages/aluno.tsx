@@ -1,6 +1,6 @@
 import React, { useState }from "react";
 import "../styles/aluno.css"
-import { FaUserCircle, FaSignOutAlt } from "react-icons/fa";
+
 
 
 export default function aluno(){
