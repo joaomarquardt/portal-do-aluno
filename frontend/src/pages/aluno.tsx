@@ -1,14 +1,24 @@
-import React, { useState }from "react";
+import React, { useState, useEffect}from "react";
 import "../styles/aluno.css"
-
-
+import Comunicados from "./componetes_adm/comunicados";
+import "../styles/adm.css"
 
 export default function aluno(){
+
+  const [comunicados, setComunicados] = useState<{ titulo: string; mensagem: string }[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
   };
+  
+   useEffect(() => {
+      fetch("http://localhost:3000/comunicados")
+        .then(res => res.json())
+        .then(data => setComunicados(data))
+        .catch(err => console.error("Erro ao carregar comunicados:", err));
+    }, []);
+  
   return (
     <div className="container">
       <aside className="sidebar">
@@ -37,7 +47,12 @@ export default function aluno(){
           <button>Sair</button>
         </div>
       </aside>
-      <main className="content"></main>
+      <main className="content">
+        <div className="direita">
+          <h3>Comunicados</h3>
+          <Comunicados comunicados={comunicados} setComunicados={setComunicados}></Comunicados>
+        </div>
+      </main>
     </div>
   );
 };

@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react";
 import "../styles/adm.css";
 import { FaTrash } from "react-icons/fa";
+import "../styles/aluno.css"
 
-type Comunicado = {
-titulo: string;
-mensagem: string;
-};
+
+import Comunicados from "./componetes_adm/comunicados";
+
 
 export default function Administrador() {
   const [mostrarDashboard, setMostrarDashboard] = useState(false);
-  const [comunicados, setComunicados] = useState<Comunicado[]>([]);
   const [titulo, setTitulo] = useState("");
   const [mensagem, setMensagem] = useState("");
-
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [comunicados, setComunicados] = useState<{ titulo: string; mensagem: string }[]>([]);
 
   useEffect(() => {
     fetch("http://localhost:3000/comunicados")
@@ -20,16 +20,15 @@ export default function Administrador() {
       .then(data => setComunicados(data))
       .catch(err => console.error("Erro ao carregar comunicados:", err));
   }, []);
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
 
   const alternarDashboard = () => {
     setMostrarDashboard(!mostrarDashboard);
   };
-  const removerComunicado = (indice: number) => {
-    const novaLista = [...comunicados];
-    novaLista.splice(indice, 1);
-    setComunicados(novaLista);
-  };
- const handleSubmit = async (e: React.FormEvent) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (titulo.trim() === "" || mensagem.trim() === "") return;
@@ -44,7 +43,6 @@ export default function Administrador() {
       const data = await response.json();
       console.log("Resposta do servidor:", data);
 
-      // Atualiza a lista local
       setComunicados([...comunicados, { titulo, mensagem }]);
       setTitulo("");
       setMensagem("");
@@ -54,19 +52,34 @@ export default function Administrador() {
   };
 
   return (
-    <section className="TelaAdminstrador">
-      <div className="headerPai">
-        <div className="HeaderInfos">
-          <span>RJ</span>
-          <span>UNIRIO</span>
+   <div className="container">
+      <aside className="sidebar">
+        <div className="user-info">
+          <div className="avatar"></div>
+          <button className="username-btn" onClick={toggleDropdown}>
+            NOME ALUNO ▾
+          </button>
         </div>
-      </div>
-      <div className="headerFilho">
-        <span>Administrador</span>
-      </div>
-      <div className="conteudoHeader">
-        <span>Bem-vindo</span>
-      </div>
+
+        {dropdownOpen && (
+          <div className="dropdown-expanded">
+            <button>Conta</button>
+            <button>Configurações</button>
+          </div>
+        )}
+
+        <nav className="nav-links">
+          <button>Grade horária</button>
+          <button>Calendário</button>
+          <button>Relatórios</button>
+          <button>Turmas</button>
+        </nav>
+
+        <div className="logout">
+          <button>Sair</button>
+        </div>
+      </aside>
+      <main className="content">
       <div className="conteudo">
         <div className="esquerda">
           <button className="botaoDashboard" onClick={alternarDashboard}>
@@ -100,28 +113,13 @@ export default function Administrador() {
             </div>
           )}
         </div>
-
+          
         <div className="direita">
           <h3>Comunicados</h3>
-         <div className="listaComunicados">
-            {comunicados.map((item, index) => (
-              <div key={index} className="comunicado">
-                <div className="comunicadoHeader">
-                  <strong>{item.titulo}</strong>
-                  <button
-                    className="botaoLixeira"
-                    onClick={() => removerComunicado(index)}
-                    title="Excluir comunicado"
-                  >
-                    <FaTrash />
-                  </button>
-                </div>
-                <p>{item.mensagem}</p>
-              </div>
-            ))}
-          </div>
+          <Comunicados comunicados={comunicados} setComunicados={setComunicados}></Comunicados>
         </div>
       </div>
-    </section>
+      </main>
+    </div>
   );
 }

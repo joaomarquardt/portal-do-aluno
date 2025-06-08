@@ -41,8 +41,8 @@
 }
 
 .conteudo{
-    border: 1px solid red;
-    width: 100%;
+ 
+    width: 80vw;
     height: 100vh;
     display: flex;
 }
@@ -109,10 +109,11 @@
 .direita {
     width: 30vw;
     max-height: 80vh;
+    border: 1px solid black;
     background-color: #f8f8f8;
     border-radius: 10px;
     padding: 16px;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+
     display: flex;
     flex-direction: column;
     overflow-y: auto;
@@ -135,6 +136,7 @@
 
 .comunicado {
     background-color: white;
+    border: 1px solid black;
     padding: 10px 14px;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
