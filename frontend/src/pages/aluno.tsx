@@ -15,7 +15,7 @@ export default function aluno(){
         <div className="user-info">
           <div className="avatar"></div>
           <button className="username-btn" onClick={toggleDropdown}>
-            João Marquardt ▾
+            NOME ALUNO ▾
           </button>
         </div>
 

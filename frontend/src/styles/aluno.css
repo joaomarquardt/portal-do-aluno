@@ -113,3 +113,25 @@
   flex: 1;
   background-color: #f0f0f0;
 }
+.botaoDashboard {
+    margin-bottom: 20px;
+    padding: 10px 16px;
+    background-color: #21216c;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.botaoDashboard:hover {
+    background-color: #3f4497;
+}
+
+.esquerda {
+    width: 65vw;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
