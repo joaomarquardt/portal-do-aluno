@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../styles/adm.css";
+import { FaTrash } from "react-icons/fa";
 
 type Comunicado = {
 titulo: string;
@@ -13,20 +14,43 @@ export default function Administrador() {
   const [mensagem, setMensagem] = useState("");
 
 
-  // resto do código...
+  useEffect(() => {
+    fetch("http://localhost:3000/comunicados")
+      .then(res => res.json())
+      .then(data => setComunicados(data))
+      .catch(err => console.error("Erro ao carregar comunicados:", err));
+  }, []);
 
   const alternarDashboard = () => {
     setMostrarDashboard(!mostrarDashboard);
   };
-
-  const handleSubmit = (e) => {
+  const removerComunicado = (indice: number) => {
+    const novaLista = [...comunicados];
+    novaLista.splice(indice, 1);
+    setComunicados(novaLista);
+  };
+ const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (titulo.trim() === "" || mensagem.trim() === "") return;
 
-    setComunicados([...comunicados, { titulo, mensagem }]);
-    setTitulo("");
-    setMensagem(""); // opcional: fecha o painel após envio
+    try {
+      const response = await fetch("http://localhost:3000/comunicados", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ titulo, mensagem }),
+      });
+
+      const data = await response.json();
+      console.log("Resposta do servidor:", data);
+
+      // Atualiza a lista local
+      setComunicados([...comunicados, { titulo, mensagem }]);
+      setTitulo("");
+      setMensagem("");
+    } catch (error) {
+      console.error("Erro ao enviar:", error);
+    }
   };
 
   return (
@@ -79,10 +103,19 @@ export default function Administrador() {
 
         <div className="direita">
           <h3>Comunicados</h3>
-          <div className="listaComunicados">
+         <div className="listaComunicados">
             {comunicados.map((item, index) => (
               <div key={index} className="comunicado">
-                <strong>{item.titulo}</strong>
+                <div className="comunicadoHeader">
+                  <strong>{item.titulo}</strong>
+                  <button
+                    className="botaoLixeira"
+                    onClick={() => removerComunicado(index)}
+                    title="Excluir comunicado"
+                  >
+                    <FaTrash />
+                  </button>
+                </div>
                 <p>{item.mensagem}</p>
               </div>
             ))}
