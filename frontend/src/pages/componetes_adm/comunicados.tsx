@@ -21,6 +21,7 @@ export default function Comunicados({ comunicados, setComunicados }: Props){
     return(
         <>
         <div className="listaComunicados">
+            
             {comunicados.map((item, index) => (
                 <div key={index} className="comunicado">
                 <div className="comunicadoHeader">

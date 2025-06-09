@@ -14,6 +14,14 @@ export default function Administrador() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [comunicados, setComunicados] = useState<{ titulo: string; mensagem: string }[]>([]);
 
+  const [qtdAlunos, setQtdAlunos] = useState(0)
+
+  useEffect(()=>{
+    fetch("http://localhost:3000/alunos")
+    .then(res =>res.json())
+    .then(data => setQtdAlunos(data.length))
+    .then(err => console.error("erro ao carregar dados alunos "))
+  })
   useEffect(() => {
     fetch("http://localhost:3000/comunicados")
       .then(res => res.json())
@@ -57,7 +65,7 @@ export default function Administrador() {
         <div className="user-info">
           <div className="avatar"></div>
           <button className="username-btn" onClick={toggleDropdown}>
-            NOME ALUNO ▾
+            ADMINSTRADOR
           </button>
         </div>
 
@@ -69,9 +77,9 @@ export default function Administrador() {
         )}
 
         <nav className="nav-links">
-          <button>Grade horária</button>
-          <button>Calendário</button>
-          <button>Relatórios</button>
+          <button>Professores matriculados</button>
+          <button>Alunos</button>
+          <button>Disciplinas</button>
           <button>Turmas</button>
         </nav>
 
@@ -80,12 +88,42 @@ export default function Administrador() {
         </div>
       </aside>
       <main className="content">
+        <div className="dashboard-cards">
+          <div className="card">
+            <h4>Alunos Cadastrados</h4>
+            <p>234</p>
+          </div>
+          <div className="card">
+            <h4>Professores Cadastrados</h4>
+            <p>42</p>
+          </div>
+          <div className="card">
+            <h4>Total de Turmas</h4>
+            <p>18</p>
+          </div>
+          <div className="card">
+            <h4>Alunos Matriculados</h4>
+            <p>87%</p>
+          </div>
+        </div> 
       <div className="conteudo">
+        
         <div className="esquerda">
-          <button className="botaoDashboard" onClick={alternarDashboard}>
+          <h1>Ações</h1>
+          <div className="acoes">
+            <button className="botaoDashboard" onClick={alternarDashboard}>
             {mostrarDashboard ? "Fechar painel" : "Criar postagem"}
           </button>
-
+          <button className="botaoDashboard" onClick={alternarDashboard}>
+            Cadastrar Aluno
+          </button>
+          <button className="botaoDashboard" onClick={alternarDashboard}>
+            Cadastrar Professor
+          </button>
+          </div>
+       
+          
+          
           {mostrarDashboard && (
             <div className="dashboard">
               <h2>Criar nova postagem</h2>

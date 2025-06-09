@@ -39,5 +39,16 @@ app.post("/comunicados", (req, res) => {
         });
 });
 
+app.get("/alunos", async (req,res)=>{
+  try{
+    const response = await fetch(process.env.URL_API + "/comunicados");
+    const dados = await response.json();
+    res.status(200).json(dados);
+  }catch{
+    console.error(erro);
+    res.status(500).json({ erro: "Erro ao buscar alunos" });
+    
+  }
+})
 
 app.listen(process.env.PORTA_SERVIDOR_FRONT, () => console.log(`Servidor rodando na porta ${process.env.PORTA_SERVIDOR_FRONT}`));
