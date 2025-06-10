@@ -5,6 +5,7 @@ import java.util.List;
 public record TurmaResponseDTO(
         String codigo,
         String periodo,
+        int vagasTotais,
         String horario,
         DisciplinaResponseDTO disciplina,
         ProfessorResponseDTO professor,

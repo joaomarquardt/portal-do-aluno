@@ -39,13 +39,15 @@ public class Turma {
             inverseJoinColumns = @JoinColumn(name = "aluno_id"))
     private List<Aluno> alunos;
 
+    private int vagasTotais;
     private String horario;
 
-    public Turma(String codigo, String periodo, Disciplina disciplina, Professor professor, List<Aluno> alunos, String horario) {
+    public Turma(String codigo, String periodo, Disciplina disciplina, Professor professor, List<Aluno> alunos, int vagasTotais, String horario) {
         this.codigo = codigo;
         this.periodo = periodo;
         this.disciplina = disciplina;
         this.professor = professor;
+        this.vagasTotais = vagasTotais;
         this.alunos = alunos;
         this.horario = horario;
     }

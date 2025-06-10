@@ -4,7 +4,6 @@ public record CreateDisciplinaRequestDTO(
         String codigo,
         String nome,
         int periodo,
-        int vagasTotais,
         int cargaHoraria
 ) {
 }

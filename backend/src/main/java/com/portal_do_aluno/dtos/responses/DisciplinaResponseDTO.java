@@ -4,7 +4,6 @@ public record DisciplinaResponseDTO(
         String codigo,
         String nome,
         int periodo,
-        int vagasTotais,
         int cargaHoraria
 ) {
 }

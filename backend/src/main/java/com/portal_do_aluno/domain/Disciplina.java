@@ -41,16 +41,14 @@ public class Disciplina {
     private List<Curso> cursos;
 
     private int periodo;
-    private int vagasTotais;
     private int cargaHoraria;
 
-    public Disciplina(String codigo, String nome, List<Disciplina> preRequisitos, List<Curso> cursos, int periodo, int vagasTotais, int cargaHoraria) {
+    public Disciplina(String codigo, String nome, List<Disciplina> preRequisitos, List<Curso> cursos, int periodo, int cargaHoraria) {
         this.codigo = codigo;
         this.nome = nome;
         this.preRequisitos = preRequisitos;
         this.cursos = cursos;
         this.periodo = periodo;
-        this.vagasTotais = vagasTotais;
         this.cargaHoraria = cargaHoraria;
     }
 }
