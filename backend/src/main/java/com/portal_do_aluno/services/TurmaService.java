@@ -1,5 +1,7 @@
 package com.portal_do_aluno.services;
 
+import com.portal_do_aluno.domain.Disciplina;
+import com.portal_do_aluno.domain.Professor;
 import com.portal_do_aluno.domain.Turma;
 import com.portal_do_aluno.dtos.requests.CreateTurmaRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateTurmaRequestDTO;
@@ -20,6 +22,15 @@ public class TurmaService {
     @Autowired
     private TurmaMapper mapper;
 
+    @Autowired
+    private DisciplinaService disciplinaService;
+
+    @Autowired
+    private ProfessorService professorService;
+
+    @Autowired
+    private PeriodoLetivoService periodoLetivoService;
+
     public List<TurmaResponseDTO> findAll() {
         return mapper.toDTOResponseList(repository.findAll());
     }
@@ -30,7 +41,15 @@ public class TurmaService {
     }
 
     public TurmaResponseDTO create(CreateTurmaRequestDTO turmaDTO) {
-        Turma entidadeCriada = repository.save(mapper.toEntity(turmaDTO));
+        Turma entidade = mapper.toEntity(turmaDTO);
+        Disciplina disciplina = disciplinaService.findByIdOrThrowEntity(turmaDTO.disciplinaID());
+        Professor professor = professorService.findByIdOrThrowEntity(turmaDTO.professorID());
+        entidade.setProfessor(professor);
+        entidade.setDisciplina(disciplina);
+        String periodoLetivo = periodoLetivoService.getAcademicTerm();
+        entidade.setPeriodo(periodoLetivo);
+        entidade.setCodigo(generateCode(disciplina.getCodigo(), periodoLetivo));
+        Turma entidadeCriada = repository.save(entidade);
         return mapper.toResponseDTO(entidadeCriada);
     }
 
@@ -43,5 +62,12 @@ public class TurmaService {
 
     public void delete(Long id) {
         repository.deleteById(id);
+    }
+
+    public String generateCode(String codigoDisciplina, String periodoLetivo) {
+        String prefixo = periodoLetivo + "-" + codigoDisciplina;
+        int qtdTurmas = repository.countByCodigoStartingWith(prefixo);
+        char letraTurma = (char) ('A' + qtdTurmas);
+        return prefixo + '-' + letraTurma;
     }
 }
