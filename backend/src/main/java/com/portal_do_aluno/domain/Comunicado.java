@@ -20,7 +20,7 @@ public class Comunicado {
     private Long id;
     private String titulo;
     private String mensagem;
-    private LocalDateTime dataPublicacao;
+    private LocalDateTime dataPublicacao = LocalDateTime.now().withNano(0);
 
     public Comunicado(String titulo, String mensagem, LocalDateTime dataPublicacao) {
         this.titulo = titulo;
