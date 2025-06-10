@@ -1,5 +1,6 @@
 package com.portal_do_aluno.controllers;
 
+import com.portal_do_aluno.dtos.requests.AddAlunosTurmaDTO;
 import com.portal_do_aluno.dtos.requests.CreateTurmaRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateTurmaRequestDTO;
 import com.portal_do_aluno.dtos.responses.TurmaResponseDTO;
@@ -33,6 +34,12 @@ public class TurmaController {
     public ResponseEntity<TurmaResponseDTO> create(@RequestBody CreateTurmaRequestDTO turmaDTO) {
         TurmaResponseDTO turmaCriadoDTO = service.create(turmaDTO);
         return new ResponseEntity<>(turmaCriadoDTO, HttpStatus.CREATED);
+    }
+
+    @PostMapping(value = "/{idTurma}/alunos")
+    public ResponseEntity<TurmaResponseDTO> addStudentsToTheClass(@PathVariable(value = "idTurma") Long idTurma, @RequestBody AddAlunosTurmaDTO idAlunosDTO) {
+        TurmaResponseDTO turmaDTO = service.addStudentsToTheClass(idTurma, idAlunosDTO.idAlunos());
+        return new ResponseEntity<>(turmaDTO, HttpStatus.OK);
     }
 
     @PutMapping(value = "/{id}")
