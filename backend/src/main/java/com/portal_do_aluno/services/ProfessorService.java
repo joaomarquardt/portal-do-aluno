@@ -25,8 +25,12 @@ public class ProfessorService {
     }
 
     public ProfessorResponseDTO findById(Long id) {
-        Professor entidade = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Professor não encontrado!"));
+        Professor entidade = findByIdOrThrowEntity(id);
         return mapper.toResponseDTO(entidade);
+    }
+
+    public Professor findByIdOrThrowEntity(Long id) {
+        return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Professor não encontrado!"));
     }
 
     public Professor findBySiapeOrThrowEntity(String siape) {

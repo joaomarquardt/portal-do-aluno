@@ -25,8 +25,12 @@ public class DisciplinaService {
     }
 
     public DisciplinaResponseDTO findById(Long id) {
-        Disciplina entidade = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Disciplina não encontrado!"));
+        Disciplina entidade = findByIdOrThrowEntity(id);
         return mapper.toResponseDTO(entidade);
+    }
+
+    public Disciplina findByIdOrThrowEntity(Long id) {
+        return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Disciplina não encontrada!"));
     }
 
     public DisciplinaResponseDTO create(CreateDisciplinaRequestDTO alunoDTO) {
