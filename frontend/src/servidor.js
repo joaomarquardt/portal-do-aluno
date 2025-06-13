@@ -7,6 +7,7 @@ app.use(cors());
 app.use(express.json())
 
 app.get("/comunicados", async (req, res) => {
+  console.log("estou por aqui")
   try {
     const response = await fetch(process.env.URL_API + "/comunicados");
     const dados = await response.json();
@@ -41,7 +42,7 @@ app.post("/comunicados", (req, res) => {
 
 app.get("/alunos", async (req,res)=>{
   try{
-    const response = await fetch(process.env.URL_API + "/comunicados");
+    const response = await fetch(process.env.URL_API + "/usuarios");
     const dados = await response.json();
     res.status(200).json(dados);
   }catch{
@@ -49,6 +50,27 @@ app.get("/alunos", async (req,res)=>{
     res.status(500).json({ erro: "Erro ao buscar alunos" });
     
   }
+})
+
+app.post("/alunos", async (req,res)=>{
+   fetch(process.env.URL_API + "/usuarios", {
+        method: 'POST',
+        headers: { 'Content-Type': "application/json" },
+        body: JSON.stringify(req.body)
+    })
+        .then(response => {
+            if (!response.ok)
+                throw new Error(`Erro no envio da postagem: ${response.status}`);
+            return response.json();
+        })
+        .then(dados => {
+            console.log(dados);
+            res.status(200).json({ mensagem: "Postagem enviada com sucesso", dados });
+        })
+        .catch(erro => {
+            console.error(erro);
+            res.status(500).json({ erro: "Erro ao enviar postagem" });
+        });
 })
 
 app.listen(process.env.PORTA_SERVIDOR_FRONT, () => console.log(`Servidor rodando na porta ${process.env.PORTA_SERVIDOR_FRONT}`));

@@ -42,8 +42,7 @@
 
 .conteudo{
     justify-content: space-between;
-    border: 1px solid red;
-    width: 80vw;
+    width: 82vw;
     height: 80vh;
     display: flex;
 }
@@ -56,7 +55,16 @@
     font-weight: 700;
     height: 50px;
 }
+.contentPai{
+    display: flex;
+    background-color: black;
+    width: 100vw;
+    height: 100vh;
+    border: 1px solid blue;
+}
 .dashboard {
+    position: absolute;
+    
     border: 1px solid red;
     width: 30vw;
     padding: 20px;
@@ -70,8 +78,8 @@
 }
 .esquerda{
     padding: 10px;
-    width: 10vw;
-    height: 40vh;
+    width: 13vw;
+    height: 45vh;
     align-items: center;
     text-align: center;
     display: flex;
@@ -154,9 +162,9 @@
     background-color: rgb(50, 50, 150);
 }
 .direita {
-    width: 30vw;
-    max-height: 80vh;
-    border: 1px solid black;
+    width: 20vw;
+    height: 45vh;
+    box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
     background-color: #f8f8f8;
     border-radius: 10px;
     padding: 16px;
@@ -220,4 +228,34 @@
 
 .botaoLixeira:hover {
   color: #900;
+}
+
+.parent {
+display: grid;
+grid-template-columns: repeat(4, 2fr);
+grid-template-rows: repeat(5, 2fr);
+grid-column-gap: 0px;
+grid-row-gap: 0px;
+}
+.botaoDashboard{
+    width: 150px;
+}
+.div1 { 
+    grid-area: 1 / 4 / 4 / 5; 
+    border: 1px solid red;
+}
+.div2 { 
+  
+    grid-area: 1 / 1 / 4 / 2;
+    border: 1px solid red;
+}
+.div3 { grid-area: 1 / 2 / 4 / 4; border: 1px solid red;}
+.div4 { grid-area: 4 / 1 / 6 / 5; }
+
+.formularioEntre {
+  position: absolute;
+  top:15vh;
+  left: 43vw;
+  transform: translateX(-50%);
+  z-index: 10;
 }

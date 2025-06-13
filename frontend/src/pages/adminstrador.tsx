@@ -3,12 +3,13 @@ import "../styles/adm.css";
 import { FaTrash } from "react-icons/fa";
 import "../styles/aluno.css"
 
-
+import FormAluno from "./componetes_adm/formAluno";
 import Comunicados from "./componetes_adm/comunicados";
 
 
 export default function Administrador() {
   const [mostrarDashboard, setMostrarDashboard] = useState(false);
+  const [mostrarDashboardUsuario, setMostrarDashboardUsuario] = useState(false);
   const [titulo, setTitulo] = useState("");
   const [mensagem, setMensagem] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -34,6 +35,10 @@ export default function Administrador() {
 
   const alternarDashboard = () => {
     setMostrarDashboard(!mostrarDashboard);
+  };
+
+    const alterarDashboardUsuario = () => {
+    setMostrarDashboardUsuario(!mostrarDashboardUsuario);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -106,7 +111,7 @@ export default function Administrador() {
             <p>87%</p>
           </div>
         </div> 
-      <div className="conteudo">
+      {/* <div className="conteudo">
         
         <div className="esquerda">
           <h1>Ações</h1>
@@ -114,8 +119,8 @@ export default function Administrador() {
             <button className="botaoDashboard" onClick={alternarDashboard}>
             {mostrarDashboard ? "Fechar painel" : "Criar postagem"}
           </button>
-          <button className="botaoDashboard" onClick={alternarDashboard}>
-            Cadastrar Aluno
+          <button className="botaoDashboard" onClick={alterarDashboardUsuario}>
+            {mostrarDashboardUsuario ? "Fechar painel" : "Criar Usuario"}
           </button>
           <button className="botaoDashboard" onClick={alternarDashboard}>
             Cadastrar Professor
@@ -125,6 +130,34 @@ export default function Administrador() {
           
           
           {mostrarDashboard && (
+            
+            <div className="dashboard">
+            aaa
+              <h2>Criar nova postagem</h2>
+              <form className="formPostagem" onSubmit={handleSubmit}>
+                <label htmlFor="titulo">Título:</label>
+                <input
+                  type="text"
+                  id="titulo"
+                  value={titulo}
+                  onChange={(e) => setTitulo(e.target.value)}
+                  placeholder="Digite o título"
+                />
+
+                <label htmlFor="mensagem">Mensagem:</label>
+                <textarea
+                  id="mensagem"
+                  value={mensagem}
+                  onChange={(e) => setMensagem(e.target.value)}
+
+                  placeholder="Digite a mensagem"
+                ></textarea>
+
+                <button type="submit">Enviar</button>
+              </form>
+            </div>
+          )}
+          {mostrarDashboardUsuario && (
             <div className="dashboard">
               <h2>Criar nova postagem</h2>
               <form className="formPostagem" onSubmit={handleSubmit}>
@@ -156,7 +189,75 @@ export default function Administrador() {
           <h3>Comunicados</h3>
           <Comunicados comunicados={comunicados} setComunicados={setComunicados}></Comunicados>
         </div>
+      </div> */}
+      <div className="parent">
+        <div className="div2">
+          <div className="direita">
+            <h3>Comunicados</h3>
+            <Comunicados comunicados={comunicados} setComunicados={setComunicados} />
+          </div>
+        </div>
+
+      {/* Formulário Dashboard entre as divs */}
+      {(mostrarDashboard || mostrarDashboardUsuario) && (
+        <div className="formularioEntre">
+          {mostrarDashboard && (
+            <div className="dashboard">
+              <h2>Criar nova postagem</h2>
+              <form className="formPostagem" onSubmit={handleSubmit}>
+                <label htmlFor="titulo">Título:</label>
+                <input
+                  type="text"
+                  id="titulo"
+                  value={titulo}
+                  onChange={(e) => setTitulo(e.target.value)}
+                  placeholder="Digite o título"
+                />
+                <label htmlFor="mensagem">Mensagem:</label>
+                <textarea
+                  id="mensagem"
+                  value={mensagem}
+                  onChange={(e) => setMensagem(e.target.value)}
+                  placeholder="Digite a mensagem"
+                />
+                <button type="submit">Enviar</button>
+              </form>
+            </div>
+          )}
+
+          {mostrarDashboardUsuario && (
+           <FormAluno></FormAluno>
+          )}
+        </div>
+      )}
+
+      <div className="div1">
+        <div className="esquerda">
+          <h1>Ações</h1>
+          <div className="acoes">
+            <button className="botaoDashboard" onClick={alternarDashboard}>
+              {mostrarDashboard ? "Fechar painel" : "Criar postagem"}
+            </button>
+            <button className="botaoDashboard" onClick={alterarDashboardUsuario}>
+              {mostrarDashboardUsuario ? "Fechar painel" : "Criar Aluno"}
+            </button>
+            <button className="botaoDashboard" onClick={alterarDashboardUsuario}>
+              {mostrarDashboardUsuario ? "Fechar painel" : "Criar Profesor"}
+            </button>
+            <button className="botaoDashboard" onClick={alterarDashboardUsuario}>
+              {mostrarDashboardUsuario ? "Fechar painel" : "Criar Disciplina"}
+            </button>
+            <button className="botaoDashboard" onClick={alterarDashboardUsuario}>
+              {mostrarDashboardUsuario ? "Fechar painel" : "Criar Turma"}
+            </button>
+          </div>
+        </div>
       </div>
+
+      <div className="div3"></div>
+      <div className="div4"></div>
+    </div>
+
       </main>
     </div>
   );
