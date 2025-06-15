@@ -22,7 +22,7 @@ public class Student {
     @Column(unique = true)
     private String registrationNumber;
 
-    private int periodoAtual = 1;
+    private int currentTerm = 1;
     private String enrollmentSemester;
 
     @ManyToOne
