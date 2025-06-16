@@ -22,19 +22,19 @@ public class Professor {
     @Column(unique = true)
     private String siape;
 
-    private String departamento;
+    private String department;
 
     @OneToMany(mappedBy = "professor")
-    private List<Turma> turmas;
+    private List<ClassGroup> classGroup;
 
     @OneToOne
-    @JoinColumn(name = "usuario_id")
-    private Usuario usuario;
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    public Professor(String siape, String departamento, List<Turma> turmas, Usuario usuario) {
+    public Professor(String siape, String department, List<ClassGroup> classGroup, User user) {
         this.siape = siape;
-        this.departamento = departamento;
-        this.turmas = turmas;
-        this.usuario = usuario;
+        this.department = department;
+        this.classGroup = classGroup;
+        this.user = user;
     }
 }
