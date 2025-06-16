@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "cursos")
+@Table(name = "courses")
 public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,16 +24,16 @@ public class Course {
     private String shift;
     private String department;
 
-    @ManyToMany(mappedBy = "cursos")
+    @ManyToMany(mappedBy = "courses")
     private List<Subject> subjects;
 
-    @OneToMany(mappedBy = "curso")
+    @OneToMany(mappedBy = "course")
     private List<Student> students;
 
     @ManyToMany
     @JoinTable(
-            name = "cursos_professores",
-            joinColumns = @JoinColumn(name = "curso_id"),
+            name = "courses_professors",
+            joinColumns = @JoinColumn(name = "course_id"),
             inverseJoinColumns = @JoinColumn(name = "professor_id")
     )
     private List<Professor> professors;

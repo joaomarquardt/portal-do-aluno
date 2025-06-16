@@ -11,25 +11,25 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "medias")
-public class Media {
+@Table(name = "averages")
+public class Average {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private double valor = 0.0;
+    private double value = 0.0;
 
     @ManyToOne
-    @JoinColumn(name = "aluno_id")
-    private Aluno aluno;
+    @JoinColumn(name = "student_id")
+    private Student student;
 
     @ManyToOne
-    @JoinColumn(name = "turma_id")
-    private Turma turma;
+    @JoinColumn(name = "classGroup_id")
+    private ClassGroup classGroup;
 
-    public Media(double valor, Aluno aluno, Turma turma) {
+    public Media(double valor, Student student, ClassGroup classGroup) {
         this.valor = valor;
-        this.aluno = aluno;
-        this.turma = turma;
+        this.student = student;
+        this.classGroup = classGroup;
     }
 }

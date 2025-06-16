@@ -29,15 +29,15 @@ public class Student {
     @JoinColumn(name = "course_id", nullable = false)
     private course course;
 
-    @ManyToMany(mappedBy = "alunos")
-    private List<Turma> classGroups;
+    @ManyToMany(mappedBy = "students")
+    private List<ClassGroup> classGroups;
     private boolean enrolled= true;
 
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    public Student(String registrationNumber, String enrollmentSemester, course course, List<Turma> classGroups, user user) {
+    public Student(String registrationNumber, String enrollmentSemester, course course, List<ClassGroup> classGroups, user user) {
         this.registrationNumber = registrationNumber;
         this.enrollmentSemester = enrollmentSemester;
         this.course = course;
