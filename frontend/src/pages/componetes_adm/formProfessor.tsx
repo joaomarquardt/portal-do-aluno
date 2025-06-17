@@ -29,15 +29,15 @@ function FormProfessor() {
     }
 
     const payload = {
-      nome,
-      cpf,
-      emailPessoal,
-      emailInstitucional,
-      telefone,
-      senha,
+      nome:nome,
+      cpf:cpf,
+      emailPessoal:emailPessoal,
+      emailInstitucional:emailInstitucional,
+      telefone:telefone,
+      senha:senha,
       professor: {
-        siape,
-        departamento,
+        siape:siape,
+        departamento:departamento,
       },
     };
 
@@ -72,8 +72,8 @@ function FormProfessor() {
   };
 
   return (
-    <div className="dashboard">
-      <h2>Criar Professor</h2>
+      <>
+        <h2>Criar Professor</h2>
       <form className="formPostagem" onSubmit={handleSubmit}>
         <label htmlFor="nome">Nome:</label>
         <input
@@ -132,24 +132,20 @@ function FormProfessor() {
         />
 
         <label htmlFor="departamento">Departamento:</label>
-        <select
+        <input
+          type='text'
           id="departamento"
           value={departamento}
           onChange={(e) => setDepartamento(e.target.value)}
         >
-          <option value="" disabled>
-            Selecione um departamento
-          </option>
-          <option value="informática">Informática</option>
-          <option value="matemática">Matemática</option>
-          <option value="física">Física</option>
-          <option value="engenharia">Engenharia</option>
-        </select>
+
+        </input>
 
         <button type="submit">Cadastrar Professor</button>
       </form>
-    </div>
-  );
+      </>
+      
+   );
 }
 
 export default FormProfessor;

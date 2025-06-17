@@ -1,0 +1,12 @@
+.dashBoardTurma{
+    width: 90vw;
+    max-height: 80vh;
+    flex-direction: column;
+    display: flex;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: #ff0000;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}

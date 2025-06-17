@@ -1,11 +1,21 @@
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Forçar sem scroll se for desejado */
+}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 .TelaAdminstrador{
     display: flex;
     align-items: center;
     flex-direction: column;
     background-color: white;
     display: flex;
-    width: 80vw;
-    height: 90vh;
+    width: 100%;
+    height: 100%;
 }
 
 .headerPai{
@@ -42,8 +52,8 @@
 
 .conteudo{
     justify-content: space-between;
-    width: 82vw;
-    height: 80vh;
+    width: 100%;
+    height: 100%;
     display: flex;
 }
 .conteudoHeader{
@@ -55,27 +65,53 @@
     font-weight: 700;
     height: 50px;
 }
-.contentPai{
+.contentPai {
     display: flex;
+    width: 100%;
+    height: 100%;
     background-color: black;
+}
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100vw;
     height: 100vh;
-    border: 1px solid blue;
-}
-.dashboard {
-    position: absolute;
-    
-    border: 1px solid red;
-    width: 30vw;
-    padding: 20px;
-    background-color: #f5f5f5;
-    border-radius: 12px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: rgba(0, 0, 0, 0.6); /* fundo escuro */
     display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin-top: 20px;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
+.dashboardHeader{
+    display: flex;
+    justify-content: right;
+    width: 100%;
+    height: 40px;
+}
+.dashboardHeader button{
+    background-color: #ba2b1e;
+    color: white;
+    font-family: sans-serif;
+    border: none;
+    padding: 5px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    cursor: pointer;
+} 
+.dashboard {
+    width: 50vw;
+    max-height: 80vh;
+    flex-direction: column;
+    display: flex;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: #f8f8f8;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
 .esquerda{
     padding: 10px;
     width: 13vw;
@@ -242,15 +278,15 @@ grid-row-gap: 0px;
 }
 .div1 { 
     grid-area: 1 / 4 / 4 / 5; 
-    border: 1px solid red;
+
 }
 .div2 { 
   
     grid-area: 1 / 1 / 4 / 2;
-    border: 1px solid red;
+
 }
-.div3 { grid-area: 1 / 2 / 4 / 4; border: 1px solid red;}
-.div4 { grid-area: 4 / 1 / 6 / 5; }
+.div3 { grid-area: 1 / 2 / 4 / 4; }
+/* .div4 { grid-area: 4 / 1 / 6 / 5; } */
 
 .formularioEntre {
   position: absolute;

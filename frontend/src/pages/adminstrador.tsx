@@ -1,23 +1,19 @@
 import React, { useState, useEffect } from "react";
 import "../styles/adm.css";
 import "../styles/aluno.css";
-import { FaTrash } from "react-icons/fa";
+import "../styles/turmas.css"
 
 import FormPeriodo from "./componetes_adm/formPeriodoLetivo";
 import FormAluno from "./componetes_adm/formAluno";
 import Comunicados from "./componetes_adm/comunicados";
+import FormDisciplina from "./componetes_adm/formDisciplina";
 import FormProfessor from "./componetes_adm/formProfessor";
+import FormCursos from "./componetes_adm/formCurso";
 
 export default function Administrador() {
-  const [mostrarFormComunicado, setMostrarFormComunicado] = useState(false);
-  const [mostrarFormAluno, setMostrarFormAluno] = useState(false);
+
   const [mostrarFormPeriodo, setMostrarFormPeriodo] = useState(false);
-  const [mostrarFormProfessor, setMostrarFormProfessor] = useState(false);
-  const [mostrarFormDisciplina, setMostrarFormDisciplina] = useState(false);
-
-  const [mostrarFormCurso, setMostrarFormCurso] = useState(false);
-  const [mostrarFormTurma, setMostrarFormTurma] = useState(false);
-
+  const [painelTurmaAtivo,setpainelTurmaAtivo] =  useState<string | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const [titulo, setTitulo] = useState("");
@@ -25,14 +21,24 @@ export default function Administrador() {
 
   const [comunicados, setComunicados] = useState<{ titulo: string; mensagem: string }[]>([]);
   const [qtdAlunos, setQtdAlunos] = useState(0);
+  const [qtdProfessor, setQtdProfessores] = useState(0);
+
+  const [painelAtivo, setPainelAtivo] = useState<string | null>(null);
 
   // 🔗 Carregar alunos
   useEffect(() => {
     fetch("http://localhost:3000/alunos")
       .then(res => res.json())
       .then(data => setQtdAlunos(data.length))
+
       .catch(err => console.error("Erro ao carregar dados dos alunos:", err));
   }, []);
+  useEffect(() => {
+  fetch("http://localhost:3000/professores")
+    .then(res => res.json())
+    .then(data => setQtdProfessores(data.length))
+    .catch(err => console.error("Erro ao carregar dados dos professores:", err));
+}, []);
 
   // 🔗 Carregar comunicados
   useEffect(() => {
@@ -64,29 +70,77 @@ export default function Administrador() {
       console.error("Erro ao enviar comunicado:", error);
     }
   };
+  const abrirPainel = (painel: string) => {
+  setPainelAtivo((prev) => (prev === painel ? null : painel));
+};
 
   // 🎯 Toggle funções
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
-  const toggleFormComunicado = () => setMostrarFormComunicado(!mostrarFormComunicado);
-  const toggleFormAluno = () => setMostrarFormAluno(!mostrarFormAluno);
-  const toggleFormProfessor = () => setMostrarFormProfessor(!mostrarFormProfessor)
-  const toggleFormTurma = () => setMostrarFormTurma(!mostrarFormTurma)
-  const toggleFormCurso = () => setMostrarFormCurso(!mostrarFormCurso)
-  const toggleFormDisciplina = () => setMostrarFormDisciplina(!mostrarFormDisciplina)
-  const toggleFormPeriodo = () => setMostrarFormPeriodo(!mostrarFormPeriodo);
+
 
   // 🔘 Ações do painel
   const acoes = [
-    { label: "Criar postagem", action: toggleFormComunicado, ativo: mostrarFormComunicado },
-    { label: "Criar aluno", action: toggleFormAluno, ativo: mostrarFormAluno },
-    { label: "Criar professor", action: toggleFormProfessor, ativo: mostrarFormProfessor },
-    { label: "Criar disciplina", action: toggleFormDisciplina, ativo: mostrarFormDisciplina },
-    { label: "Criar turma", action: toggleFormTurma, ativo: mostrarFormTurma },
-    { label: "Criar curso", action: toggleFormCurso, ativo: mostrarFormCurso },
+    { label: "Criar postagem", painel: "comunicado" },
+    { label: "Criar aluno", painel: "aluno" },
+    { label: "Criar professor", painel: "professor" },
+    { label: "Criar disciplina", painel: "disciplina" },
+    { label: "Criar turma", painel: "turma" },
+    { label: "Criar curso", painel: "curso" },
+    { label: "Definir Periodo", painel: "periodo"}
   ];
 
   return (
     <div className="container">
+       {painelAtivo && (
+        <div className="overlay">
+          <div className="dashboard">
+          <div className="dashboardHeader">
+             <button onClick={() => setPainelAtivo(null)}>Fechar</button>
+          </div>
+         
+            {painelAtivo === "comunicado" && (
+              <>
+                <h2>Criar nova postagem</h2>
+                <form className="formPostagem" onSubmit={handleSubmit}>
+                  <label htmlFor="titulo">Título:</label>
+                  <input
+                    type="text"
+                    id="titulo"
+                    value={titulo}
+                    onChange={(e) => setTitulo(e.target.value)}
+                    placeholder="Digite o título"
+                  />
+                  <label htmlFor="mensagem">Mensagem:</label>
+                  <textarea
+                    id="mensagem"
+                    value={mensagem}
+                    onChange={(e) => setMensagem(e.target.value)}
+                    placeholder="Digite a mensagem"
+                  />
+                  <button type="submit">Enviar</button>
+                </form>
+              </>
+            )}
+            {painelAtivo === "aluno" && <FormAluno />}
+            {painelAtivo === "professor" && <FormProfessor />}
+            {painelAtivo === "disciplina" && <FormDisciplina />}
+            {painelAtivo === "curso" && <FormCursos></FormCursos>}
+            {painelAtivo === "periodo" && <FormPeriodo/>}
+
+          </div>
+        </div>
+        )}
+        {painelAtivo === "turma" && (
+        <div className="overlay">
+          <div className="dashBoardTurma">
+          <div className="dashboardHeader">
+             <button onClick={() => setPainelAtivo(null)}>Fechar</button>
+          </div>
+             <div><h2>Criar turma</h2></div>
+          </div>
+        </div>
+        )}
+
       {/* 🧭 Sidebar */}
       <aside className="sidebar">
         <div className="user-info">
@@ -125,7 +179,7 @@ export default function Administrador() {
           </div>
           <div className="card">
             <h4>Professores Cadastrados</h4>
-            <p>0</p>
+            <p>{qtdProfessor}</p>
           </div>
           <div className="card">
             <h4>Total de Turmas</h4>
@@ -152,53 +206,28 @@ export default function Administrador() {
             <div className="esquerda">
               <h1>Ações</h1>
               <div className="acoes">
-                {acoes.map((acao, index) => (
-                  <button key={index} className="botaoDashboard" onClick={acao.action}>
-                    {acao.ativo ? "Fechar painel" : acao.label}
-                  </button>
-                ))}
+                  {acoes.map((acao, index) => (
+                    <button
+                      key={index}
+                      className="botaoDashboard"
+                      onClick={() => abrirPainel(acao.painel)}
+                    >
+                      {painelAtivo === acao.painel ? "Fechar painel" : acao.label}
+                    </button>
+                  ))}
               </div>
             </div>
           </div>
 
           {/* Formulários */}
           <div className="div3">
-            {(mostrarFormComunicado || mostrarFormAluno) && (
-              <div className="formularioEntre">
-                {mostrarFormComunicado && (
-                  <div className="dashboard">
-                    <h2>Criar nova postagem</h2>
-                    <form className="formPostagem" onSubmit={handleSubmit}>
-                      <label htmlFor="titulo">Título:</label>
-                      <input
-                        type="text"
-                        id="titulo"
-                        value={titulo}
-                        onChange={(e) => setTitulo(e.target.value)}
-                        placeholder="Digite o título"
-                      />
-                      <label htmlFor="mensagem">Mensagem:</label>
-                      <textarea
-                        id="mensagem"
-                        value={mensagem}
-                        onChange={(e) => setMensagem(e.target.value)}
-                        placeholder="Digite a mensagem"
-                      />
-                      <button type="submit">Enviar</button>
-                    </form>
-                  </div>
-                )}
-
-                {mostrarFormAluno && (<FormAluno />)}
-                {mostrarFormProfessor && (<FormProfessor />)}
-              </div>
-            )}
+           
           </div>
 
           {/* 🗓️ Período Letivo */}
           <div className="div4">
-            <button onClick={toggleFormPeriodo}>Definir Período Letivo</button>
-            {mostrarFormPeriodo && <FormPeriodo />}
+            
+            
           </div>
         </div>
       </main>

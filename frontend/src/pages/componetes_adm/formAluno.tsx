@@ -83,7 +83,7 @@ function FormAluno() {
   };
 
   return (
-    <div className="dashboard">
+    <>
       <h2>Criar Aluno</h2>
       <form className="formPostagem" onSubmit={handleSubmit}>
         <label htmlFor="nome">Nome:</label>
@@ -152,8 +152,8 @@ function FormAluno() {
 
         <button type="submit">Cadastrar Aluno</button>
       </form>
-    </div>
-  );
+  </>
+);
 }
 
 export default FormAluno;

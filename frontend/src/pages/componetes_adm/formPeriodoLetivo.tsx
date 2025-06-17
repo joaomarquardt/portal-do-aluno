@@ -55,7 +55,7 @@ export default function FormPeriodo() {
   };
 
   return (
-    <div className="dashboard">
+    <>
       <h2>Cadastrar Período</h2>
       <form className="formPostagem" onSubmit={handleSubmit}>
 
@@ -103,6 +103,7 @@ export default function FormPeriodo() {
 
         <button type="submit">Cadastrar Período</button>
       </form>
-    </div>
+
+    </>
   );
 }

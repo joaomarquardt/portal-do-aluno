@@ -11,6 +11,7 @@ function App() {
         <Route path="/esqueci-senha" element={<EsqueciSenha />} />
         <Route path="/aluno" element={<TelaAluno/>}></Route>
         <Route path='/admin' element={<Administrador/>}></Route>
+        
       </Routes>
     </BrowserRouter>
   );
