@@ -9,6 +9,7 @@ import Comunicados from "./componetes_adm/comunicados";
 import FormDisciplina from "./componetes_adm/formDisciplina";
 import FormProfessor from "./componetes_adm/formProfessor";
 import FormCursos from "./componetes_adm/formCurso";
+import TelaTurmas from "./componetes_adm/telaTurmas";
 
 export default function Administrador() {
 
@@ -136,7 +137,9 @@ export default function Administrador() {
           <div className="dashboardHeader">
              <button onClick={() => setPainelAtivo(null)}>Fechar</button>
           </div>
-             <div><h2>Criar turma</h2></div>
+             <div>
+              <TelaTurmas></TelaTurmas>
+             </div>
           </div>
         </div>
         )}

@@ -74,11 +74,19 @@ app.post("/disciplina", (req, res) => {
   sendPostTo('/disciplinas', req, res);
 });
 
+app.get("/disciplina",(req,res)=>{
+  sendGetTo("/disciplinas",req,res)
+})
+
 app.post("/professores",(req,res)=>{
   sendPostTo("/usuarios",req,res)
 })
 app.get("/professores",(req,res)=>{
-  sendGetTo("/professores",req,res)
+  sendGetTo("/usuarios",req,res)
+})
+
+app.post("/turmas",(req,res)=>{
+  sendPostTo("/turmas",req,res)
 })
 
 // Start
