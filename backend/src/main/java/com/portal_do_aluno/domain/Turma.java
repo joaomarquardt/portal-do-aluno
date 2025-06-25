@@ -51,4 +51,8 @@ public class Turma {
         this.alunos = alunos;
         this.horario = horario;
     }
+
+    public boolean isValidAttendanceHours(int horas) {
+        return horas >= 0 && this.getDisciplina().getCargaHoraria() >= horas;
+    }
 }

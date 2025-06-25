@@ -2,6 +2,7 @@ package com.portal_do_aluno.controllers;
 
 import com.portal_do_aluno.dtos.requests.AddAlunosTurmaDTO;
 import com.portal_do_aluno.dtos.requests.CreateTurmaRequestDTO;
+import com.portal_do_aluno.dtos.requests.UpdateDesempenhoRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateTurmaRequestDTO;
 import com.portal_do_aluno.dtos.responses.TurmaResponseDTO;
 import com.portal_do_aluno.services.TurmaService;
@@ -40,6 +41,12 @@ public class TurmaController {
     public ResponseEntity<TurmaResponseDTO> addStudentsToTheClass(@PathVariable(value = "idTurma") Long idTurma, @RequestBody AddAlunosTurmaDTO idAlunosDTO) {
         TurmaResponseDTO turmaDTO = service.addStudentsToTheClass(idTurma, idAlunosDTO.idAlunos());
         return new ResponseEntity<>(turmaDTO, HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/{idTurma}/alunos/{idAluno}")
+    public ResponseEntity<Void> updateStudentPerformance(@PathVariable(value = "idTurma") Long idTurma, @PathVariable(value = "idAluno") Long idAluno, @RequestBody UpdateDesempenhoRequestDTO desempenhoDTO) {
+        service.updateStudentPerformance(idTurma, idAluno, desempenhoDTO);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PutMapping(value = "/{id}")

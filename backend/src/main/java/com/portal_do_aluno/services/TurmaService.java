@@ -2,6 +2,7 @@ package com.portal_do_aluno.services;
 
 import com.portal_do_aluno.domain.*;
 import com.portal_do_aluno.dtos.requests.CreateTurmaRequestDTO;
+import com.portal_do_aluno.dtos.requests.UpdateDesempenhoRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateTurmaRequestDTO;
 import com.portal_do_aluno.dtos.responses.TurmaResponseDTO;
 import com.portal_do_aluno.exceptions.VagasInsuficientesException;
@@ -87,8 +88,28 @@ public class TurmaService {
         return mapper.toResponseDTO(turmaAtualizada);
     }
 
+    public void updateStudentPerformance(Long idTurma, Long idAluno, UpdateDesempenhoRequestDTO desempenhoDTO) {
+        if (desempenhoDTO.presenca() < 0 || desempenhoDTO.valor() < 0) {
+            throw new IllegalArgumentException("Presença e média não podem ser negativas.");
+        }
+        if (desempenhoDTO.valor() > 10) {
+            throw new IllegalArgumentException("Média não pode ser maior que 10.");
+        }
+        Turma turma = this.findByIdOrThrowEntity(idTurma);
+        if (!turma.isValidAttendanceHours(desempenhoDTO.presenca())) {
+            throw new IllegalArgumentException("Presença não pode ultrapassar a carga horária total da disciplina!");
+        }
+        Aluno aluno = alunoService.findByIdOrThrowEntity(idAluno);
+        Media media = mediaRepository.findByAlunoAndTurma(aluno, turma).orElseThrow(() -> new EntityNotFoundException("Não há media associada a este aluno nesta turma!"));
+        Presenca presenca = presencaRepository.findByAlunoAndTurma(aluno, turma).orElseThrow(() -> new EntityNotFoundException("Não há presença associada a este aluno nesta turma!"));
+        presenca.setNumeroPresencas(desempenhoDTO.presenca());
+        media.setValor(desempenhoDTO.valor());
+        presencaRepository.save(presenca);
+        mediaRepository.save(media);
+    }
+
     public TurmaResponseDTO update(Long id, UpdateTurmaRequestDTO turmaDTO) {
-        Turma entidade = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Turma não encontrado!"));
+        Turma entidade = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Turma não encontrada!"));
         mapper.updateEntityFromDTO(turmaDTO, entidade);
         entidade = repository.save(entidade);
         return mapper.toResponseDTO(entidade);
