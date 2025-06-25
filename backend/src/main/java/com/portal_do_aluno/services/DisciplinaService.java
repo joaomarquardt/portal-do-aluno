@@ -33,14 +33,15 @@ public class DisciplinaService {
         return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Disciplina não encontrada!"));
     }
 
-    public DisciplinaResponseDTO create(CreateDisciplinaRequestDTO alunoDTO) {
-        Disciplina entidadeCriada = repository.save(mapper.toEntity(alunoDTO));
+    public DisciplinaResponseDTO create(CreateDisciplinaRequestDTO disciplinaDTO) {
+
+        Disciplina entidadeCriada = repository.save(mapper.toEntity(disciplinaDTO));
         return mapper.toResponseDTO(entidadeCriada);
     }
 
-    public DisciplinaResponseDTO update(Long id, UpdateDisciplinaRequestDTO alunoDTO) {
+    public DisciplinaResponseDTO update(Long id, UpdateDisciplinaRequestDTO disciplinaDTO) {
         Disciplina entidade = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Disciplina não encontrado!"));
-        mapper.updateEntityFromDTO(alunoDTO, entidade);
+        mapper.updateEntityFromDTO(disciplinaDTO, entidade);
         entidade = repository.save(entidade);
         return mapper.toResponseDTO(entidade);
     }
