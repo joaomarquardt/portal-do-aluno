@@ -1,9 +1,9 @@
 package com.portal_do_aluno.mappers;
 
 import com.portal_do_aluno.domain.Usuario;
-import com.portal_do_aluno.dtos.requests.CreateUsuarioRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateUsuarioRequestDTO;
 import com.portal_do_aluno.dtos.responses.UsuarioResponseDTO;
+import com.portal_do_aluno.security.dtos.requests.RegisterRequestDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -17,7 +17,7 @@ public interface UsuarioMapper {
 
     UsuarioResponseDTO toResponseDTO(Usuario entity);
 
-    Usuario toEntity(CreateUsuarioRequestDTO dto);
+    Usuario toEntity(RegisterRequestDTO dto);
 
     List<UsuarioResponseDTO> toDTOResponseList(List<Usuario> entities);
 
