@@ -5,10 +5,12 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.portal_do_aluno.domain.Usuario;
+import com.portal_do_aluno.security.domain.PapelUsuario;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
 
 @Service
 public class TokenService {
@@ -18,10 +20,15 @@ public class TokenService {
     public String generateToken(Usuario usuario) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
+            List<String> papeis = usuario.getPapeis()
+                    .stream()
+                    .map(PapelUsuario::name)
+                    .toList();
             return JWT.create()
                     .withIssuer("portal-do-aluno")
                     .withSubject(usuario.getUsername())
                     .withExpiresAt(Instant.now().plusSeconds(3600))
+                    .withClaim("roles", papeis)
                     .sign(algorithm);
         } catch (JWTCreationException e) {
             throw new JWTCreationException("Erro ao gerar token", e);
