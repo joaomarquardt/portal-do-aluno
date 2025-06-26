@@ -1,6 +1,5 @@
 package com.portal_do_aluno.controllers;
 
-import com.portal_do_aluno.dtos.requests.CreateUsuarioRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateUsuarioRequestDTO;
 import com.portal_do_aluno.dtos.responses.UsuarioResponseDTO;
 import com.portal_do_aluno.services.UsuarioService;
@@ -27,12 +26,6 @@ public class UsuarioController {
     public ResponseEntity<UsuarioResponseDTO> findById(@PathVariable(value = "id") Long id) {
         UsuarioResponseDTO usuarioDTO = service.findById(id);
         return new ResponseEntity<>(usuarioDTO, HttpStatus.OK);
-    }
-
-    @PostMapping
-    public ResponseEntity<UsuarioResponseDTO> create(@RequestBody CreateUsuarioRequestDTO usuarioDTO) {
-        UsuarioResponseDTO usuarioCriadoDTO = service.create(usuarioDTO);
-        return new ResponseEntity<>(usuarioCriadoDTO, HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/{id}")
