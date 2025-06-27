@@ -13,6 +13,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.Instant;
+
 @Service
 public class AuthenticationService {
     @Autowired
@@ -30,12 +33,17 @@ public class AuthenticationService {
     @Autowired
     private TokenService tokenService;
 
+    @Autowired
+    private TokenCacheService tokenCacheService;
+
     public String login(AuthRequestDTO authDTO) {
         repository.findByCpf(authDTO.cpf()).orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado com CPF: " + authDTO.cpf()));
         var usuarioSenha = new UsernamePasswordAuthenticationToken(authDTO.cpf(), authDTO.senha());
         try {
             var auth = this.authenticationManager.authenticate(usuarioSenha);
-            return tokenService.generateToken((Usuario) auth.getPrincipal());
+            String token = tokenService.generateToken((Usuario) auth.getPrincipal());
+            tokenCacheService.cacheToken(token, 3600);
+            return token;
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException("CPF e/ou senha inválidos.");
         }
@@ -50,4 +58,15 @@ public class AuthenticationService {
         usuarioService.create(registerAtualizado);
     }
 
+    public void logout(String token) {
+        if (token == null || token.isBlank()) {
+            throw new IllegalArgumentException("Token não pode ser nulo ou vazio.");
+        }
+        String tokenLimpo = token.replace("Bearer ", "");
+        Instant expirationTime = tokenService.getExpiration(tokenLimpo);
+        long segundosTTL = Duration.between(Instant.now(), expirationTime).getSeconds();
+        if (segundosTTL > 0) {
+            tokenCacheService.invalidateToken(tokenLimpo);
+        }
+    }
 }
