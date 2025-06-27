@@ -47,4 +47,9 @@ public class TokenService {
             return "";
         }
     }
+
+    public Instant getExpiration(String token) {
+        return JWT.decode(token)
+                .getExpiresAtAsInstant();
+    }
 }
