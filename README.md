@@ -25,12 +25,12 @@
 
 ---
 
-### Nome do Serviço 2: **Consulta de Disciplina disponíveis**
+### Nome do Serviço 2: **Consulta de Cursos disponíveis**
 
 - **Tipo de operações:** leitura
 - **Arquivos envolvidos:**
-  - [`/backend/src/main/java/com/portal_do_aluno/controllers/DisciplinaController.java`](https://github.com/joaomarquardt/portal-do-alunobackend/src/main/java/com/portal_do_aluno/controllers/DisciplinaController.java)
-  - [`/backend/src/main/java/com/portal_do_aluno/services/DisciplinaService.java`](https://github.com/joaomarquardt/portal-do-aluno/backend/src/main/java/com/portal_do_aluno/services/DisciplinaService.java)
+  - [`/backend/src/main/java/com/portal_do_aluno/controllers/CursoController.java`](https://github.com/joaomarquardt/portal-do-alunobackend/src/main/java/com/portal_do_aluno/controllers/CursoController.java)
+  - [`/backend/src/main/java/com/portal_do_aluno/services/CursoService.java`](https://github.com/joaomarquardt/portal-do-aluno/backend/src/main/java/com/portal_do_aluno/services/CursoService.java)
 - **Arquivos com o código fonte de medição do SLA:**
   - [`/tests/load/history_query_test.jmx`](https://github.com/seu-repo/tests/load/history_query_test.jmx)
 - **Data da medição:** 30/06/2025
