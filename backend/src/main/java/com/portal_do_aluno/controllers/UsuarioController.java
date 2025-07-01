@@ -3,8 +3,8 @@ package com.portal_do_aluno.controllers;
 import com.portal_do_aluno.dtos.requests.UpdateUsuarioRequestDTO;
 import com.portal_do_aluno.dtos.responses.UsuarioResponseDTO;
 import com.portal_do_aluno.services.UsuarioService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,25 +18,25 @@ public class UsuarioController {
 
     @GetMapping
     public ResponseEntity<List<UsuarioResponseDTO>> findAll() {
-        List<UsuarioResponseDTO> usuariosDTO = service.findAll();
-        return new ResponseEntity<>(usuariosDTO, HttpStatus.OK);
+        return ResponseEntity.ok(service.findAll());
     }
 
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<UsuarioResponseDTO> findById(@PathVariable(value = "id") Long id) {
-        UsuarioResponseDTO usuarioDTO = service.findById(id);
-        return new ResponseEntity<>(usuarioDTO, HttpStatus.OK);
+    @GetMapping("/{id}")
+    public ResponseEntity<UsuarioResponseDTO> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findById(id));
     }
 
-    @PutMapping(value = "/{id}")
-    public ResponseEntity<UsuarioResponseDTO> update(@PathVariable(value = "id") Long id, @RequestBody UpdateUsuarioRequestDTO usuarioDTO) {
-        UsuarioResponseDTO usuarioAtualizadoDTO = service.update(id, usuarioDTO);
-        return new ResponseEntity<>(usuarioAtualizadoDTO, HttpStatus.OK);
+    @PutMapping("/{id}")
+    public ResponseEntity<UsuarioResponseDTO> update(
+        @PathVariable Long id,
+        @RequestBody @Valid UpdateUsuarioRequestDTO dto
+    ) {
+        return ResponseEntity.ok(service.update(id, dto));
     }
 
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Void> delete(@PathVariable(value = "id") Long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 }

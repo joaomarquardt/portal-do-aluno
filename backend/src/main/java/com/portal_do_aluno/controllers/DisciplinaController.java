@@ -4,6 +4,7 @@ import com.portal_do_aluno.dtos.requests.CreateDisciplinaRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateDisciplinaRequestDTO;
 import com.portal_do_aluno.dtos.responses.DisciplinaResponseDTO;
 import com.portal_do_aluno.services.DisciplinaService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,31 +20,30 @@ public class DisciplinaController {
 
     @GetMapping
     public ResponseEntity<List<DisciplinaResponseDTO>> findAll() {
-        List<DisciplinaResponseDTO> disciplinasDTO = service.findAll();
-        return new ResponseEntity<>(disciplinasDTO, HttpStatus.OK);
+        return ResponseEntity.ok(service.findAll());
     }
 
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<DisciplinaResponseDTO> findById(@PathVariable(value = "id") Long id) {
-        DisciplinaResponseDTO disciplinaDTO = service.findById(id);
-        return new ResponseEntity<>(disciplinaDTO, HttpStatus.OK);
+    @GetMapping("/{id}")
+    public ResponseEntity<DisciplinaResponseDTO> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findById(id));
     }
 
     @PostMapping
-    public ResponseEntity<DisciplinaResponseDTO> create(@RequestBody CreateDisciplinaRequestDTO disciplinaDTO) {
-        DisciplinaResponseDTO disciplinaCriadoDTO = service.create(disciplinaDTO);
-        return new ResponseEntity<>(disciplinaCriadoDTO, HttpStatus.CREATED);
+    public ResponseEntity<DisciplinaResponseDTO> create(@RequestBody @Valid CreateDisciplinaRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
     }
 
-    @PutMapping(value = "/{id}")
-    public ResponseEntity<DisciplinaResponseDTO> update(@PathVariable(value = "id") Long id, @RequestBody UpdateDisciplinaRequestDTO disciplinaDTO) {
-        DisciplinaResponseDTO disciplinaAtualizadoDTO = service.update(id, disciplinaDTO);
-        return new ResponseEntity<>(disciplinaAtualizadoDTO, HttpStatus.OK);
+    @PutMapping("/{id}")
+    public ResponseEntity<DisciplinaResponseDTO> update(
+        @PathVariable Long id,
+        @RequestBody @Valid UpdateDisciplinaRequestDTO dto
+    ) {
+        return ResponseEntity.ok(service.update(id, dto));
     }
 
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Void> delete(@PathVariable(value = "id") Long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 }
