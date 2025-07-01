@@ -10,7 +10,7 @@
   - [`/backend/src/main/java/com/portal_do_aluno/security/services/AuthenticationService.java`](https://github.com/joaomarquardt/portal-do-aluno/backend/src/main/java/com/portal_do_aluno/security/services/AuthenticationService.java)
   - [`/backend/srcsrc/main/java/com/portal_do_aluno/repositories/UsuarioRepository.java`](https://github.com/joaomarquardt/portal-do-aluno/backend/src/main/java/com/portal_do_aluno/repositories/UsuarioRepository.java)
 - **Arquivos com o código fonte de medição do SLA:**
-  - [`backend/teste-carga-login-post.js`](https://github.com/joaomarquardt/portal-do-aluno/blob/main/backend/teste-carga-login-post.js)
+  - [`backend/teste-carga-login-post.js`](backend/teste-carga-login-post.js)
 - **Data da medição:** 30/06/2025
 - **Descrição das configurações:**
   - **Servidor de aplicação:** Spring Boot rodando localmente com o servidor tendo 32GB de memória RAM
@@ -34,7 +34,7 @@
   - [`/backend/src/main/java/com/portal_do_aluno/controllers/DisciplinaController.java`](https://github.com/joaomarquardt/portal-do-alunobackend/src/main/java/com/portal_do_aluno/controllers/DisciplinaController.java)
   - [`/backend/src/main/java/com/portal_do_aluno/services/DisciplinaService.java`](https://github.com/joaomarquardt/portal-do-aluno/backend/src/main/java/com/portal_do_aluno/services/DisciplinaService.java)
 - **Arquivos com o código fonte de medição do SLA:**
-  - [`backend/teste-carga-cursos-get.js`]([https://github.com/joaomarquardt/portal-do-aluno/blob/main/backend/teste-carga-cursos-get.js]))
+  - [`backend/teste-carga-cursos-get.js`]([backend/teste-carga-cursos-get.js]))
 - **Data da medição:** 30/06/2025
 - **Descrição das configurações:**
   - **Servidor de aplicação:** Spring Boot rodando localmente com o servidor tendo 32GB de memória RAM
