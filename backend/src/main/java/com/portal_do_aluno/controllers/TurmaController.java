@@ -6,6 +6,7 @@ import com.portal_do_aluno.dtos.requests.UpdateDesempenhoRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateTurmaRequestDTO;
 import com.portal_do_aluno.dtos.responses.TurmaResponseDTO;
 import com.portal_do_aluno.services.TurmaService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,44 +22,48 @@ public class TurmaController {
 
     @GetMapping
     public ResponseEntity<List<TurmaResponseDTO>> findAll() {
-        List<TurmaResponseDTO> turmasDTO = service.findAll();
-        return new ResponseEntity<>(turmasDTO, HttpStatus.OK);
+        return ResponseEntity.ok(service.findAll());
     }
 
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<TurmaResponseDTO> findById(@PathVariable(value = "id") Long id) {
-        TurmaResponseDTO turmaDTO = service.findById(id);
-        return new ResponseEntity<>(turmaDTO, HttpStatus.OK);
+    @GetMapping("/{id}")
+    public ResponseEntity<TurmaResponseDTO> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findById(id));
     }
 
     @PostMapping
-    public ResponseEntity<TurmaResponseDTO> create(@RequestBody CreateTurmaRequestDTO turmaDTO) {
-        TurmaResponseDTO turmaCriadoDTO = service.create(turmaDTO);
-        return new ResponseEntity<>(turmaCriadoDTO, HttpStatus.CREATED);
+    public ResponseEntity<TurmaResponseDTO> create(@RequestBody @Valid CreateTurmaRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
     }
 
-    @PostMapping(value = "/{idTurma}/alunos")
-    public ResponseEntity<TurmaResponseDTO> addStudentsToTheClass(@PathVariable(value = "idTurma") Long idTurma, @RequestBody AddAlunosTurmaDTO idAlunosDTO) {
-        TurmaResponseDTO turmaDTO = service.addStudentsToTheClass(idTurma, idAlunosDTO.idAlunos());
-        return new ResponseEntity<>(turmaDTO, HttpStatus.OK);
+    @PostMapping("/{idTurma}/alunos")
+    public ResponseEntity<TurmaResponseDTO> addStudentsToTheClass(
+        @PathVariable Long idTurma,
+        @RequestBody @Valid AddAlunosTurmaDTO dto
+    ) {
+        return ResponseEntity.ok(service.addStudentsToTheClass(idTurma, dto.idAlunos()));
     }
 
-    @PutMapping(value = "/{idTurma}/alunos/{idAluno}")
-    public ResponseEntity<Void> updateStudentPerformance(@PathVariable(value = "idTurma") Long idTurma, @PathVariable(value = "idAluno") Long idAluno, @RequestBody UpdateDesempenhoRequestDTO desempenhoDTO) {
-        service.updateStudentPerformance(idTurma, idAluno, desempenhoDTO);
-        return new ResponseEntity<>(HttpStatus.OK);
+    @PutMapping("/{idTurma}/alunos/{idAluno}")
+    public ResponseEntity<Void> updateStudentPerformance(
+        @PathVariable Long idTurma,
+        @PathVariable Long idAluno,
+        @RequestBody @Valid UpdateDesempenhoRequestDTO dto
+    ) {
+        service.updateStudentPerformance(idTurma, idAluno, dto);
+        return ResponseEntity.ok().build();
     }
 
-    @PutMapping(value = "/{id}")
-    public ResponseEntity<TurmaResponseDTO> update(@PathVariable(value = "id") Long id, @RequestBody UpdateTurmaRequestDTO turmaDTO) {
-        TurmaResponseDTO turmaAtualizadoDTO = service.update(id, turmaDTO);
-        return new ResponseEntity<>(turmaAtualizadoDTO, HttpStatus.OK);
+    @PutMapping("/{id}")
+    public ResponseEntity<TurmaResponseDTO> update(
+        @PathVariable Long id,
+        @RequestBody @Valid UpdateTurmaRequestDTO dto
+    ) {
+        return ResponseEntity.ok(service.update(id, dto));
     }
 
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Void> delete(@PathVariable(value = "id") Long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 }
-

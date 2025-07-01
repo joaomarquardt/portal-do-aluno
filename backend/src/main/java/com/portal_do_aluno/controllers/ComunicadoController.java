@@ -4,6 +4,7 @@ import com.portal_do_aluno.dtos.requests.CreateComunicadoRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateComunicadoRequestDTO;
 import com.portal_do_aluno.dtos.responses.ComunicadoResponseDTO;
 import com.portal_do_aluno.services.ComunicadoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,31 +20,30 @@ public class ComunicadoController {
 
     @GetMapping
     public ResponseEntity<List<ComunicadoResponseDTO>> findAll() {
-        List<ComunicadoResponseDTO> comunicadosDTO = service.findAll();
-        return new ResponseEntity<>(comunicadosDTO, HttpStatus.OK);
+        return ResponseEntity.ok(service.findAll());
     }
 
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<ComunicadoResponseDTO> findById(@PathVariable(value = "id") Long id) {
-        ComunicadoResponseDTO comunicadoDTO = service.findById(id);
-        return new ResponseEntity<>(comunicadoDTO, HttpStatus.OK);
+    @GetMapping("/{id}")
+    public ResponseEntity<ComunicadoResponseDTO> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findById(id));
     }
 
     @PostMapping
-    public ResponseEntity<ComunicadoResponseDTO> create(@RequestBody CreateComunicadoRequestDTO comunicadoDTO) {
-        ComunicadoResponseDTO comunicadoCriadoDTO = service.create(comunicadoDTO);
-        return new ResponseEntity<>(comunicadoCriadoDTO, HttpStatus.CREATED);
+    public ResponseEntity<ComunicadoResponseDTO> create(@RequestBody @Valid CreateComunicadoRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
     }
 
-    @PutMapping(value = "/{id}")
-    public ResponseEntity<ComunicadoResponseDTO> update(@PathVariable(value = "id") Long id, @RequestBody UpdateComunicadoRequestDTO comunicadoDTO) {
-        ComunicadoResponseDTO comunicadoAtualizadoDTO = service.update(id, comunicadoDTO);
-        return new ResponseEntity<>(comunicadoAtualizadoDTO, HttpStatus.OK);
+    @PutMapping("/{id}")
+    public ResponseEntity<ComunicadoResponseDTO> update(
+        @PathVariable Long id,
+        @RequestBody @Valid UpdateComunicadoRequestDTO dto
+    ) {
+        return ResponseEntity.ok(service.update(id, dto));
     }
 
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Void> delete(@PathVariable(value = "id") Long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 }
