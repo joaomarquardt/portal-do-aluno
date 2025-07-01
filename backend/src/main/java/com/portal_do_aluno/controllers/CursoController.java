@@ -4,6 +4,7 @@ import com.portal_do_aluno.dtos.requests.CreateCursoRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateCursoRequestDTO;
 import com.portal_do_aluno.dtos.responses.CursoResponseDTO;
 import com.portal_do_aluno.services.CursoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,31 +20,30 @@ public class CursoController {
 
     @GetMapping
     public ResponseEntity<List<CursoResponseDTO>> findAll() {
-        List<CursoResponseDTO> cursosDTO = service.findAll();
-        return new ResponseEntity<>(cursosDTO, HttpStatus.OK);
+        return ResponseEntity.ok(service.findAll());
     }
 
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<CursoResponseDTO> findById(@PathVariable(value = "id") Long id) {
-        CursoResponseDTO cursoDTO = service.findById(id);
-        return new ResponseEntity<>(cursoDTO, HttpStatus.OK);
+    @GetMapping("/{id}")
+    public ResponseEntity<CursoResponseDTO> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findById(id));
     }
 
     @PostMapping
-    public ResponseEntity<CursoResponseDTO> create(@RequestBody CreateCursoRequestDTO cursoDTO) {
-        CursoResponseDTO cursoCriadoDTO = service.create(cursoDTO);
-        return new ResponseEntity<>(cursoCriadoDTO, HttpStatus.CREATED);
+    public ResponseEntity<CursoResponseDTO> create(@RequestBody @Valid CreateCursoRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
     }
 
-    @PutMapping(value = "/{id}")
-    public ResponseEntity<CursoResponseDTO> update(@PathVariable(value = "id") Long id, @RequestBody UpdateCursoRequestDTO cursoDTO) {
-        CursoResponseDTO cursoAtualizadoDTO = service.update(id, cursoDTO);
-        return new ResponseEntity<>(cursoAtualizadoDTO, HttpStatus.OK);
+    @PutMapping("/{id}")
+    public ResponseEntity<CursoResponseDTO> update(
+        @PathVariable Long id,
+        @RequestBody @Valid UpdateCursoRequestDTO dto
+    ) {
+        return ResponseEntity.ok(service.update(id, dto));
     }
 
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Void> delete(@PathVariable(value = "id") Long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 }
