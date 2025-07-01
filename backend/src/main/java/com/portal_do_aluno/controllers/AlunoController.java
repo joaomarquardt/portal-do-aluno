@@ -5,6 +5,7 @@ import com.portal_do_aluno.dtos.requests.UpdateAlunoRequestDTO;
 import com.portal_do_aluno.dtos.responses.AlunoResponseDTO;
 import com.portal_do_aluno.dtos.responses.DesempenhoResponseDTO;
 import com.portal_do_aluno.services.AlunoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,38 +21,36 @@ public class AlunoController {
 
     @GetMapping
     public ResponseEntity<List<AlunoResponseDTO>> findAll() {
-        List<AlunoResponseDTO> alunosDTO = service.findAll();
-        return new ResponseEntity<>(alunosDTO, HttpStatus.OK);
+        return ResponseEntity.ok(service.findAll());
     }
 
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<AlunoResponseDTO> findById(@PathVariable(value = "id") Long id) {
-        AlunoResponseDTO alunoDTO = service.findById(id);
-        return new ResponseEntity<>(alunoDTO, HttpStatus.OK);
+    @GetMapping("/{id}")
+    public ResponseEntity<AlunoResponseDTO> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findById(id));
     }
 
     @PostMapping
-    public ResponseEntity<AlunoResponseDTO> create(@RequestBody CreateAlunoRequestDTO alunoDTO) {
-        AlunoResponseDTO alunoCriadoDTO = service.create(alunoDTO);
-        return new ResponseEntity<>(alunoCriadoDTO, HttpStatus.CREATED);
+    public ResponseEntity<AlunoResponseDTO> create(@RequestBody @Valid CreateAlunoRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
     }
 
-    @PutMapping(value = "/{id}")
-    public ResponseEntity<AlunoResponseDTO> update(@PathVariable(value = "id") Long id, @RequestBody UpdateAlunoRequestDTO alunoDTO) {
-        AlunoResponseDTO alunoAtualizadoDTO = service.update(id, alunoDTO);
-        return new ResponseEntity<>(alunoAtualizadoDTO, HttpStatus.OK);
+    @PutMapping("/{id}")
+    public ResponseEntity<AlunoResponseDTO> update(
+        @PathVariable Long id,
+        @RequestBody @Valid UpdateAlunoRequestDTO dto
+    ) {
+        return ResponseEntity.ok(service.update(id, dto));
     }
 
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Void> delete(@PathVariable(value = "id") Long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 
-    @GetMapping(value = "/{id}/desempenho")
-    public ResponseEntity<List<DesempenhoResponseDTO>> getSchoolPerformance(@PathVariable(value = "id") Long id) {
-        List<DesempenhoResponseDTO> desempenhosDTO = service.getSchoolPerformance(id);
-        return new ResponseEntity<>(desempenhosDTO, HttpStatus.OK);
+    @GetMapping("/{id}/desempenho")
+    public ResponseEntity<List<DesempenhoResponseDTO>> getSchoolPerformance(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getSchoolPerformance(id));
     }
 
     @GetMapping(value = "/total-alunos")
