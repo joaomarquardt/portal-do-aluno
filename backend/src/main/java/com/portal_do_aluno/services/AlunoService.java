@@ -100,4 +100,12 @@ public class AlunoService {
                 )
                 .toList();
     }
+
+    public Long getNumberOfStudents(Boolean matriculado) {
+        if (matriculado == null) {
+            return alunoRepository.count();
+        } else {
+            return alunoRepository.countByMatriculado(matriculado);
+        }
+    }
 }

@@ -53,4 +53,10 @@ public class AlunoController {
         List<DesempenhoResponseDTO> desempenhosDTO = service.getSchoolPerformance(id);
         return new ResponseEntity<>(desempenhosDTO, HttpStatus.OK);
     }
+
+    @GetMapping(value = "/total-alunos")
+    public ResponseEntity<Long> getNumberOfStudents(@RequestParam(required = false) Boolean matriculado) {
+        Long totalAlunosAtivos = service.getNumberOfStudents(matriculado);
+        return new ResponseEntity<>(totalAlunosAtivos, HttpStatus.OK);
+    }
 }

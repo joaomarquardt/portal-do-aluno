@@ -11,4 +11,6 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
     int countByCursoAndPeriodoIngresso(Curso curso, String periodoIngresso);
 
     Optional<Aluno> findByMatricula(String matricula);
+
+    long countByMatriculado(Boolean matriculado);
 }
