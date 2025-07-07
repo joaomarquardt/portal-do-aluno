@@ -5,8 +5,9 @@ import { Users, GraduationCap } from 'lucide-react';
 
 const Login = () => {
   const [cpf, setCpf] = useState('');
+  const [cpfView,setCpfView] = useState("")
   const [senha, setSenha] = useState('');
-  const [tipoUsuario, setTipoUsuario] = useState<'professor' | 'estudante'>('estudante');
+  const [tipoUsuario, setTipoUsuario] = useState<'PROFESSOR' | 'ALUNO'>('ALUNO');
   const [error, setError] = useState('');
   const { login, loading } = useAuth();
 
@@ -19,7 +20,7 @@ const Login = () => {
       return;
     }
 
-    const success = await login(cpf, senha, tipoUsuario);
+    const success = await login(cpf, senha);
     if (!success) {
       setError('CPF, senha ou tipo de usuário incorretos');
     }
@@ -34,7 +35,8 @@ const Login = () => {
     const value = e.target.value;
     const numbers = value.replace(/\D/g, '');
     if (numbers.length <= 11) {
-      setCpf(formatCPF(numbers));
+      setCpfView(formatCPF(numbers));
+      setCpf(numbers);
     }
   };
 
@@ -45,15 +47,7 @@ const Login = () => {
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Sistema Acadêmico</h1>
           <p className="text-gray-600">Faça login para acessar o sistema</p>
         </div>
-
-        {/* Dados de teste */}
-        <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-6 text-sm">
-          <p className="font-semibold text-blue-800 mb-1">Dados para teste:</p>
-          <p className="text-blue-700">Admin: CPF 111.111.111-11, Senha: 123</p>
-          <p className="text-blue-700">Professor: CPF 222.222.222-22, Senha: 123</p>
-          <p className="text-blue-700">Estudante: CPF 333.333.333-33, Senha: 123</p>
-        </div>
-
+        
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -61,7 +55,7 @@ const Login = () => {
             </label>
             <input
               type="text"
-              value={cpf}
+              value={cpfView}
               onChange={handleCPFChange}
               className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-blue-500"
               placeholder="000.000.000-00"
@@ -92,9 +86,9 @@ const Login = () => {
                 <input
                   type="radio"
                   name="tipoUsuario"
-                  value="estudante"
-                  checked={tipoUsuario === 'estudante'}
-                  onChange={(e) => setTipoUsuario(e.target.value as 'estudante')}
+                  value="ALUNO"
+                  checked={tipoUsuario === 'ALUNO'}
+                  onChange={(e) => setTipoUsuario(e.target.value as 'ALUNO')}
                   className="w-4 h-4"
                 />
                 <Users className="text-blue-600" size={20} />
@@ -104,9 +98,9 @@ const Login = () => {
                 <input
                   type="radio"
                   name="tipoUsuario"
-                  value="professor"
-                  checked={tipoUsuario === 'professor'}
-                  onChange={(e) => setTipoUsuario(e.target.value as 'professor')}
+                  value="PROFESSOR"
+                  checked={tipoUsuario === 'PROFESSOR'}
+                  onChange={(e) => setTipoUsuario(e.target.value as 'PROFESSOR')}
                   className="w-4 h-4"
                 />
                 <GraduationCap className="text-green-600" size={20} />

@@ -30,20 +30,18 @@ const AppContent = () => {
     );
   }
 
-  // if (!user) {
-  //   return <Login />;
-  // }
+  if (!user) {
+    return <Login />;
+  }
 
-  // Redirecionar baseado na role do usuário
-  // if (user.role === "professor") {
-  //   return <DashboardProfessor />;
-  // }
+  if (user.role === "PROFESSOR") {
+    return <DashboardProfessor />;
+  }
 
-  // if (user.role === 'estudante') {
-  //   return <DashboardEstudante />;
-  // }
+  if (user.role === 'ALUNO') {
+    return <DashboardEstudante />;
+  }
 
-  // Se for admin, mostrar o dashboard administrativo
   return (
     <div className="min-h-screen flex w-full">
       <AppSidebar />
@@ -56,22 +54,22 @@ const AppContent = () => {
         <main className="flex-1 bg-gray-100">
           <Routes>
             <Route path="/" element={
-              // <ProtectedRoute allowedRoles={['admin']}>
+              <ProtectedRoute allowedRoles={['ADMIN']}>
                 <Index />
-              // </ProtectedRoute>
+              </ProtectedRoute>
             } />
             <Route path="/professores" element={
-              <ProtectedRoute allowedRoles={['admin']}>
+              <ProtectedRoute allowedRoles={['ADMIN']}>
                 <Professores />
               </ProtectedRoute>
             } />
             <Route path="/turmas" element={
-              <ProtectedRoute allowedRoles={['admin']}>
+              <ProtectedRoute allowedRoles={['ADMIN']}>
                 <Turmas />
               </ProtectedRoute>
             } />
             <Route path="/periodos" element={
-              <ProtectedRoute allowedRoles={['admin']}>
+              <ProtectedRoute allowedRoles={['ADMIN']}>
                 <Periodos />
               </ProtectedRoute>
             } />
