@@ -123,6 +123,10 @@ public class TurmaService {
         return mapper.toResponseDTO(entidade);
     }
 
+    public void updateStatusToClosed(String periodo) {
+        repository.updateStatusToClosed(periodo);
+    }
+
     public void delete(Long id) {
         repository.deleteById(id);
     }
