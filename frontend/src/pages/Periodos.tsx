@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Calendar, Plus, Edit, Trash2 } from "lucide-react";
 
 interface Periodo {
@@ -12,23 +12,11 @@ interface Periodo {
 
 const Periodos = () => {
   const [periodos, setPeriodos] = useState<Periodo[]>([
-    {
-      id: 1,
-      nome: "2024.1",
-      dataInicio: "2024-02-01",
-      dataFim: "2024-06-30",
-      ativo: true
-    },
-    {
-      id: 2,
-      nome: "2023.2",
-      dataInicio: "2023-08-01",
-      dataFim: "2023-12-15",
-      ativo: false
-    }
   ]);
 
   const [editingPeriodo, setEditingPeriodo] = useState<Periodo | null>(null);
+  const [year, setYear] = useState<Number>(2025)
+  const [period,setPeriod] = useState<Number>(1)
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     nome: '',
@@ -37,7 +25,7 @@ const Periodos = () => {
     ativo: false
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (editingPeriodo) {
@@ -55,7 +43,28 @@ const Periodos = () => {
         id: Math.max(...periodos.map(p => p.id), 0) + 1,
         ...formData
       };
-      setPeriodos([...periodos, newPeriodo]);
+
+      
+      try{
+        const res = await fetch("http://localhost:3000/create/periodo-letivo", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            ano: year,
+            semestre: period,
+            ativo: formData.ativo,
+            dataInicio: formData.dataInicio,
+            dataFim: formData.dataFim
+          })
+        });
+
+        const userData = await res.json();
+      }catch (Error){
+        console.error("tes")
+      }
       alert('Período criado com sucesso!');
     }
     
@@ -81,12 +90,40 @@ const Periodos = () => {
       alert('Período excluído com sucesso!');
     }
   };
-
+  const validateName = (name:string) =>{
+      const regex = /^\d{4}\.(1|2)$/;
+      const test =  regex.test(name);
+      if (test){
+        setYear(Number.parseInt(name.substring(0,3)))
+        setPeriod(Number.parseInt(name[5]))
+      }
+  }
   const cancelForm = () => {
     setShowForm(false);
     setEditingPeriodo(null);
     setFormData({ nome: '', dataInicio: '', dataFim: '', ativo: false });
   };
+
+
+
+  useEffect(() => {
+    const fetchPeriods = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/periodo-letivo",{
+          headers:{
+            "Content-type":"application/json",
+            "Authorization":`Bearer ${localStorage.getItem("token")}` 
+          }
+        });
+        const data = await response.json();
+        console.log(data); 
+      } catch (error) {
+        console.error("Erro ao buscar os períodos:", error);
+      }
+    };
+
+    fetchPeriods();
+  }, []);
 
   return (
     <div className="p-6">
@@ -119,8 +156,11 @@ const Periodos = () => {
                   </label>
                   <input
                     type="text"
-                    value={formData.nome}
-                    onChange={(e) => setFormData({...formData, nome: e.target.value})}
+                    value={year +'.'+ period}
+                    onChange={(e) => {
+                      validateName(e.target.value)
+                      setFormData({...formData, nome:e.target.value })
+                    }}
                     className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-blue-500"
                     placeholder="Ex: 2024.1"
                     required
