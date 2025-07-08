@@ -4,6 +4,7 @@ import com.portal_do_aluno.domain.Usuario;
 import com.portal_do_aluno.repositories.UsuarioRepository;
 import com.portal_do_aluno.security.dtos.requests.AuthRequestDTO;
 import com.portal_do_aluno.security.dtos.requests.RegisterRequestDTO;
+import com.portal_do_aluno.security.dtos.responses.AuthResponseDTO;
 import com.portal_do_aluno.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,14 +37,14 @@ public class AuthenticationService {
     @Autowired
     private TokenCacheService tokenCacheService;
 
-    public String login(AuthRequestDTO authDTO) {
-        repository.findByCpf(authDTO.cpf()).orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado com CPF: " + authDTO.cpf()));
+    public AuthResponseDTO login(AuthRequestDTO authDTO) {
+        Usuario usuario = repository.findByCpf(authDTO.cpf()).orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado com CPF: " + authDTO.cpf()));
         var usuarioSenha = new UsernamePasswordAuthenticationToken(authDTO.cpf(), authDTO.senha());
         try {
             var auth = this.authenticationManager.authenticate(usuarioSenha);
-            String token = tokenService.generateToken((Usuario) auth.getPrincipal());
-            tokenCacheService.cacheToken(token, 3600);
-            return token;
+            Usuario usuarioAuth = (Usuario) auth.getPrincipal();
+            String token = tokenService.generateToken(usuarioAuth);
+            return new AuthResponseDTO(token, usuario.isPrecisaRedefinirSenha());
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException("CPF e/ou senha inválidos.");
         }

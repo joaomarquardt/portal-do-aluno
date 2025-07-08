@@ -11,12 +11,16 @@ import com.portal_do_aluno.mappers.AlunoMapper;
 import com.portal_do_aluno.mappers.ProfessorMapper;
 import com.portal_do_aluno.mappers.UsuarioMapper;
 import com.portal_do_aluno.repositories.UsuarioRepository;
+import com.portal_do_aluno.security.dtos.requests.AtualizarSenhaRequestDTO;
 import com.portal_do_aluno.security.dtos.requests.RegisterRequestDTO;
 import com.portal_do_aluno.security.exceptions.RegisterConflictException;
+import org.springframework.security.access.AccessDeniedException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -40,6 +44,9 @@ public class UsuarioService {
 
     @Autowired
     private ProfessorMapper professorMapper;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public List<UsuarioResponseDTO> findAll() {
         return mapper.toDTOResponseList(repository.findAll());
@@ -88,5 +95,20 @@ public class UsuarioService {
     private Usuario getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return (Usuario) authentication.getPrincipal();
+    }
+
+    @Transactional
+    public void updatePassword(Long id, AtualizarSenhaRequestDTO atualizarSenhaRequestDTO) {
+        Usuario usuario = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado!"));
+        Usuario logado = getAuthenticatedUser();
+        if (!logado.getId().equals(id)) {
+            throw new AccessDeniedException("Você não pode alterar a senha de outro usuário!");
+        }
+        if (!usuario.isPrecisaRedefinirSenha() && !passwordEncoder.matches(atualizarSenhaRequestDTO.senhaAtual(), usuario.getSenha())) {
+            throw new IllegalArgumentException("Senha atual incorreta!");
+        }
+        usuario.setSenha(passwordEncoder.encode(atualizarSenhaRequestDTO.senhaNova()));
+        usuario.setPrecisaRedefinirSenha(false);
+        repository.save(usuario);
     }
 }
