@@ -18,8 +18,8 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@RequestBody AuthRequestDTO authDTO) {
-        String token = service.login(authDTO);
-        return new ResponseEntity<>(new AuthResponseDTO(token), HttpStatus.OK);
+        AuthResponseDTO authResponseDTO = service.login(authDTO);
+        return new ResponseEntity<>(authResponseDTO, HttpStatus.OK);
     }
 
     @PostMapping("/register")
