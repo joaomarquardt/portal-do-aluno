@@ -46,6 +46,8 @@ public class Usuario implements UserDetails {
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private Professor professor;
 
+    private boolean precisaRedefinirSenha = true;
+
     public Usuario(String nome, String cpf, String emailPessoal, String emailInstitucional, String telefone, String senha, Aluno aluno, Professor professor) {
         this.nome = nome;
         this.cpf = cpf;
