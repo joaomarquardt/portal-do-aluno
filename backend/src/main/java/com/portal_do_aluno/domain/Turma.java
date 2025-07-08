@@ -41,6 +41,7 @@ public class Turma {
 
     private int vagasTotais;
     private String horario;
+    private TurmaStatus status = TurmaStatus.ATIVA;
 
     public Turma(String codigo, String periodo, Disciplina disciplina, Professor professor, List<Aluno> alunos, int vagasTotais, String horario) {
         this.codigo = codigo;
