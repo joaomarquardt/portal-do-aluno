@@ -4,6 +4,7 @@ import com.portal_do_aluno.domain.Professor;
 import com.portal_do_aluno.dtos.requests.CreateProfessorRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateProfessorRequestDTO;
 import com.portal_do_aluno.dtos.responses.ProfessorResponseDTO;
+import com.portal_do_aluno.dtos.responses.ProfessorSelectResponseDTO;
 import com.portal_do_aluno.mappers.ProfessorMapper;
 import com.portal_do_aluno.repositories.ProfessorRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -35,6 +36,10 @@ public class ProfessorService {
 
     public Professor findBySiapeOrThrowEntity(String siape) {
         return repository.findBySiape(siape).orElseThrow(() -> new EntityNotFoundException("Professor não encontrado!"));
+    }
+
+    public List<ProfessorSelectResponseDTO> listAllToSelect() {
+        return mapper.toDTOSelectResponseList(repository.findAll());
     }
 
     public ProfessorResponseDTO create(CreateProfessorRequestDTO professorDTO) {

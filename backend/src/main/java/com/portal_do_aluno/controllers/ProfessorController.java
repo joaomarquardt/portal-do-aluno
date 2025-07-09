@@ -3,6 +3,7 @@ package com.portal_do_aluno.controllers;
 import com.portal_do_aluno.dtos.requests.CreateProfessorRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateProfessorRequestDTO;
 import com.portal_do_aluno.dtos.responses.ProfessorResponseDTO;
+import com.portal_do_aluno.dtos.responses.ProfessorSelectResponseDTO;
 import com.portal_do_aluno.services.ProfessorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,12 @@ public class ProfessorController {
     public ResponseEntity<ProfessorResponseDTO> findById(@PathVariable(value = "id") Long id) {
         ProfessorResponseDTO professorDTO = service.findById(id);
         return new ResponseEntity<>(professorDTO, HttpStatus.OK);
+    }
+
+    @GetMapping("/select")
+    public ResponseEntity<List<ProfessorSelectResponseDTO>> listAllToSelect() {
+        List<ProfessorSelectResponseDTO> professoresDTO = service.listAllToSelect();
+        return new ResponseEntity<>(professoresDTO, HttpStatus.OK);
     }
 
     @PostMapping

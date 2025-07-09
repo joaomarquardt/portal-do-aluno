@@ -4,6 +4,7 @@ import com.portal_do_aluno.domain.Professor;
 import com.portal_do_aluno.dtos.requests.CreateProfessorRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateProfessorRequestDTO;
 import com.portal_do_aluno.dtos.responses.ProfessorResponseDTO;
+import com.portal_do_aluno.dtos.responses.ProfessorSelectResponseDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -22,6 +23,8 @@ public interface ProfessorMapper {
     Professor toResponseEntity(ProfessorResponseDTO dto);
 
     List<ProfessorResponseDTO> toDTOResponseList(List<Professor> entities);
+
+    List<ProfessorSelectResponseDTO> toDTOSelectResponseList(List<Professor> entities);
 
     @Mapping(target = "id", ignore = true)
     void updateEntityFromDTO(UpdateProfessorRequestDTO dto, @MappingTarget Professor entity);
