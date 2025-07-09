@@ -29,6 +29,9 @@ public class PeriodoLetivoService {
     @Autowired
     private TurmaService turmaService;
 
+    @Autowired
+    private PeriodoLetivoProvider provider;
+
     public List<PeriodoLetivoResponseDTO> findAll() {
         return mapper.toDTOList(repository.findAll());
     }
@@ -61,7 +64,7 @@ public class PeriodoLetivoService {
             throw new InvalidDateRangeException("Data de fim do novo período ativo não pode ser anterior a data de fim do período ativo antigo!");
         }
         if (entidade.isAtivo() && !periodoLetivoDTO.ativo()) {
-            turmaService.updateStatusToClosed(getAcademicTerm());
+            turmaService.updateStatusToClosed(provider.getAcademicTerm());
         }
         mapper.updateEntityFromDTO(periodoLetivoDTO, entidade);
         entidade = repository.save(entidade);
@@ -72,8 +75,5 @@ public class PeriodoLetivoService {
         repository.deleteById(id);
     }
 
-    public String getAcademicTerm() {
-        PeriodoLetivo entidade = repository.findByAtivoTrue().orElseThrow(() -> new EntityNotFoundException("Não foi encontrado nenhum período letivo ativo!"));
-        return Integer.toString(entidade.getAno()) + "." + Integer.toString(entidade.getSemestre());
-    }
+
 }

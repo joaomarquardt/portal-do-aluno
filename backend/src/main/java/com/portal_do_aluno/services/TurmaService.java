@@ -33,7 +33,7 @@ public class TurmaService {
     private ProfessorService professorService;
 
     @Autowired
-    private PeriodoLetivoService periodoLetivoService;
+    private PeriodoLetivoProvider periodoLetivoProvider;
 
     @Autowired
     private AlunoService alunoService;
@@ -63,7 +63,7 @@ public class TurmaService {
         Professor professor = professorService.findByIdOrThrowEntity(turmaDTO.professorID());
         entidade.setProfessor(professor);
         entidade.setDisciplina(disciplina);
-        String periodoLetivo = periodoLetivoService.getAcademicTerm();
+        String periodoLetivo = periodoLetivoProvider.getAcademicTerm();
         entidade.setStatus(TurmaStatus.ATIVA);
         entidade.setPeriodo(periodoLetivo);
         entidade.setCodigo(generateCode(disciplina.getCodigo(), periodoLetivo));

@@ -22,7 +22,7 @@ public class AlunoService {
     private AlunoRepository alunoRepository;
 
     @Autowired
-    private PeriodoLetivoService periodoLetivoService;
+    private PeriodoLetivoProvider periodoLetivoProvider;
 
     @Autowired
     private CursoService cursoService;
@@ -56,7 +56,7 @@ public class AlunoService {
     public AlunoResponseDTO create(CreateAlunoRequestDTO alunoDTO) {
         Aluno entidade = mapper.toEntity(alunoDTO);
         entidade.setPeriodoAtual(1);
-        String periodoLetivo = periodoLetivoService.getAcademicTerm();
+        String periodoLetivo = periodoLetivoProvider.getAcademicTerm();
         entidade.setPeriodoIngresso(periodoLetivo);
         entidade.setCurso(cursoService.findByIdOrThrowEntity(alunoDTO.cursoID()));
         entidade.setMatricula(generateRegistration(entidade, periodoLetivo));
