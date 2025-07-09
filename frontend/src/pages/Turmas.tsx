@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BookOpen, Users, Calendar, Edit, Trash2, Plus, Clock } from "lucide-react";
 
 interface Turma {
@@ -12,7 +12,11 @@ interface Turma {
   horario: string;
   sala: string;
 }
-
+interface Professor {
+  siape: string;
+  departamento: string | null;
+  turmas: any[];
+}
 const Turmas = () => {
   const [turmas, setTurmas] = useState<Turma[]>([
     {
@@ -25,20 +29,12 @@ const Turmas = () => {
       horario: "08:00 - 10:00",
       sala: "A101"
     },
-    {
-      id: 2,
-      nome: "Turma B - História",
-      disciplina: "História do Brasil",
-      professor: "Profa. Maria Santos",
-      alunos: 30,
-      semestre: "2024.1",
-      horario: "14:00 - 16:00",
-      sala: "B205"
-    }
+
   ]);
 
   const [showForm, setShowForm] = useState(false);
   const [editingTurma, setEditingTurma] = useState<Turma | null>(null);
+  const [professores, setProfessores] = useState<Professor[]>([]);
   const [formData, setFormData] = useState({
     nome: '',
     disciplina: '',
@@ -48,7 +44,29 @@ const Turmas = () => {
     horario: '',
     sala: ''
   });
+useEffect(() => {
+  const fetchProfessores = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/professores", {
+        headers: {
+          "Content-type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        }
+      });
 
+      if (!response.ok) {
+        throw new Error(`Erro HTTP: ${response.status}`);
+      }
+
+      const data: Professor[] = await response.json();
+      setProfessores(data); // ✅ armazena exatamente como a API envia
+    } catch (error) {
+      console.error("Erro ao buscar os professores:", error);
+    }
+  };
+
+  fetchProfessores();
+}, []);
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -144,15 +162,23 @@ const Turmas = () => {
               />
             </div>
             <div>
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Professor</label>
-              <input
-                type="text"
+              <select
                 value={formData.professor}
-                onChange={(e) => setFormData({...formData, professor: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, professor: e.target.value })}
                 className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-purple-500"
                 required
-              />
+              >
+                <option value="">Selecione um professor</option>
+                {professores.map((prof) => (
+                  <option key={prof.siape} value={prof.siape}>
+                    {prof.siape} — {prof.departamento ?? 'Sem departamento'}
+                  </option>
+                ))}
+              </select>
             </div>
+          </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Número de Alunos</label>
               <input

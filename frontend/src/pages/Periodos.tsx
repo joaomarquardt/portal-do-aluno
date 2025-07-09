@@ -39,10 +39,7 @@ const Periodos = () => {
       alert('Período atualizado com sucesso!');
     } else {
       // Criar novo período
-      const newPeriodo = {
-        id: Math.max(...periodos.map(p => p.id), 0) + 1,
-        ...formData
-      };
+
 
       
       try{
@@ -62,6 +59,10 @@ const Periodos = () => {
         });
 
         const userData = await res.json();
+        const newPeriodo = {
+        id: Math.max(...periodos.map(p => p.id), 0) + 1,
+        ...formData
+      };
       }catch (Error){
         console.error("tes")
       }

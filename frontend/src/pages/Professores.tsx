@@ -1,70 +1,118 @@
 
-import { useState } from 'react';
+import { useState, useEffect} from 'react';
 import { GraduationCap, Edit, Trash2, Plus, User, Mail, BookOpen } from "lucide-react";
 
 interface Professor {
   id: number;
   nome: string;
-  email: string;
+  cpf:string;
+  emailPessoal:string;
+  emailInstitucional: string;
   departamento: string;
   telefone: string;
+  siape:string;
   disciplinas: string[];
 }
 
 const Professores = () => {
+  const [cpfFormated,setCpfFormated] = useState('')
   const [professores, setProfessores] = useState<Professor[]>([
     {
       id: 1,
       nome: "Prof. João Silva",
-      email: "joao.silva@faculdade.edu.br",
+      cpf: "16161305712",
+      emailPessoal: "rafaeltavsilva@gmail.com",
+      emailInstitucional: "joao.silva@faculdade.edu.br",
       departamento: "Matemática",
       telefone: "(11) 98765-4321",
+      siape: "99999",
       disciplinas: ["Cálculo I", "Álgebra Linear"]
     },
-    {
-      id: 2,
-      nome: "Profa. Maria Santos",
-      email: "maria.santos@faculdade.edu.br",
-      departamento: "História",
-      telefone: "(11) 98765-1234",
-      disciplinas: ["História do Brasil", "História Geral"]
-    }
   ]);
 
   const [showForm, setShowForm] = useState(false);
   const [editingProfessor, setEditingProfessor] = useState<Professor | null>(null);
+
+  // ⬇️ Atualizado com novos campos
   const [formData, setFormData] = useState({
     nome: '',
-    email: '',
+    emailInstitucional: '',
+    emailPessoal: '',
+    siape: '',
+    cpf: '',
     departamento: '',
     telefone: '',
     disciplinas: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const disciplinasArray = formData.disciplinas.split(',').map(d => d.trim()).filter(d => d);
-    
+
     if (editingProfessor) {
-      setProfessores(professores.map(prof => 
-        prof.id === editingProfessor.id 
+      setProfessores(professores.map(prof =>
+        prof.id === editingProfessor.id
           ? { ...prof, ...formData, disciplinas: disciplinasArray }
           : prof
       ));
     } else {
-      const newProfessor = {
-        id: Math.max(...professores.map(p => p.id), 0) + 1,
-        ...formData,
-        disciplinas: disciplinasArray
-      };
-      setProfessores([...professores, newProfessor]);
+      try {
+        const res = await fetch("http://localhost:3000/professores", {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            nome: formData.nome,
+            emailInstitucional:formData.emailInstitucional,
+            emailPessoal:formData.emailPessoal,
+            senha:formData.nome + " " + formData.telefone, 
+            professor:{siape:Number(formData.siape)},
+            cpf:formData.cpf,
+            telefone:formData.telefone,
+            papeis:['PROFESSOR']
+          })
+        });
+
+        // if(disciplinasArray){
+        //   const res = await fetch("http://localhost:3000/professores", {
+        //   method: "POST",
+        //   headers: {
+        //     "Content-type": "application/json",
+        //     "Authorization": `Bearer ${localStorage.getItem('token')}`
+        //   },
+        //   body: JSON.stringify({
+        //     ...formData
+        //   })
+        // });
+        // }
+
+        const newProfessor: Professor = {
+          id: Math.max(...professores.map(p => p.id), 0) + 1,
+          ...formData,
+          disciplinas: disciplinasArray
+        };
+        setProfessores([...professores, newProfessor]);
+      } catch (error) {
+        console.error("Erro ao cadastrar professor:", error);
+      }
     }
-    
+
     resetForm();
   };
 
   const resetForm = () => {
-    setFormData({ nome: '', email: '', departamento: '', telefone: '', disciplinas: '' });
+    setFormData({
+      nome: '',
+      emailInstitucional: '',
+      emailPessoal: '',
+      siape: '',
+      cpf: '',
+      departamento: '',
+      telefone: '',
+      disciplinas: ''
+    });
     setShowForm(false);
     setEditingProfessor(null);
   };
@@ -73,7 +121,10 @@ const Professores = () => {
     setEditingProfessor(professor);
     setFormData({
       nome: professor.nome,
-      email: professor.email,
+      emailInstitucional: professor.emailInstitucional,
+      emailPessoal: professor.emailPessoal,
+      siape: professor.siape,
+      cpf: professor.cpf,
       departamento: professor.departamento,
       telefone: professor.telefone,
       disciplinas: professor.disciplinas.join(', ')
@@ -126,11 +177,21 @@ const Professores = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email Pessoal</label>
               <input
                 type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                value={formData.emailPessoal}
+                onChange={(e) => setFormData({...formData, emailPessoal: e.target.value})}
+                className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email Institucional</label>
+              <input
+                type="email"
+                value={formData.emailInstitucional}
+                onChange={(e) => setFormData({...formData, emailInstitucional: e.target.value})}
                 className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500"
                 required
               />
@@ -146,12 +207,40 @@ const Professores = () => {
               />
             </div>
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">SIAPE</label>
+              <input
+                type="text"
+                value={formData.siape}
+                onChange={(e) => setFormData({...formData, siape: e.target.value})}
+                className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500"
+                required
+              />
+            </div>
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
               <input
                 type="text"
                 value={formData.telefone}
                 onChange={(e) => setFormData({...formData, telefone: e.target.value})}
                 className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">CPF </label>
+              <input
+                type="text"
+                value={cpfFormated}
+                onChange={(e) => {
+                  if(e.target.value.length <= 11){
+                    const numbers = e.target.value.replace(/\D/g, '');
+                    const cpfFormated =  numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+                    setCpfFormated(cpfFormated)
+                    setFormData({...formData, cpf:numbers})
+                  }
+                  
+                }}
+                className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500"
+                placeholder="Ex: 000.000.000-00"
               />
             </div>
             <div className="md:col-span-2">
@@ -222,7 +311,11 @@ const Professores = () => {
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center">
                     <Mail className="text-gray-500 mr-2" size={16} />
-                    <span className="text-gray-600">{professor.email}</span>
+                    <span className="text-gray-600">Ins: {professor.emailInstitucional}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Mail className="text-gray-500 mr-2" size={16} />
+                    <span className="text-gray-600">Pessoal: {professor.emailPessoal}</span>
                   </div>
                   <div className="mt-2">
                     <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">

@@ -132,6 +132,17 @@ app.post("/create/periodo-letivo",(req,res) =>{
 app.get("/periodo-letivo",(req,res) =>{
   sendAuthGetTo("/periodos-letivos",req,res,req.headers.authorization)
 })
+app.get("/turmas",(req,res) =>{
+  sendAuthGetTo("/turmas",req,res,req.headers.authorization)
+})
+
+app.post("/professores",(req,res)=>{
+  sendAuthPostTo("/auth/register",req,res,req.headers.authorization)
+})
+app.get("/professores",(req,res)=>{
+  sendAuthGetTo("/professors",req,res,req.headers.authorization)
+})
+
 
 app.listen(port, () => {
   console.log(`Servidor rodando na porta ${port}`);
