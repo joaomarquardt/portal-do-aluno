@@ -46,12 +46,15 @@ public class PeriodoLetivoService {
         if (!periodoLetivoDTO.dataFim().isAfter(periodoLetivoDTO.dataInicio())) {
             throw new InvalidDateRangeException("Data de início não pode ser posterior/igual a data de fim!");
         }
-        PeriodoLetivo periodoLetivoAtivo = repository.findByAtivoTrue().orElseThrow(() -> new EntityNotFoundException("Não foi encontrado nenhum período letivo ativo!"));
-        if (periodoLetivoDTO.ativo() && !periodoLetivoAtivo.getDataFim().isBefore(periodoLetivoDTO.dataInicio())) {
-            throw new InvalidDateRangeException("Data de início do novo período não pode ser anterior a data de fim do último período!");
-        }
-        if (periodoLetivoDTO.ativo()) {
-            repository.deactivateAllActive();
+        PeriodoLetivo periodoLetivoAtivo;
+        if (!repository.findAll().isEmpty()) {
+            periodoLetivoAtivo = repository.findByAtivoTrue().orElseThrow(() -> new EntityNotFoundException("Não foi encontrado nenhum período letivo ativo!"));
+            if (periodoLetivoDTO.ativo() && !periodoLetivoAtivo.getDataFim().isBefore(periodoLetivoDTO.dataInicio())) {
+                throw new InvalidDateRangeException("Data de início do novo período não pode ser anterior a data de fim do último período!");
+            }
+            if (periodoLetivoDTO.ativo()) {
+                repository.deactivateAllActive();
+            }
         }
         PeriodoLetivo entidadeCriada = repository.save(mapper.toEntity(periodoLetivoDTO));
         return mapper.toResponseDTO(entidadeCriada);
