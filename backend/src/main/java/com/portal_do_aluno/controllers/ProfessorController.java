@@ -22,17 +22,12 @@ public class ProfessorController {
     @GetMapping
     public ResponseEntity<List<ProfessorResponseDTO>> findAll() {
         return ResponseEntity.ok(service.findAll());
+
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProfessorResponseDTO> findById(@PathVariable Long id) {
         return ResponseEntity.ok(service.findById(id));
-    }
-
-    @GetMapping("/select")
-    public ResponseEntity<List<ProfessorSelectResponseDTO>> listAllToSelect() {
-        List<ProfessorSelectResponseDTO> professoresDTO = service.listAllToSelect();
-        return new ResponseEntity<>(professoresDTO, HttpStatus.OK);
     }
 
     @PostMapping

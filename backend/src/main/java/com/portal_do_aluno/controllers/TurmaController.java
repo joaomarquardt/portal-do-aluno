@@ -65,11 +65,12 @@ public class TurmaController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
-    }
 
+    }
     @GetMapping(value = "/media-geral")
     public ResponseEntity<Double> generalAverageAllClasses() {
          Double mediaGeral = service.generalAverageAllClasses();
          return new ResponseEntity<>(mediaGeral, HttpStatus.OK);
+
     }
 }

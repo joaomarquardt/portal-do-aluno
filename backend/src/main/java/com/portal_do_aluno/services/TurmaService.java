@@ -5,10 +5,8 @@ import com.portal_do_aluno.dtos.requests.CreateTurmaRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateDesempenhoRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateTurmaRequestDTO;
 import com.portal_do_aluno.dtos.responses.TurmaResponseDTO;
-
 import com.portal_do_aluno.exceptions.TurmaEncerradaException;
 import com.portal_do_aluno.exceptions.VagasInsuficientesException;
-import com.portal_do_aluno.exceptions.GlobalExceptionHandler;
 import com.portal_do_aluno.mappers.TurmaMapper;
 import com.portal_do_aluno.repositories.MediaRepository;
 import com.portal_do_aluno.repositories.PresencaRepository;
