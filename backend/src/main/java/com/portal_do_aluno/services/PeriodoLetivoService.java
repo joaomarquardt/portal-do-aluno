@@ -10,7 +10,6 @@ import com.portal_do_aluno.repositories.PeriodoLetivoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -24,7 +23,6 @@ public class PeriodoLetivoService {
     @Autowired
     private PeriodoLetivoRepository repository;
 
-    @Qualifier("periodoLetivoMapperImpl")
     @Autowired
     private PeriodoLetivoMapper mapper;
 
@@ -45,29 +43,32 @@ public class PeriodoLetivoService {
 
     @Transactional
     public PeriodoLetivoResponseDTO create(CreatePeriodoLetivoRequestDTO periodoLetivoDTO) {
-//        if (!periodoLetivoDTO.dataFim().isAfter(periodoLetivoDTO.dataInicio())) {
-//            throw new InvalidDateRangeException("Data de início não pode ser posterior/igual a data de fim!");
-//        }
-//        PeriodoLetivo periodoLetivoAtivo = repository.findByAtivoTrue().orElseThrow(() -> new EntityNotFoundException("Não foi encontrado nenhum período letivo ativo!"));
-//        if (periodoLetivoDTO.ativo() && !periodoLetivoAtivo.getDataFim().isBefore(periodoLetivoDTO.dataInicio())) {
-//            throw new InvalidDateRangeException("Data de início do novo período não pode ser anterior a data de fim do último período!");
-//        }
-//        if (periodoLetivoDTO.ativo()) {
-//            repository.deactivateAllActive();
-//        }
+        if (!periodoLetivoDTO.dataFim().isAfter(periodoLetivoDTO.dataInicio())) {
+            throw new InvalidDateRangeException("Data de início não pode ser posterior/igual a data de fim!");
+        }
+        PeriodoLetivo periodoLetivoAtivo;
+        if (!repository.findAll().isEmpty()) {
+            periodoLetivoAtivo = repository.findByAtivoTrue().orElseThrow(() -> new EntityNotFoundException("Não foi encontrado nenhum período letivo ativo!"));
+            if (periodoLetivoDTO.ativo() && !periodoLetivoAtivo.getDataFim().isBefore(periodoLetivoDTO.dataInicio())) {
+                throw new InvalidDateRangeException("Data de início do novo período não pode ser anterior a data de fim do último período!");
+            }
+            if (periodoLetivoDTO.ativo()) {
+                repository.deactivateAllActive();
+            }
+        }
         PeriodoLetivo entidadeCriada = repository.save(mapper.toEntity(periodoLetivoDTO));
         return mapper.toResponseDTO(entidadeCriada);
     }
 
     public PeriodoLetivoResponseDTO update(Long id, UpdatePeriodoLetivoRequestDTO periodoLetivoDTO) {
         PeriodoLetivo entidade = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Periodo Letivo não encontrado!"));
-//        PeriodoLetivo periodoLetivoAtivo = repository.findByAtivoTrue().orElseThrow(() -> new EntityNotFoundException("Não foi encontrado nenhum período letivo ativo!"));
-//        if (periodoLetivoDTO.ativo() && !Objects.equals(periodoLetivoAtivo.getId(), id) && !periodoLetivoAtivo.getDataFim().isBefore(periodoLetivoDTO.dataFim())) {
-//            throw new InvalidDateRangeException("Data de fim do novo período ativo não pode ser anterior a data de fim do período ativo antigo!");
-//        }
-//        if (entidade.isAtivo() && !periodoLetivoDTO.ativo()) {
-//            turmaService.updateStatusToClosed(provider.getAcademicTerm());
-//        }
+        PeriodoLetivo periodoLetivoAtivo = repository.findByAtivoTrue().orElseThrow(() -> new EntityNotFoundException("Não foi encontrado nenhum período letivo ativo!"));
+        if (periodoLetivoDTO.ativo() && !Objects.equals(periodoLetivoAtivo.getId(), id) && !periodoLetivoAtivo.getDataFim().isBefore(periodoLetivoDTO.dataFim())) {
+            throw new InvalidDateRangeException("Data de fim do novo período ativo não pode ser anterior a data de fim do período ativo antigo!");
+        }
+        if (entidade.isAtivo() && !periodoLetivoDTO.ativo()) {
+            turmaService.updateStatusToClosed(provider.getAcademicTerm());
+        }
         mapper.updateEntityFromDTO(periodoLetivoDTO, entidade);
         entidade = repository.save(entidade);
         return mapper.toResponseDTO(entidade);
