@@ -27,6 +27,7 @@ public class TokenService {
             return JWT.create()
                     .withIssuer("portal-do-aluno")
                     .withSubject(usuario.getUsername())
+                    .withClaim("nome", usuario.getNome().split(" ")[0])
                     .withExpiresAt(Instant.now().plusSeconds(3600))
                     .withClaim("roles", papeis)
                     .sign(algorithm);

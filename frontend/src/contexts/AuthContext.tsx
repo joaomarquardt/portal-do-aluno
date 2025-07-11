@@ -54,8 +54,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const decoded: any = jwtDecode(userData.token);
 
         const payload: User = {
-          cpf: decoded.aud,
-          nome: decoded.sub,
+          cpf: decoded.sub,
+          nome: decoded.nome,
           role: decoded.roles?.[0] ?? 'ALUNO' // <- Se roles for array
         };
 
