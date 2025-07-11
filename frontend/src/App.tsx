@@ -13,6 +13,7 @@ import Periodos from "./pages/Periodos";
 import DashboardProfessor from "./pages/DashboardProfessor";
 import DashboardEstudante from "./pages/DashboardEstudante";
 import NotFound from "./pages/NotFound";
+import Cursos from "./pages/Cursos";
 
 const queryClient = new QueryClient();
 
@@ -71,6 +72,11 @@ const AppContent = () => {
             <Route path="/periodos" element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
                 <Periodos />
+              </ProtectedRoute>
+            } />
+             <Route path="/cursos" element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <Cursos />
               </ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />

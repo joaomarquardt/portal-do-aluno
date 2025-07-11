@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Users, MessageSquarePlus, X } from 'lucide-react';
 import StudentCard from '../components/StudentCard';
 import AddStudentForm from '../components/AddStudentForm';
@@ -6,37 +6,32 @@ import Stats from '../components/Stats';
 
 interface Student {
   id: number;
+  cpf: string;
   name: string;
   email: string;
-  major: string;
-  year: string;
-  gpa: number;
+  institucionalEmail: string;
+  cellphone: string;
+  CursoId: number;
 }
 
 interface Comunicado {
   id: number;
   titulo: string;
   mensagem: string;
-  data: string;
-  autor: string;
 }
 
+interface ComunicadoServ{
+  id: number;
+  titulo: string;
+  mensagem:string;
+  data:string;
+}
 const Index = () => {
-  const [students, setStudents] = useState<Student[]>([
-    { id: 1, name: 'João Silva', email: 'joao.silva@faculdade.edu.br', major: 'Ciência da Computação', year: '3º', gpa: 3.7 },
-    { id: 2, name: 'Sarah Santos', email: 'sarah.s@faculdade.edu.br', major: 'Administração', year: '4º', gpa: 3.9 },
-    { id: 3, name: 'Miguel Wilson', email: 'miguel.w@faculdade.edu.br', major: 'Engenharia', year: '2º', gpa: 3.2 },
-    { id: 4, name: 'Emma Davis', email: 'emma.davis@faculdade.edu.br', major: 'Psicologia', year: '1º', gpa: 3.5 },
-  ]);
+  const [students, setStudents] = useState<Student[]>([]);
+  
+  const [comunicados, setComunicados] = useState<Comunicado[]>([])
+  const [ComunicadosServ, setComunicadosServ] = useState<ComunicadoServ[]>([
 
-  const [comunicados, setComunicados] = useState<Comunicado[]>([
-    {
-      id: 1,
-      titulo: 'Bem-vindos ao semestre 2024.1',
-      mensagem: 'Desejamos a todos um excelente semestre letivo!',
-      data: '2024-01-15',
-      autor: 'Administração',
-    },
   ]);
 
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
@@ -44,7 +39,30 @@ const Index = () => {
   const [showComunicadoForm, setShowComunicadoForm] = useState(false);
   const [comunicadoForm, setComunicadoForm] = useState({ titulo: '', mensagem: '' });
 
-  // Helpers
+  useEffect(() => {
+  const fetchComunicados = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/comunicados', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro ao buscar comunicados: ${response.status}`);
+      }
+
+      const data: ComunicadoServ[] = await response.json();
+      setComunicadosServ(data);
+    } catch (error) {
+      console.error(error);
+    
+    }
+  };
+
+  fetchComunicados();
+}, []);
+
   const getNextId = (list: { id: number }[]) => Math.max(0, ...list.map(item => item.id)) + 1;
 
   const addStudent = (data: Omit<Student, 'id'>) => {
@@ -71,20 +89,42 @@ const Index = () => {
     scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleComunicadoSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const novo: Comunicado = {
-      id: getNextId(comunicados),
-      titulo: comunicadoForm.titulo,
-      mensagem: comunicadoForm.mensagem,
-      data: new Date().toISOString().split('T')[0],
-      autor: 'Administração',
-    };
-    setComunicados(prev => [novo, ...prev]);
+ const handleComunicadoSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  const novo: Omit<Comunicado, 'id'> = {
+    titulo: comunicadoForm.titulo,
+    mensagem: comunicadoForm.mensagem,
+
+
+  };
+
+  try {
+    const response = await fetch('http://localhost:3000/comunicados', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify(novo),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Erro ao criar comunicado: ${response.status}`);
+    }
+
+    const comunicadoSalvo: ComunicadoServ = await response.json();
+    setComunicadosServ(prev => [comunicadoSalvo, ...prev]);
+
+    // Resetar formulário
     setComunicadoForm({ titulo: '', mensagem: '' });
     setShowComunicadoForm(false);
     alert('Comunicado criado com sucesso!');
-  };
+  } catch (error) {
+    console.error(error);
+    alert('Erro ao criar comunicado. Tente novamente.');
+  }
+};
 
   const deleteComunicado = (id: number) => {
     if (confirm('Tem certeza que deseja excluir este comunicado?')) {
@@ -92,8 +132,8 @@ const Index = () => {
     }
   };
 
-  const filteredStudents = students.filter(({ name, email, major }) =>
-    [name, email, major].some(field =>
+  const filteredStudents = students.filter(({ name, email }) =>
+    [name, email].some(field =>
       field.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
@@ -157,13 +197,14 @@ const Index = () => {
 
         {/* Lista de comunicados */}
         <div className="space-y-3">
-          {comunicados.map(({ id, titulo, mensagem, data, autor }) => (
+          {ComunicadosServ.map(({ id, titulo, mensagem, data }) => (
             <div key={id} className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
               <div className="flex justify-between items-start">
                 <div>
                   <h4 className="font-bold text-gray-800">{titulo}</h4>
                   <p className="text-gray-600 mt-1">{mensagem}</p>
-                  <p className="text-sm text-gray-500 mt-2">{autor} - {new Date(data).toLocaleDateString('pt-BR')}</p>
+                  <p className="text-sm text-gray-500 mt-2">Administração - {new Date(data + 'Z').toLocaleDateString('pt-BR')
+                  }</p>
                 </div>
                 <button onClick={() => deleteComunicado(id)} className="text-red-500 hover:text-red-700 ml-2">
                   <X size={16} />

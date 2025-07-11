@@ -13,6 +13,7 @@ import com.portal_do_aluno.repositories.PresencaRepository;
 import com.portal_do_aluno.repositories.TurmaRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ public class TurmaService {
     @Autowired
     private TurmaRepository repository;
 
+    @Qualifier("turmaMapperImpl")
     @Autowired
     private TurmaMapper mapper;
 

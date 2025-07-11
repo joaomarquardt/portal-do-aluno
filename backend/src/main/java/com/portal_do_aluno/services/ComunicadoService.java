@@ -8,6 +8,7 @@ import com.portal_do_aluno.mappers.ComunicadoMapper;
 import com.portal_do_aluno.repositories.ComunicadoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +18,7 @@ public class ComunicadoService {
     @Autowired
     private ComunicadoRepository repository;
 
+    @Qualifier("comunicadoMapperImpl")
     @Autowired
     private ComunicadoMapper mapper;
 

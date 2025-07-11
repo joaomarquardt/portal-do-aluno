@@ -8,7 +8,15 @@ interface Student {
   institucionalEmail: string;
   cellphone: string;
   CursoId: number;
-  gpa: number;
+}
+
+interface Curso {
+  id: string;
+  nome: string;
+  tipo: string;
+  anosDuracao: number;
+  turno: string;
+  departamento: string;
 }
 
 interface AddStudentFormProps {
@@ -24,8 +32,7 @@ const initialFormState: Omit<Student, 'id'> = {
   email: '',
   institucionalEmail: '',
   cellphone: '',
-  CursoId: 0,
-  gpa: 0,
+  CursoId: 1,
 };
 
 const AddStudentForm = ({
@@ -35,7 +42,9 @@ const AddStudentForm = ({
   onCancel,
 }: AddStudentFormProps) => {
   const [formData, setFormData] = useState<Omit<Student, 'id'>>(initialFormState);
+  const [cursos, setCursos] = useState<Curso[]>([]);
 
+  
   useEffect(() => {
     if (editingStudent) {
       const { id, ...data } = editingStudent;
@@ -43,32 +52,69 @@ const AddStudentForm = ({
     }
   }, [editingStudent]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  useEffect(() => {
+    const fetchCursos = async () => {
+      try {
+        const res = await fetch('http://localhost:3000/Cursos', {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        if (!res.ok) throw new Error(`Erro HTTP: ${res.status}`);
+        const data: Curso[] = await res.json();
+        setCursos(data);
+      } catch (error) {
+        console.error('Erro ao buscar os cursos:', error);
+      }
+    };
+    fetchCursos();
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      [name]: name === 'gpa' ? parseFloat(value) || 0 :
-              name === 'CursoId' ? Number(value) || 0 :
-              value,
+      [name]: name === 'CursoId' ? Number(value) : value,
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (editingStudent && onUpdateStudent) {
       onUpdateStudent({ ...editingStudent, ...formData });
     } else {
-      onAddStudent(formData);
+      try {
+        await fetch('http://localhost:3000/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: JSON.stringify({
+            nome: formData.name,
+            emailInstitucional: formData.institucionalEmail,
+            emailPessoal: formData.email,
+            senha: `${formData.cpf}`,
+            Aluno: { cursoID: Number(formData.CursoId) },
+            cpf: formData.cpf,
+            telefone: formData.cellphone,
+            papeis: ['ALUNO'],
+          }),
+        });
+      } catch (err) {
+        console.error('Erro ao adicionar aluno:', err);
+      }
     }
+
     setFormData(initialFormState);
   };
 
   return (
     <div className="bg-white border-2 border-gray-300 rounded-lg p-6 mb-6 shadow-md">
       <h2 className="text-xl font-bold mb-4 text-gray-800">
-        {editingStudent ? 'Edit Student' : 'Add New Student'}
+        {editingStudent ? 'Editar Aluno' : 'Adicionar Aluno'}
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -100,29 +146,16 @@ const AddStudentForm = ({
               name="CursoId"
               value={formData.CursoId}
               onChange={handleChange}
-              className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-blue-500 focus:outline-none"
               required
+              className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-purple-500"
             >
-              <option value={0} disabled>Selecione o curso</option>
-              <option value={1}>Ciência da Computação</option>
-              <option value={2}>Engenharia</option>
-              <option value={3}>Administração</option>
+              <option value="">Selecione um curso</option>
+              {cursos.map(curso => (
+                <option key={curso.id} value={curso.id}>
+                  {curso.nome} — {curso.departamento || 'Sem departamento'}
+                </option>
+              ))}
             </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">GPA</label>
-            <input
-              type="number"
-              name="gpa"
-              value={formData.gpa}
-              onChange={handleChange}
-              min="0"
-              max="4"
-              step="0.1"
-              className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-blue-500 focus:outline-none"
-              placeholder="3.5"
-            />
           </div>
         </div>
 

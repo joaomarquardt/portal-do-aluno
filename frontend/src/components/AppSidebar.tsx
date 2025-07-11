@@ -24,6 +24,11 @@ const menuItems = [
     url: "/periodos", 
     icon: Calendar 
   },
+    { 
+    title: "Cursos", 
+    url: "/cursos", 
+    icon: Calendar 
+  },
 ];
 
 export function AppSidebar() {

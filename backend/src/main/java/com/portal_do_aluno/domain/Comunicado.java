@@ -8,10 +8,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+
 @Entity
 @Table(name = "comunicados")
 public class Comunicado {
@@ -25,6 +22,48 @@ public class Comunicado {
     public Comunicado(String titulo, String mensagem, LocalDateTime dataPublicacao) {
         this.titulo = titulo;
         this.mensagem = mensagem;
+        this.dataPublicacao = dataPublicacao;
+    }
+
+    public Comunicado() {
+    }
+
+    public Comunicado(Long id, String titulo, String mensagem, LocalDateTime dataPublicacao) {
+        this.id = id;
+        this.titulo = titulo;
+        this.mensagem = mensagem;
+        this.dataPublicacao = dataPublicacao;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitulo() {
+        return titulo;
+    }
+
+    public void setTitulo(String titulo) {
+        this.titulo = titulo;
+    }
+
+    public String getMensagem() {
+        return mensagem;
+    }
+
+    public void setMensagem(String mensagem) {
+        this.mensagem = mensagem;
+    }
+
+    public LocalDateTime getDataPublicacao() {
+        return dataPublicacao;
+    }
+
+    public void setDataPublicacao(LocalDateTime dataPublicacao) {
         this.dataPublicacao = dataPublicacao;
     }
 }

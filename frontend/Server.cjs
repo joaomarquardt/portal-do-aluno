@@ -125,7 +125,7 @@ app.post('/api/login', (req, res) => {
     login("/auth/login",{req, res});
 });
 
-app.post("/create/periodo-letivo",(req,res) =>{
+app.post("/periodo-letivo",(req,res) =>{
   sendAuthPostTo("/periodos-letivos", req,res, req.headers.authorization)
 })
 
@@ -136,12 +136,35 @@ app.get("/turmas",(req,res) =>{
   sendAuthGetTo("/turmas",req,res,req.headers.authorization)
 })
 
-app.post("/professores",(req,res)=>{
+app.post("/register",(req,res)=>{
   sendAuthPostTo("/auth/register",req,res,req.headers.authorization)
 })
 app.get("/professores",(req,res)=>{
-  sendAuthGetTo("/professors",req,res,req.headers.authorization)
+  sendAuthGetTo("/professores/select",req,res,req.headers.authorization)
 })
+
+app.get("/alunos",(req,res)=>{
+  sendAuthGetTo("/professores/select",req,res,req.headers.authorization)
+})
+
+app.get("/comunicados", (req,res) =>{
+  console.log(req.body)
+  sendAuthGetTo("/comunicados",req,res,req.headers.authorization)
+})
+
+app.post("/comunicados", (req,res) =>{
+  sendAuthPostTo("/comunicados",req,res,req.headers.authorization)
+})
+
+app.get("/Cursos", (req,res) =>{
+  console.log(req.body)
+  sendAuthGetTo("/cursos",req,res,req.headers.authorization)
+})
+
+app.post("/Cursos", (req,res) =>{
+  sendAuthPostTo("/cursos",req,res,req.headers.authorization)
+})
+
 
 
 app.listen(port, () => {

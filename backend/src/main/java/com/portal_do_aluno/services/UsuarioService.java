@@ -14,6 +14,7 @@ import com.portal_do_aluno.repositories.UsuarioRepository;
 import com.portal_do_aluno.security.dtos.requests.AtualizarSenhaRequestDTO;
 import com.portal_do_aluno.security.dtos.requests.RegisterRequestDTO;
 import com.portal_do_aluno.security.exceptions.RegisterConflictException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.AccessDeniedException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -33,6 +34,7 @@ public class UsuarioService {
     @Autowired
     private AlunoService alunoService;
 
+    @Qualifier("usuarioMapperImpl")
     @Autowired
     private UsuarioMapper mapper;
 

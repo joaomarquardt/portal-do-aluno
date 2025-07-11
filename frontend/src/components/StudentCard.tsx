@@ -3,11 +3,12 @@ import { Users, Mail, Calendar, Edit, Trash2 } from "lucide-react";
 
 interface Student {
   id: number;
+  cpf: string;
   name: string;
   email: string;
-  major: string;
-  year: string;
-  gpa: number;
+  institucionalEmail: string;
+  cellphone: string;
+  CursoId: number;
 }
 
 interface StudentCardProps {
@@ -44,24 +45,6 @@ const StudentCard = ({ student, onEdit, onDelete }: StudentCardProps) => {
         <div className="flex items-center">
           <Mail className="text-gray-500 mr-2" size={16} />
           <span className="text-gray-600">{student.email}</span>
-        </div>
-        <div className="flex items-center">
-          <Calendar className="text-gray-500 mr-2" size={16} />
-          <span className="text-gray-600">{student.year} Período</span>
-        </div>
-        <div className="mt-2">
-          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
-            {student.major}
-          </span>
-        </div>
-        <div className="mt-2">
-          <span className={`px-2 py-1 rounded text-xs font-medium ${
-            student.gpa >= 3.5 ? 'bg-green-100 text-green-800' : 
-            student.gpa >= 3.0 ? 'bg-yellow-100 text-yellow-800' : 
-            'bg-red-100 text-red-800'
-          }`}>
-            CRA: {student.gpa}
-          </span>
         </div>
       </div>
     </div>

@@ -6,10 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+
 @Entity
 @Table(name = "medias")
 public class Media {
@@ -30,6 +27,48 @@ public class Media {
     public Media(double valor, Aluno aluno, Turma turma) {
         this.valor = valor;
         this.aluno = aluno;
+        this.turma = turma;
+    }
+
+    public Media(Long id, double valor, Aluno aluno, Turma turma) {
+        this.id = id;
+        this.valor = valor;
+        this.aluno = aluno;
+        this.turma = turma;
+    }
+
+    public Media() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public double getValor() {
+        return valor;
+    }
+
+    public void setValor(double valor) {
+        this.valor = valor;
+    }
+
+    public Aluno getAluno() {
+        return aluno;
+    }
+
+    public void setAluno(Aluno aluno) {
+        this.aluno = aluno;
+    }
+
+    public Turma getTurma() {
+        return turma;
+    }
+
+    public void setTurma(Turma turma) {
         this.turma = turma;
     }
 }

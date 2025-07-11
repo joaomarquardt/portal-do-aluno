@@ -44,6 +44,7 @@ public class AuthenticationService {
             var auth = this.authenticationManager.authenticate(usuarioSenha);
             Usuario usuarioAuth = (Usuario) auth.getPrincipal();
             String token = tokenService.generateToken(usuarioAuth);
+            tokenCacheService.cacheToken(token, 3600);
             return new AuthResponseDTO(token, usuario.isPrecisaRedefinirSenha());
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException("CPF e/ou senha inválidos.");

@@ -8,10 +8,7 @@ import lombok.Setter;
 
 import java.util.List;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+
 @Entity
 @Table(name = "alunos")
 public class Aluno {
@@ -42,6 +39,84 @@ public class Aluno {
         this.periodoIngresso = periodoIngresso;
         this.curso = curso;
         this.turmas = turmas;
+        this.usuario = usuario;
+    }
+
+    public Aluno() {
+    }
+
+    public Aluno(Long id, String matricula, int periodoAtual, String periodoIngresso, Curso curso, List<Turma> turmas, boolean matriculado, Usuario usuario) {
+        this.id = id;
+        this.matricula = matricula;
+        this.periodoAtual = periodoAtual;
+        this.periodoIngresso = periodoIngresso;
+        this.curso = curso;
+        this.turmas = turmas;
+        this.matriculado = matriculado;
+        this.usuario = usuario;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getMatricula() {
+        return matricula;
+    }
+
+    public void setMatricula(String matricula) {
+        this.matricula = matricula;
+    }
+
+    public int getPeriodoAtual() {
+        return periodoAtual;
+    }
+
+    public void setPeriodoAtual(int periodoAtual) {
+        this.periodoAtual = periodoAtual;
+    }
+
+    public String getPeriodoIngresso() {
+        return periodoIngresso;
+    }
+
+    public void setPeriodoIngresso(String periodoIngresso) {
+        this.periodoIngresso = periodoIngresso;
+    }
+
+    public Curso getCurso() {
+        return curso;
+    }
+
+    public void setCurso(Curso curso) {
+        this.curso = curso;
+    }
+
+    public List<Turma> getTurmas() {
+        return turmas;
+    }
+
+    public void setTurmas(List<Turma> turmas) {
+        this.turmas = turmas;
+    }
+
+    public boolean isMatriculado() {
+        return matriculado;
+    }
+
+    public void setMatriculado(boolean matriculado) {
+        this.matriculado = matriculado;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
     }
 }

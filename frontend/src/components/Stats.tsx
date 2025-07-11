@@ -1,11 +1,13 @@
 
+
 interface Student {
   id: number;
+  cpf: string;
   name: string;
   email: string;
-  major: string;
-  year: string;
-  gpa: number;
+  institucionalEmail: string;
+  cellphone: string;
+  CursoId: number;
 }
 
 interface StatsProps {
@@ -15,15 +17,15 @@ interface StatsProps {
 const Stats = ({ students }: StatsProps) => {
   const totalStudents = students.length;
   const averageGPA = students.length > 0 
-    ? (students.reduce((sum, student) => sum + student.gpa, 0) / students.length).toFixed(2)
+    ? (students.reduce((sum, student) => sum + 1, 0) / students.length).toFixed(2)
     : '0.00';
   
-  const yearCounts = students.reduce((acc, student) => {
-    acc[student.year] = (acc[student.year] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  // const yearCounts = students.reduce((acc, student) => {
+  //   acc[student.year] = (acc[student.year] || 0) + 1;
+  //   return acc;
+  // }, {} as Record<string, number>);
 
-  const highPerformers = students.filter(student => student.gpa >= 3.5).length;
+  const highPerformers = students.filter(student => 1 >= 3.5).length;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -46,9 +48,9 @@ const Stats = ({ students }: StatsProps) => {
       <div className="bg-purple-100 border-l-4 border-purple-500 p-4 rounded shadow">
         <h3 className="text-purple-800 font-bold text-lg">Período Mais Comum</h3>
         <p className="text-2xl font-bold text-purple-900">
-          {Object.keys(yearCounts).length > 0 
+          {/* {Object.keys(yearCounts).length > 0 
             ? Object.entries(yearCounts).sort(([,a], [,b]) => b - a)[0][0] 
-            : 'N/A'}
+            : 'N/A'} */}
         </p>
       </div>
     </div>

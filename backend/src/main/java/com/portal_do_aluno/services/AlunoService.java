@@ -12,6 +12,7 @@ import com.portal_do_aluno.repositories.MediaRepository;
 import com.portal_do_aluno.repositories.PresencaRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public class AlunoService {
     @Autowired
     private MediaRepository mediaRepository;
 
+    @Qualifier("alunoMapperImpl")
     @Autowired
     private AlunoMapper mapper;
 

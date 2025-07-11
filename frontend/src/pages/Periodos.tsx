@@ -25,53 +25,52 @@ const Periodos = () => {
     ativo: false
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  try {
     if (editingPeriodo) {
-      // Atualizar período existente
-      const updatedPeriodo = {
-        ...editingPeriodo,
-        ...formData
-      };
-      setPeriodos(periodos.map(p => p.id === editingPeriodo.id ? updatedPeriodo : p));
+      // Atualização futura: PUT para editar
+      const updatedPeriodo = { ...editingPeriodo, ...formData };
+      setPeriodos(prev =>
+        prev.map(p => (p.id === editingPeriodo.id ? updatedPeriodo : p))
+      );
       setEditingPeriodo(null);
-      alert('Período atualizado com sucesso!');
+      alert('Período atualizado localmente!');
     } else {
-      // Criar novo período
+      // Criar novo período via POST
+      const response = await fetch("http://localhost:3000/periodo-letivo", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          ano: year,
+          semestre: period,
+          ativo: formData.ativo,
+          dataInicio: formData.dataInicio,
+          dataFim: formData.dataFim
+        })
+      });
 
-
-      
-      try{
-        const res = await fetch("http://localhost:3000/create/periodo-letivo", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify({
-            ano: year,
-            semestre: period,
-            ativo: formData.ativo,
-            dataInicio: formData.dataInicio,
-            dataFim: formData.dataFim
-          })
-        });
-
-        const userData = await res.json();
-        const newPeriodo = {
-        id: Math.max(...periodos.map(p => p.id), 0) + 1,
-        ...formData
-      };
-      }catch (Error){
-        console.error("tes")
+      if (!response.ok) {
+        throw new Error(`Erro ao criar período: ${response.status}`);
       }
+
+      const savedPeriodo: Periodo = await response.json();
+      setPeriodos(prev => [...prev, savedPeriodo]);
+
       alert('Período criado com sucesso!');
     }
-    
-    setFormData({ nome: '', dataInicio: '', dataFim: '', ativo: false });
-    setShowForm(false);
-  };
+  } catch (error) {
+    console.error("Erro no envio do período:", error);
+    alert("Erro ao salvar o período.");
+  }
+
+  setFormData({ nome: '', dataInicio: '', dataFim: '', ativo: false });
+  setShowForm(false);
+};
 
   const handleEdit = (periodo: Periodo) => {
     setEditingPeriodo(periodo);

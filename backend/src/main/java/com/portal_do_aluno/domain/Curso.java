@@ -8,10 +8,7 @@ import lombok.Setter;
 
 import java.util.List;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+
 @Entity
 @Table(name = "cursos")
 public class Curso {
@@ -46,6 +43,93 @@ public class Curso {
         this.departamento = departamento;
         this.disciplinas = disciplinas;
         this.alunos = alunos;
+        this.professores = professores;
+    }
+
+    public Curso() {
+    }
+
+    public Curso(Long id, String nome, String tipo, int anosDuracao, String turno, String departamento, List<Disciplina> disciplinas, List<Aluno> alunos, List<Professor> professores) {
+        this.id = id;
+        this.nome = nome;
+        this.tipo = tipo;
+        this.anosDuracao = anosDuracao;
+        this.turno = turno;
+        this.departamento = departamento;
+        this.disciplinas = disciplinas;
+        this.alunos = alunos;
+        this.professores = professores;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    public int getAnosDuracao() {
+        return anosDuracao;
+    }
+
+    public void setAnosDuracao(int anosDuracao) {
+        this.anosDuracao = anosDuracao;
+    }
+
+    public String getTurno() {
+        return turno;
+    }
+
+    public void setTurno(String turno) {
+        this.turno = turno;
+    }
+
+    public String getDepartamento() {
+        return departamento;
+    }
+
+    public void setDepartamento(String departamento) {
+        this.departamento = departamento;
+    }
+
+    public List<Disciplina> getDisciplinas() {
+        return disciplinas;
+    }
+
+    public void setDisciplinas(List<Disciplina> disciplinas) {
+        this.disciplinas = disciplinas;
+    }
+
+    public List<Aluno> getAlunos() {
+        return alunos;
+    }
+
+    public void setAlunos(List<Aluno> alunos) {
+        this.alunos = alunos;
+    }
+
+    public List<Professor> getProfessores() {
+        return professores;
+    }
+
+    public void setProfessores(List<Professor> professores) {
         this.professores = professores;
     }
 }

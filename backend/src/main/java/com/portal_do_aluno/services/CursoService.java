@@ -8,6 +8,7 @@ import com.portal_do_aluno.mappers.CursoMapper;
 import com.portal_do_aluno.repositories.CursoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +18,7 @@ public class CursoService {
     @Autowired
     private CursoRepository repository;
 
+    @Qualifier("cursoMapperImpl")
     @Autowired
     private CursoMapper mapper;
 

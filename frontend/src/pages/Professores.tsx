@@ -75,18 +75,7 @@ const Professores = () => {
           })
         });
 
-        // if(disciplinasArray){
-        //   const res = await fetch("http://localhost:3000/professores", {
-        //   method: "POST",
-        //   headers: {
-        //     "Content-type": "application/json",
-        //     "Authorization": `Bearer ${localStorage.getItem('token')}`
-        //   },
-        //   body: JSON.stringify({
-        //     ...formData
-        //   })
-        // });
-        // }
+
 
         const newProfessor: Professor = {
           id: Math.max(...professores.map(p => p.id), 0) + 1,

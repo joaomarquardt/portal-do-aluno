@@ -9,6 +9,7 @@ import com.portal_do_aluno.mappers.ProfessorMapper;
 import com.portal_do_aluno.repositories.ProfessorRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +19,7 @@ public class ProfessorService {
     @Autowired
     private ProfessorRepository repository;
 
+    @Qualifier("professorMapperImpl")
     @Autowired
     private ProfessorMapper mapper;
 

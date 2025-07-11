@@ -37,4 +37,55 @@ public class Professor {
         this.turmas = turmas;
         this.usuario = usuario;
     }
+
+    public Professor(Long id, String siape, String departamento, List<Turma> turmas, Usuario usuario) {
+        this.id = id;
+        this.siape = siape;
+        this.departamento = departamento;
+        this.turmas = turmas;
+        this.usuario = usuario;
+    }
+
+    public Professor() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getSiape() {
+        return siape;
+    }
+
+    public void setSiape(String siape) {
+        this.siape = siape;
+    }
+
+    public String getDepartamento() {
+        return departamento;
+    }
+
+    public void setDepartamento(String departamento) {
+        this.departamento = departamento;
+    }
+
+    public List<Turma> getTurmas() {
+        return turmas;
+    }
+
+    public void setTurmas(List<Turma> turmas) {
+        this.turmas = turmas;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
 }

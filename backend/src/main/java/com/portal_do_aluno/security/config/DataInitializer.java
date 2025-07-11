@@ -13,7 +13,7 @@ import java.util.List;
 
 @Configuration
 public class DataInitializer {
-    @Value("${api.security.admin.password}")
+    @Value("password")
     private String senhaAdmin;
 
     @Bean

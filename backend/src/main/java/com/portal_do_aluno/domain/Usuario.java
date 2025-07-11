@@ -14,10 +14,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+
 @Entity
 @Table(name = "usuarios")
 public class Usuario implements UserDetails {
@@ -94,5 +91,110 @@ public class Usuario implements UserDetails {
     @Override
     public boolean isEnabled() {
         return UserDetails.super.isEnabled();
+    }
+
+    public Usuario() {
+    }
+
+    public Usuario(Long id, String nome, String cpf, String emailPessoal, String emailInstitucional, String telefone, String senha, List<PapelUsuario> papeis, Aluno aluno, Professor professor, boolean precisaRedefinirSenha) {
+        this.id = id;
+        this.nome = nome;
+        this.cpf = cpf;
+        this.emailPessoal = emailPessoal;
+        this.emailInstitucional = emailInstitucional;
+        this.telefone = telefone;
+        this.senha = senha;
+        this.papeis = papeis;
+        this.aluno = aluno;
+        this.professor = professor;
+        this.precisaRedefinirSenha = precisaRedefinirSenha;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getCpf() {
+        return cpf;
+    }
+
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
+    }
+
+    public String getEmailPessoal() {
+        return emailPessoal;
+    }
+
+    public void setEmailPessoal(String emailPessoal) {
+        this.emailPessoal = emailPessoal;
+    }
+
+    public String getEmailInstitucional() {
+        return emailInstitucional;
+    }
+
+    public void setEmailInstitucional(String emailInstitucional) {
+        this.emailInstitucional = emailInstitucional;
+    }
+
+    public String getTelefone() {
+        return telefone;
+    }
+
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
+    }
+
+    public String getSenha() {
+        return senha;
+    }
+
+    public void setSenha(String senha) {
+        this.senha = senha;
+    }
+
+    public List<PapelUsuario> getPapeis() {
+        return papeis;
+    }
+
+    public void setPapeis(List<PapelUsuario> papeis) {
+        this.papeis = papeis;
+    }
+
+    public Aluno getAluno() {
+        return aluno;
+    }
+
+    public void setAluno(Aluno aluno) {
+        this.aluno = aluno;
+    }
+
+    public Professor getProfessor() {
+        return professor;
+    }
+
+    public void setProfessor(Professor professor) {
+        this.professor = professor;
+    }
+
+    public boolean isPrecisaRedefinirSenha() {
+        return precisaRedefinirSenha;
+    }
+
+    public void setPrecisaRedefinirSenha(boolean precisaRedefinirSenha) {
+        this.precisaRedefinirSenha = precisaRedefinirSenha;
     }
 }

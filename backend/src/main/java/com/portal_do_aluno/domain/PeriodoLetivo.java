@@ -8,10 +8,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+
 @Entity
 @Table(name = "periodos_letivos")
 public class PeriodoLetivo {
@@ -35,5 +32,65 @@ public class PeriodoLetivo {
         this.ativo = ativo;
         this.dataInicio = dataInicio;
         this.dataFim = dataFim;
+    }
+
+    public PeriodoLetivo() {
+    }
+
+    public PeriodoLetivo(Long id, int ano, int semestre, boolean ativo, LocalDate dataInicio, LocalDate dataFim) {
+        this.id = id;
+        this.ano = ano;
+        this.semestre = semestre;
+        this.ativo = ativo;
+        this.dataInicio = dataInicio;
+        this.dataFim = dataFim;
+    }
+
+    public LocalDate getDataFim() {
+        return dataFim;
+    }
+
+    public void setDataFim(LocalDate dataFim) {
+        this.dataFim = dataFim;
+    }
+
+    public LocalDate getDataInicio() {
+        return dataInicio;
+    }
+
+    public void setDataInicio(LocalDate dataInicio) {
+        this.dataInicio = dataInicio;
+    }
+
+    public boolean isAtivo() {
+        return ativo;
+    }
+
+    public void setAtivo(boolean ativo) {
+        this.ativo = ativo;
+    }
+
+    public int getSemestre() {
+        return semestre;
+    }
+
+    public void setSemestre(int semestre) {
+        this.semestre = semestre;
+    }
+
+    public int getAno() {
+        return ano;
+    }
+
+    public void setAno(int ano) {
+        this.ano = ano;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }
