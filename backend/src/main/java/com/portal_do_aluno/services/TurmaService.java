@@ -139,4 +139,12 @@ public class TurmaService {
         char letraTurma = (char) ('A' + qtdTurmas);
         return prefixo + '-' + letraTurma;
     }
+
+    public Double generalAverageAllClasses() {
+        List<Double> valores = repository.findValuesByStatus(TurmaStatus.ENCERRADA);
+        return valores.stream()
+                .mapToDouble(Double::doubleValue)
+                .average()
+                .orElse(0.0);
+    }
 }
