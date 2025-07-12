@@ -112,7 +112,7 @@ public class TurmaService {
         Aluno aluno = alunoService.findByIdOrThrowEntity(idAluno);
         Media media = mediaRepository.findByAlunoAndTurma(aluno, turma).orElseThrow(() -> new EntityNotFoundException("Não há media associada a este aluno nesta turma!"));
         Presenca presenca = presencaRepository.findByAlunoAndTurma(aluno, turma).orElseThrow(() -> new EntityNotFoundException("Não há presença associada a este aluno nesta turma!"));
-        presenca.setNumeroPresencas(desempenhoDTO.presenca());
+        presenca.setHorasRegistradas(desempenhoDTO.presenca());
         media.setValor(desempenhoDTO.valor());
         presencaRepository.save(presenca);
         mediaRepository.save(media);
