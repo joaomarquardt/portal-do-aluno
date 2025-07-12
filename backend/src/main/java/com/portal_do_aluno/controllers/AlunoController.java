@@ -61,6 +61,12 @@ public class AlunoController {
         return new ResponseEntity<>(totalAlunosAtivos, HttpStatus.OK);
     }
 
+    @GetMapping(value = "/{id}/disciplinas-ativas")
+    public ResponseEntity<List<DesempenhoResponseDTO>> getActiveStudentSubjects(@PathVariable(value = "id") Long id) {
+        List<DesempenhoResponseDTO> desempenhosDTO = service.getActiveStudentSubjects(id);
+        return new ResponseEntity<>(desempenhosDTO, HttpStatus.OK);
+    }
+
     @GetMapping(value = "/{id}/sumario-dashboard")
     public ResponseEntity<DashboardAlunoResponseDTO> getDashboardSummary(@PathVariable(value = "id") Long id) {
         DashboardAlunoResponseDTO dashboardAlunoDTO = service.getDashboardSummary(id);

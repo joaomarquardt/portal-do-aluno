@@ -109,6 +109,25 @@ public class AlunoService {
         }
     }
 
+    public List<DesempenhoResponseDTO> getActiveStudentSubjects(Long id) {
+        Aluno aluno = findByIdOrThrowEntity(id);
+        return aluno.getTurmas().stream()
+                .filter(turma -> turma.getStatus() == TurmaStatus.ATIVA)
+                .map(
+                        turma -> {
+                            Media media = mediaRepository.findByAlunoAndTurma(aluno, turma).orElseThrow(() -> new EntityNotFoundException("Não há média registrada para o aluno nesta turma!"));
+                            Presenca presenca = presencaRepository.findByAlunoAndTurma(aluno, turma).orElseThrow(() -> new EntityNotFoundException("Não há presença registrada para o aluno nesta turma!"));
+                            TurmaDesempenhoResponseDTO turmaDesempenhoResponseDTO = new TurmaDesempenhoResponseDTO(
+                                    turma.getCodigo(),
+                                    turma.getDisciplina().getNome(),
+                                    turma.getPeriodo()
+                            );
+                            return new DesempenhoResponseDTO(turmaDesempenhoResponseDTO, media.getValor(), presenca.getHorasRegistradas());
+                        }
+                )
+                .toList();
+    }
+
     public DashboardAlunoResponseDTO getDashboardSummary(Long idAluno) {
         Aluno aluno = findByIdOrThrowEntity(idAluno);
         Integer numTurmasAtivas = aluno.getTurmas().stream()
