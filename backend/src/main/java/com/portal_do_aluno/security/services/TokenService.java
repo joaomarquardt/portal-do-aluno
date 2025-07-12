@@ -24,10 +24,15 @@ public class TokenService {
                     .stream()
                     .map(PapelUsuario::name)
                     .toList();
+            Long idAluno = usuario.getAluno() != null ? usuario.getAluno().getId() : null;
+            Long idProfessor = usuario.getProfessor() != null ? usuario.getProfessor().getId() : null;
             return JWT.create()
                     .withIssuer("portal-do-aluno")
                     .withSubject(usuario.getUsername())
                     .withClaim("nome", usuario.getNome().split(" ")[0])
+                    .withClaim("idUsuario", usuario.getId())
+                    .withClaim("idAluno", idAluno)
+                    .withClaim("idProfessor", idProfessor)
                     .withExpiresAt(Instant.now().plusSeconds(3600))
                     .withClaim("roles", papeis)
                     .sign(algorithm);

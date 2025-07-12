@@ -3,9 +3,7 @@ package com.portal_do_aluno.services;
 import com.portal_do_aluno.domain.*;
 import com.portal_do_aluno.dtos.requests.CreateAlunoRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateAlunoRequestDTO;
-import com.portal_do_aluno.dtos.responses.AlunoResponseDTO;
-import com.portal_do_aluno.dtos.responses.DesempenhoResponseDTO;
-import com.portal_do_aluno.dtos.responses.TurmaDesempenhoResponseDTO;
+import com.portal_do_aluno.dtos.responses.*;
 import com.portal_do_aluno.mappers.AlunoMapper;
 import com.portal_do_aluno.repositories.AlunoRepository;
 import com.portal_do_aluno.repositories.MediaRepository;
@@ -86,7 +84,7 @@ public class AlunoService {
     }
 
     public List<DesempenhoResponseDTO> getSchoolPerformance(Long id) {
-        Aluno aluno = alunoRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado!"));
+        Aluno aluno = findByIdOrThrowEntity(id);
         return aluno.getTurmas().stream()
                 .map(
                         turma -> {
@@ -97,7 +95,7 @@ public class AlunoService {
                                     turma.getDisciplina().getNome(),
                                     turma.getPeriodo()
                             );
-                            return new DesempenhoResponseDTO(turmaDesempenhoResponseDTO, media.getValor(), presenca.getNumeroPresencas());
+                            return new DesempenhoResponseDTO(turmaDesempenhoResponseDTO, media.getValor(), presenca.getHorasRegistradas());
                         }
                 )
                 .toList();
@@ -109,5 +107,48 @@ public class AlunoService {
         } else {
             return alunoRepository.countByMatriculado(matriculado);
         }
+    }
+
+    public List<DesempenhoResponseDTO> getActiveStudentSubjects(Long id) {
+        Aluno aluno = findByIdOrThrowEntity(id);
+        return aluno.getTurmas().stream()
+                .filter(turma -> turma.getStatus() == TurmaStatus.ATIVA)
+                .map(
+                        turma -> {
+                            Media media = mediaRepository.findByAlunoAndTurma(aluno, turma).orElseThrow(() -> new EntityNotFoundException("Não há média registrada para o aluno nesta turma!"));
+                            Presenca presenca = presencaRepository.findByAlunoAndTurma(aluno, turma).orElseThrow(() -> new EntityNotFoundException("Não há presença registrada para o aluno nesta turma!"));
+                            TurmaDesempenhoResponseDTO turmaDesempenhoResponseDTO = new TurmaDesempenhoResponseDTO(
+                                    turma.getCodigo(),
+                                    turma.getDisciplina().getNome(),
+                                    turma.getPeriodo()
+                            );
+                            return new DesempenhoResponseDTO(turmaDesempenhoResponseDTO, media.getValor(), presenca.getHorasRegistradas());
+                        }
+                )
+                .toList();
+    }
+
+    public DashboardAlunoResponseDTO getDashboardSummary(Long idAluno) {
+        Aluno aluno = findByIdOrThrowEntity(idAluno);
+        Integer numTurmasAtivas = aluno.getTurmas().stream()
+                .filter(turma -> turma.getStatus() == TurmaStatus.ATIVA).toList().size();
+        List<Long> idsTurmasEncerradas = aluno.getTurmas().stream()
+                .filter(turma -> turma.getStatus() == TurmaStatus.ENCERRADA)
+                .map(Turma::getId).toList();
+        List<Double> medias = mediaRepository.findByAlunoAndTurmas(idAluno, idsTurmasEncerradas);
+        Double mediaGeralAluno = medias.stream()
+                .mapToDouble(Double::doubleValue)
+                .average()
+                .orElse(0.0);
+        int horasTotais = aluno.getTurmas().stream()
+                .filter(t -> t.getStatus() == TurmaStatus.ENCERRADA)
+                .mapToInt(t -> t.getDisciplina().getCargaHoraria())
+                .sum();
+        List<Presenca> presencas = presencaRepository.findByAlunoAndTurmas(aluno.getId(), idsTurmasEncerradas);
+        int horasFeitas = presencas.stream()
+                .mapToInt(Presenca::getHorasRegistradas)
+                .sum();
+        Integer presencaPorcentagem = horasTotais > 0 ? (int) ((horasFeitas * 100.0) / horasTotais) : 0;
+        return new DashboardAlunoResponseDTO(numTurmasAtivas, mediaGeralAluno, presencaPorcentagem);
     }
 }
