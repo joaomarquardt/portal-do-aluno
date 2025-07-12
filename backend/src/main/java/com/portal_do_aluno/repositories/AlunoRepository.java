@@ -2,6 +2,8 @@ package com.portal_do_aluno.repositories;
 
 import com.portal_do_aluno.domain.Aluno;
 import com.portal_do_aluno.domain.Curso;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -15,6 +17,8 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
     Optional<Aluno> findByMatricula(String matricula);
 
     long countByMatriculado(Boolean matriculado);
+
+    Page<Aluno> findByUsuarioNomeContainingIgnoreCase(String nome, Pageable pageable);
 
     @Query("""
     SELECT a.periodoAtual

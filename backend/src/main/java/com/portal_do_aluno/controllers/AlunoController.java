@@ -6,7 +6,11 @@ import com.portal_do_aluno.dtos.responses.AlunoResponseDTO;
 import com.portal_do_aluno.dtos.responses.DashboardAlunoResponseDTO;
 import com.portal_do_aluno.dtos.responses.DesempenhoResponseDTO;
 import com.portal_do_aluno.services.AlunoService;
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +27,14 @@ public class AlunoController {
     public ResponseEntity<List<AlunoResponseDTO>> findAll() {
         List<AlunoResponseDTO> alunosDTO = service.findAll();
         return new ResponseEntity<>(alunosDTO, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/paginacao")
+    public Page<AlunoResponseDTO> findAllPageable(@PageableDefault(size = 9) Pageable pageable, @RequestParam(required = false) @Nullable String nome) {
+        if (nome != null && !nome.isEmpty()) {
+            return service.findByNomeContainingIgnoreCase(nome, pageable);
+        }
+        return service.findAll(pageable);
     }
 
     @GetMapping(value = "/{id}")
@@ -68,8 +80,8 @@ public class AlunoController {
     }
 
     @GetMapping(value = "/{id}/sumario-dashboard")
-    public ResponseEntity<DashboardAlunoResponseDTO> getDashboardSummary(@PathVariable(value = "id") Long id) {
-        DashboardAlunoResponseDTO dashboardAlunoDTO = service.getDashboardSummary(id);
+    public ResponseEntity<DashboardAlunoResponseDTO> getStudentDashboardSummary(@PathVariable(value = "id") Long id) {
+        DashboardAlunoResponseDTO dashboardAlunoDTO = service.getStudentDashboardSummary(id);
         return new ResponseEntity<>(dashboardAlunoDTO, HttpStatus.OK);
     }
 }

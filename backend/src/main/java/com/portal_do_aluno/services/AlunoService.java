@@ -11,6 +11,8 @@ import com.portal_do_aluno.repositories.PresencaRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,6 +40,16 @@ public class AlunoService {
 
     public List<AlunoResponseDTO> findAll() {
         return mapper.toDTOResponseList(alunoRepository.findAll());
+    }
+
+    public Page<AlunoResponseDTO> findAll(Pageable pageable) {
+        return alunoRepository.findAll(pageable)
+                .map(mapper::toResponseDTO);
+    }
+
+    public Page<AlunoResponseDTO> findByNomeContainingIgnoreCase(String nome, Pageable pageable) {
+        return alunoRepository.findByUsuarioNomeContainingIgnoreCase(nome, pageable)
+                .map(mapper::toResponseDTO);
     }
 
     public AlunoResponseDTO findById(Long id) {
