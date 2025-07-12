@@ -4,6 +4,7 @@ import com.portal_do_aluno.domain.*;
 import com.portal_do_aluno.dtos.requests.CreateTurmaRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateDesempenhoRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateTurmaRequestDTO;
+import com.portal_do_aluno.dtos.responses.DashboardAdminResponseDTO;
 import com.portal_do_aluno.dtos.responses.TurmaResponseDTO;
 import com.portal_do_aluno.exceptions.TurmaEncerradaException;
 import com.portal_do_aluno.exceptions.VagasInsuficientesException;
@@ -147,5 +148,13 @@ public class TurmaService {
                 .mapToDouble(Media::getValor)
                 .average()
                 .orElse(0.0);
+    }
+
+    public DashboardAdminResponseDTO getAdminDashboardSummary() {
+        Long totalAlunos = alunoService.getNumberOfStudents(null);
+        Double crMedio = generalAverageAllClasses();
+        Long numAlunosAltoDesempenho = alunoService.countHighPerformanceStudents();
+        Integer periodoMaisComum = alunoService.findMostCommonPeriod();
+        return new DashboardAdminResponseDTO(totalAlunos, crMedio, numAlunosAltoDesempenho, periodoMaisComum);
     }
 }

@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class AlunoService {
@@ -110,6 +109,11 @@ public class AlunoService {
         }
     }
 
+    public Integer findMostCommonPeriod() {
+        List<Integer> periodos = alunoRepository.findMostCommonPeriod();
+        return periodos.isEmpty() ? null : periodos.getFirst();
+    }
+
     public List<DesempenhoResponseDTO> getActiveStudentSubjects(Long id) {
         Aluno aluno = findByIdOrThrowEntity(id);
         return aluno.getTurmas().stream()
@@ -129,7 +133,11 @@ public class AlunoService {
                 .toList();
     }
 
-    public DashboardAlunoResponseDTO getDashboardSummary(Long idAluno) {
+    public Long countHighPerformanceStudents() {
+        return mediaRepository.countHighPerformanceStudents();
+    }
+
+    public DashboardAlunoResponseDTO getStudentDashboardSummary(Long idAluno) {
         Aluno aluno = findByIdOrThrowEntity(idAluno);
         Integer numTurmasAtivas = aluno.getTurmas().stream()
                 .filter(turma -> turma.getStatus() == TurmaStatus.ATIVA).toList().size();

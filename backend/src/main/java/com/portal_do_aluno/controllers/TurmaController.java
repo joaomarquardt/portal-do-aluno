@@ -4,6 +4,7 @@ import com.portal_do_aluno.dtos.requests.AddAlunosTurmaDTO;
 import com.portal_do_aluno.dtos.requests.CreateTurmaRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateDesempenhoRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateTurmaRequestDTO;
+import com.portal_do_aluno.dtos.responses.DashboardAdminResponseDTO;
 import com.portal_do_aluno.dtos.responses.TurmaResponseDTO;
 import com.portal_do_aluno.services.TurmaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +66,12 @@ public class TurmaController {
     public ResponseEntity<Double> generalAverageAllClasses() {
          Double mediaGeral = service.generalAverageAllClasses();
          return new ResponseEntity<>(mediaGeral, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/sumario-dashboard")
+    public ResponseEntity<DashboardAdminResponseDTO> getAdminDashboardSummary() {
+        DashboardAdminResponseDTO dashboardAdminDTO = service.getAdminDashboardSummary();
+        return new ResponseEntity<>(dashboardAdminDTO, HttpStatus.OK);
     }
 }
 

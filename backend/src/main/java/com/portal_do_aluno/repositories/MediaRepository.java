@@ -15,4 +15,13 @@ public interface MediaRepository extends JpaRepository<Media, Long> {
 
     @Query("SELECT m.valor FROM Media m WHERE m.aluno.id = :alunoId AND m.turma.id IN :turmaIds AND m.valor IS NOT NULL")
     List<Double> findByAlunoAndTurmas(@Param("alunoId") Long alunoId, @Param("turmaIds") List<Long> turmaIds);
+
+    @Query("""
+    SELECT COUNT(DISTINCT m.aluno.id)
+    FROM Media m
+    WHERE m.valor IS NOT NULL
+    GROUP BY m.aluno.id
+    HAVING AVG(m.valor) >= 8.5
+    """)
+    Long countHighPerformanceStudents();
 }
