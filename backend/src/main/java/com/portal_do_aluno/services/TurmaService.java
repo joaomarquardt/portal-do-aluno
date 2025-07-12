@@ -87,8 +87,8 @@ public class TurmaService {
             Aluno aluno = alunoService.findByIdOrThrowEntity(id);
             if (!turma.getAlunos().contains(aluno)) {
                 turma.getAlunos().add(aluno);
-                mediaRepository.save(new Media(0.0, aluno, turma));
-                presencaRepository.save(new Presenca(0, aluno, turma));
+                mediaRepository.save(new Media(null, aluno, turma));
+                presencaRepository.save(new Presenca(null, aluno, turma));
             }
         }
         Turma turmaAtualizada = repository.save(turma);
@@ -141,9 +141,10 @@ public class TurmaService {
     }
 
     public Double generalAverageAllClasses() {
-        List<Double> valores = repository.findValuesByStatus(TurmaStatus.ENCERRADA);
-        return valores.stream()
-                .mapToDouble(Double::doubleValue)
+        List<Media> medias = mediaRepository.findAll();
+        return medias.stream()
+                .filter(media -> media.getValor() != null)
+                .mapToDouble(Media::getValor)
                 .average()
                 .orElse(0.0);
     }

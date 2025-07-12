@@ -10,7 +10,7 @@ public class Presenca {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private int horasRegistradas = 0;
+    private Integer horasRegistradas = 0;
 
     @ManyToOne
     @JoinColumn(name = "aluno_id")
@@ -20,7 +20,7 @@ public class Presenca {
     @JoinColumn(name = "turma_id")
     private Turma turma;
 
-    public Presenca(int horasRegistradas, Aluno aluno, Turma turma) {
+    public Presenca(Integer horasRegistradas, Aluno aluno, Turma turma) {
         this.horasRegistradas = horasRegistradas;
         this.aluno = aluno;
         this.turma = turma;
@@ -29,7 +29,7 @@ public class Presenca {
     public Presenca() {
     }
 
-    public Presenca(Long id, int horasRegistradas, Aluno aluno, Turma turma) {
+    public Presenca(Long id, Integer horasRegistradas, Aluno aluno, Turma turma) {
         this.id = id;
         this.horasRegistradas = horasRegistradas;
         this.aluno = aluno;
@@ -44,11 +44,11 @@ public class Presenca {
         this.id = id;
     }
 
-    public int getHorasRegistradas() {
+    public Integer getHorasRegistradas() {
         return horasRegistradas;
     }
 
-    public void setHorasRegistradas(int horasRegistradas) {
+    public void setHorasRegistradas(Integer horasRegistradas) {
         this.horasRegistradas = horasRegistradas;
     }
 

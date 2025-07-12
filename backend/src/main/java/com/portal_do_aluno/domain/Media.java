@@ -10,7 +10,7 @@ public class Media {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private double valor = 0.0;
+    private Double valor = 0.0;
 
     @ManyToOne
     @JoinColumn(name = "aluno_id")
@@ -20,13 +20,13 @@ public class Media {
     @JoinColumn(name = "turma_id")
     private Turma turma;
 
-    public Media(double valor, Aluno aluno, Turma turma) {
+    public Media(Double valor, Aluno aluno, Turma turma) {
         this.valor = valor;
         this.aluno = aluno;
         this.turma = turma;
     }
 
-    public Media(Long id, double valor, Aluno aluno, Turma turma) {
+    public Media(Long id, Double valor, Aluno aluno, Turma turma) {
         this.id = id;
         this.valor = valor;
         this.aluno = aluno;
@@ -44,11 +44,11 @@ public class Media {
         this.id = id;
     }
 
-    public double getValor() {
+    public Double getValor() {
         return valor;
     }
 
-    public void setValor(double valor) {
+    public void setValor(Double valor) {
         this.valor = valor;
     }
 

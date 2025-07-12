@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class AlunoService {
@@ -132,21 +133,22 @@ public class AlunoService {
         Aluno aluno = findByIdOrThrowEntity(idAluno);
         Integer numTurmasAtivas = aluno.getTurmas().stream()
                 .filter(turma -> turma.getStatus() == TurmaStatus.ATIVA).toList().size();
-        List<Long> idsTurmasEncerradas = aluno.getTurmas().stream()
-                .filter(turma -> turma.getStatus() == TurmaStatus.ENCERRADA)
+        List<Long> idsTurmas = aluno.getTurmas().stream()
                 .map(Turma::getId).toList();
-        List<Double> medias = mediaRepository.findByAlunoAndTurmas(idAluno, idsTurmasEncerradas);
+        List<Double> medias = mediaRepository.findByAlunoAndTurmas(idAluno, idsTurmas);
         Double mediaGeralAluno = medias.stream()
                 .mapToDouble(Double::doubleValue)
                 .average()
                 .orElse(0.0);
-        int horasTotais = aluno.getTurmas().stream()
-                .filter(t -> t.getStatus() == TurmaStatus.ENCERRADA)
-                .mapToInt(t -> t.getDisciplina().getCargaHoraria())
-                .sum();
-        List<Presenca> presencas = presencaRepository.findByAlunoAndTurmas(aluno.getId(), idsTurmasEncerradas);
-        int horasFeitas = presencas.stream()
+        List<Presenca> presencas = presencaRepository.findByAlunoAndTurmas(aluno.getId(), idsTurmas);
+        List<Presenca> presencasValidas = presencas.stream()
+                .filter(p -> p.getHorasRegistradas() != null)
+                .toList();
+        int horasFeitas = presencasValidas.stream()
                 .mapToInt(Presenca::getHorasRegistradas)
+                .sum();
+        int horasTotais = presencasValidas.stream()
+                .mapToInt(p -> p.getTurma().getDisciplina().getCargaHoraria())
                 .sum();
         Integer presencaPorcentagem = horasTotais > 0 ? (int) ((horasFeitas * 100.0) / horasTotais) : 0;
         return new DashboardAlunoResponseDTO(numTurmasAtivas, mediaGeralAluno, presencaPorcentagem);
