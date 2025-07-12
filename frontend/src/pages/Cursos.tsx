@@ -142,34 +142,36 @@
           </h2>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nome da Curso</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nome do Curso</label>
               <input
                 type="text"
                 value={formData.nome}
                 onChange={(e) => setFormData({...formData, nome: e.target.value})}
                 className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-purple-500"
+                placeholder='Sistemas de informação...'
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">tipo</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
               <input
                 type="text"
                 value={formData.tipo}
                 onChange={(e) => setFormData({...formData, tipo: e.target.value})}
                 className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-purple-500"
+                placeholder=' Presencial, a distância...'
                 required
               />
             </div>
             <div>
                         <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Horário</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
               <input
                 type="text"
                 value={formData.departamento}
                 onChange={(e) => setFormData({...formData, departamento: e.target.value})}
                 className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-purple-500"
-                placeholder="Ex: 08:00 - 10:00"
+                placeholder="Informática aplicada, Biologia..."
                 required
               />
             </div>
@@ -191,7 +193,7 @@
                 value={formData.turno}
                 onChange={(e) => setFormData({...formData, turno: e.target.value})}
                 className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-purple-500"
-                placeholder="Ex: 2024.1"
+                placeholder="Noturno/diurno..."
                 required
               />
             </div>

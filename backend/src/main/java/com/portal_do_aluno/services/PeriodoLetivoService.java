@@ -10,6 +10,7 @@ import com.portal_do_aluno.repositories.PeriodoLetivoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -23,6 +24,7 @@ public class PeriodoLetivoService {
     @Autowired
     private PeriodoLetivoRepository repository;
 
+    @Qualifier("periodoLetivoMapperImpl")
     @Autowired
     private PeriodoLetivoMapper mapper;
 

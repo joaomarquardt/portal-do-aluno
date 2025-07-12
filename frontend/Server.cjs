@@ -144,7 +144,7 @@ app.get("/professores",(req,res)=>{
 })
 
 app.get("/alunos",(req,res)=>{
-  sendAuthGetTo("/professores/select",req,res,req.headers.authorization)
+  sendAuthGetTo("/alunos",req,res,req.headers.authorization)
 })
 
 app.get("/comunicados", (req,res) =>{
@@ -163,6 +163,10 @@ app.get("/Cursos", (req,res) =>{
 
 app.post("/Cursos", (req,res) =>{
   sendAuthPostTo("/cursos",req,res,req.headers.authorization)
+})
+app.get("/alunos", (req,res) =>{
+  console.log(req.body)
+  sendAuthGetTo("/alunos",req,res,req.headers.authorization)
 })
 
 

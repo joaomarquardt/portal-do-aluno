@@ -11,24 +11,11 @@ interface Professor {
   departamento: string;
   telefone: string;
   siape:string;
-  disciplinas: string[];
+  
 }
 
 const Professores = () => {
   const [cpfFormated,setCpfFormated] = useState('')
-  const [professores, setProfessores] = useState<Professor[]>([
-    {
-      id: 1,
-      nome: "Prof. João Silva",
-      cpf: "16161305712",
-      emailPessoal: "rafaeltavsilva@gmail.com",
-      emailInstitucional: "joao.silva@faculdade.edu.br",
-      departamento: "Matemática",
-      telefone: "(11) 98765-4321",
-      siape: "99999",
-      disciplinas: ["Cálculo I", "Álgebra Linear"]
-    },
-  ]);
 
   const [showForm, setShowForm] = useState(false);
   const [editingProfessor, setEditingProfessor] = useState<Professor | null>(null);
@@ -42,22 +29,21 @@ const Professores = () => {
     cpf: '',
     departamento: '',
     telefone: '',
-    disciplinas: ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const disciplinasArray = formData.disciplinas.split(',').map(d => d.trim()).filter(d => d);
+
 
     if (editingProfessor) {
       setProfessores(professores.map(prof =>
         prof.id === editingProfessor.id
-          ? { ...prof, ...formData, disciplinas: disciplinasArray }
+          ? { ...prof, ...formData }
           : prof
       ));
     } else {
       try {
-        const res = await fetch("http://localhost:3000/professores", {
+        const res = await fetch("http://localhost:3000/register", {
           method: "POST",
           headers: {
             "Content-type": "application/json",
@@ -65,24 +51,18 @@ const Professores = () => {
           },
           body: JSON.stringify({
             nome: formData.nome,
-            emailInstitucional:formData.emailInstitucional,
-            emailPessoal:formData.emailPessoal,
-            senha:formData.nome + " " + formData.telefone, 
-            professor:{siape:Number(formData.siape)},
-            cpf:formData.cpf,
-            telefone:formData.telefone,
-            papeis:['PROFESSOR']
+            emailInstitucional: formData.emailInstitucional,
+            emailPessoal: formData.emailPessoal,
+            senha: formData.nome + " " + formData.telefone,
+            professor: { siape: Number(formData.siape) },
+            cpf: formData.cpf,
+            telefone: formData.telefone,
+            papeis: ['PROFESSOR']
           })
         });
+        const professorSalvo:Professor = await res.json()
+        setProfessores(prev => [...prev, professorSalvo]);
 
-
-
-        const newProfessor: Professor = {
-          id: Math.max(...professores.map(p => p.id), 0) + 1,
-          ...formData,
-          disciplinas: disciplinasArray
-        };
-        setProfessores([...professores, newProfessor]);
       } catch (error) {
         console.error("Erro ao cadastrar professor:", error);
       }
@@ -100,7 +80,7 @@ const Professores = () => {
       cpf: '',
       departamento: '',
       telefone: '',
-      disciplinas: ''
+
     });
     setShowForm(false);
     setEditingProfessor(null);
@@ -115,8 +95,7 @@ const Professores = () => {
       siape: professor.siape,
       cpf: professor.cpf,
       departamento: professor.departamento,
-      telefone: professor.telefone,
-      disciplinas: professor.disciplinas.join(', ')
+      telefone: professor.telefone
     });
     setShowForm(true);
   };
@@ -127,6 +106,41 @@ const Professores = () => {
     }
   };
 
+const [professores, setProfessores] = useState<Professor[]>([]); // Removido mock
+
+useEffect(() => {
+  const fetchProfessores = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/professores", {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+
+      const data: any[] = await response.json();
+
+      const parsedProfessores: Professor[] = data.map((p, index) => ({
+        id: p.id ?? index, // fallback se id não vier
+        nome: p.nome,
+        cpf: p.cpf,
+        emailPessoal: p.emailPessoal,
+        emailInstitucional: p.emailInstitucional,
+        departamento: p.departamento,
+        telefone: p.telefone,
+        siape: p.siape
+      }));
+
+      setProfessores(parsedProfessores);
+    } catch (error) {
+      console.error("Erro ao buscar os professores:", error);
+    }
+  };
+
+  fetchProfessores();
+}, []);
   return (
     <div className="p-6">
       <div className="mb-6">
@@ -232,16 +246,6 @@ const Professores = () => {
                 placeholder="Ex: 000.000.000-00"
               />
             </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Disciplinas (separadas por vírgula)</label>
-              <input
-                type="text"
-                value={formData.disciplinas}
-                onChange={(e) => setFormData({...formData, disciplinas: e.target.value})}
-                className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500"
-                placeholder="Ex: Matemática, Física, Química"
-              />
-            </div>
             <div className="md:col-span-2 flex gap-2">
               <button
                 type="submit"
@@ -313,19 +317,6 @@ const Professores = () => {
                   </div>
                   <div className="mt-2">
                     <span className="text-gray-600 text-xs">Tel: {professor.telefone}</span>
-                  </div>
-                  <div className="mt-2">
-                    <div className="flex items-center mb-1">
-                      <BookOpen className="text-gray-500 mr-1" size={14} />
-                      <span className="text-xs text-gray-600">Disciplinas:</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {professor.disciplinas.map((disciplina, index) => (
-                        <span key={index} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                          {disciplina}
-                        </span>
-                      ))}
-                    </div>
                   </div>
                 </div>
               </div>

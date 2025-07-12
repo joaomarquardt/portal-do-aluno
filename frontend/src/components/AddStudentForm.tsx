@@ -36,7 +36,6 @@ const initialFormState: Omit<Student, 'id'> = {
 };
 
 const AddStudentForm = ({
-  onAddStudent,
   editingStudent,
   onUpdateStudent,
   onCancel,
@@ -94,12 +93,12 @@ const AddStudentForm = ({
           },
           body: JSON.stringify({
             nome: formData.name,
-            emailInstitucional: formData.institucionalEmail,
-            emailPessoal: formData.email,
-            senha: `${formData.cpf}`,
-            Aluno: { cursoID: Number(formData.CursoId) },
             cpf: formData.cpf,
+            emailPessoal: formData.email,
+            emailInstitucional: formData.institucionalEmail,
             telefone: formData.cellphone,
+            senha: `${formData.cpf}`,
+            aluno: { cursoID: Number(formData.CursoId) },
             papeis: ['ALUNO'],
           }),
         });

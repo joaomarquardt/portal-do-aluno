@@ -27,8 +27,8 @@ interface ComunicadoServ{
   data:string;
 }
 const Index = () => {
-  const [students, setStudents] = useState<Student[]>([]);
-  
+  const [Allstudents, setStudents] = useState<Student[]>([]);
+  const [newStudent,setNewStudent] = useState(false);
   const [comunicados, setComunicados] = useState<Comunicado[]>([])
   const [ComunicadosServ, setComunicadosServ] = useState<ComunicadoServ[]>([
 
@@ -59,14 +59,33 @@ const Index = () => {
     
     }
   };
-
+  fetchStudents();
   fetchComunicados();
-}, []);
+}, [comunicados]);
+ const fetchStudents = async () => {
+    try {
+      const res = await fetch('http://localhost:3000/alunos', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error(`Erro ao buscar estudantes: ${res.status}`);
+      }
+
+      const data: Student[] = await res.json();
+      console.log(data)
+      setStudents(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const getNextId = (list: { id: number }[]) => Math.max(0, ...list.map(item => item.id)) + 1;
 
   const addStudent = (data: Omit<Student, 'id'>) => {
-    const newStudent: Student = { ...data, id: getNextId(students) };
+    const newStudent: Student = { ...data, id: getNextId(Allstudents) };
     setStudents(prev => [...prev, newStudent]);
     console.log('Estudante adicionado:', newStudent);
   };
@@ -132,15 +151,15 @@ const Index = () => {
     }
   };
 
-  const filteredStudents = students.filter(({ name, email }) =>
-    [name, email].some(field =>
-      field.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+  // const students = Allstudents.filter(({ name, email }) =>
+  //   [name, email].some(field =>
+  //     field.toLowerCase().includes(searchTerm.toLowerCase())
+  //   )
+  // );
 
   return (
     <div className="p-6">
-      <Stats students={students} />
+      {/* <Stats students={students} /> */}
 
       {/* Comunicados */}
       <section className="bg-white border-2 border-gray-300 rounded-lg p-4 mb-6 shadow-md">
@@ -222,27 +241,15 @@ const Index = () => {
         onCancel={() => setEditingStudent(null)}
       />
 
-      {/* Busca */}
-      <div className="bg-white border-2 border-gray-300 rounded-lg p-4 mb-6 shadow-md">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Buscar Estudantes</label>
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Busque por nome, email ou curso..."
-          className="w-full px-4 py-2 border-2 border-gray-300 rounded focus:border-blue-500"
-        />
-      </div>
-
       {/* Lista de Estudantes */}
       <div className="bg-white border-2 border-gray-300 rounded-lg p-4 shadow-md">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-gray-800">
-            Lista de Estudantes ({filteredStudents.length})
+            Lista de Estudantes ({Allstudents.length})
           </h2>
         </div>
 
-        {filteredStudents.length === 0 ? (
+        {Allstudents.length === 0 ? (
           <div className="text-center py-8">
             <Users size={48} className="mx-auto text-gray-400 mb-4" />
             <p className="text-gray-600">
@@ -251,7 +258,7 @@ const Index = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredStudents.map((student) => (
+            {Allstudents.map((student) => (
               <StudentCard
                 key={student.id}
                 student={student}

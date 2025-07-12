@@ -115,8 +115,8 @@ const Periodos = () => {
             "Authorization":`Bearer ${localStorage.getItem("token")}` 
           }
         });
-        const data = await response.json();
-        console.log(data); 
+        const data:Periodo[] = await response.json();
+        setPeriodos(data)
       } catch (error) {
         console.error("Erro ao buscar os períodos:", error);
       }
