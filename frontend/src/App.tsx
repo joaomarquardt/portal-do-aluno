@@ -54,6 +54,7 @@ const AppContent = () => {
         </header>
         <main className="flex-1 bg-gray-100">
           <Routes>
+            <Route path="/login" element={<Login />} />
             <Route path="/" element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
                 <Index />

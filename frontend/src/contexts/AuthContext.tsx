@@ -4,6 +4,9 @@ import { jwtDecode } from 'jwt-decode';
 interface User {
   nome: string;
   cpf: string;
+  idUsuario: number;
+  idAluno?: number;
+  idProfessor?: number;
   role: 'ADMIN' | 'PROFESSOR' | 'ALUNO';
 }
 
@@ -16,6 +19,7 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const apiUrl = import.meta.env.VITE_URL_API;
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -48,7 +52,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = async (cpf: string, senha: string): Promise<{ success: boolean; needsPasswordChange: boolean }> => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3000/api/login', {
+      const response = await fetch(`${apiUrl}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cpf, senha })
@@ -64,6 +68,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const payload: User = {
           cpf: decoded.sub,
           nome: decoded.nome,
+          idUsuario: decoded.idUsuario,
+          idAluno: decoded.idAluno,
+          idProfessor: decoded.idProfessor,
           role: decoded.roles?.[0] ?? 'ALUNO'
         };
 

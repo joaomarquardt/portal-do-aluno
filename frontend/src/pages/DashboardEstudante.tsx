@@ -1,75 +1,146 @@
+import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { LogOut, BookOpen, Calendar, Award } from 'lucide-react';
 import { useEffect, useState } from 'react';
-require("dotenv").config();
+
 interface ComunicadoServ {
   id: number;
   titulo: string;
   mensagem: string;
-  data: string;
+  dataPublicacao: string;
 }
 
 const DashboardEstudante = () => {
   const { user, logout, changePassword } = useAuth();
-  const [ComunicadosServ, setComunicadosServ] = useState<ComunicadoServ[]>([]);
   const [novaSenha, setNovaSenha] = useState('');
   const [trocaSucesso, setTrocaSucesso] = useState(false);
-  const [erro, setErro] = useState('');
+  const [erroTrocaSenha, setErroTrocaSenha] = useState('');
+
+  const [disciplinasAtivas, setDisciplinasAtivas] = useState(0);
+  const [mediaGeral, setMediaGeral] = useState(0.0);
+  const [presencaPorcentagem, setPresencaPorcentagem] = useState('0%');
+  const [comunicados, setComunicados] = useState<ComunicadoServ[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [errorDashboard, setErrorDashboard] = useState<string | null>(null);
+
+  const apiUrl = import.meta.env.VITE_URL_API;
 
   useEffect(() => {
-    const fetchComunicados = async () => {
+    if (!apiUrl) {
+      setErrorDashboard("Erro: Configuração da API ausente. Contate o suporte.");
+      setLoading(false);
+      return;
+    }
+
+    if (!user || !user.idAluno) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchDashboardData = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/comunicados`, {
+        setLoading(true);
+        setErrorDashboard(null);
+
+        const summaryResponse = await axios.get(`${apiUrl}/alunos/${user.idAluno}/sumario-dashboard`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         });
+        setDisciplinasAtivas(summaryResponse.data.numDisciplinasAtivas);
+        setMediaGeral(summaryResponse.data.mediaGeral);
+        setPresencaPorcentagem(summaryResponse.data.presencaPorcentagem);
 
-        if (!response.ok) {
-          throw new Error(`Erro ao buscar comunicados: ${response.status}`);
+        const announcementsResponse = await axios.get(`${apiUrl}/comunicados`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        setComunicados(announcementsResponse.data);
+        debugger;
+      } catch (err) {
+        console.error('Erro ao buscar dados do dashboard:', err);
+        if (axios.isAxiosError(err)) {
+          if (err.response) {
+            setErrorDashboard(`Erro do servidor: ${err.response.status} - ${err.response.data.message || 'Erro desconhecido.'}`);
+          } else if (err.request) {
+            setErrorDashboard("Erro de rede: Não foi possível conectar ao servidor.");
+          } else {
+            setErrorDashboard('Erro na configuração da requisição.');
+          }
+        } else {
+          setErrorDashboard('Um erro inesperado ocorreu.');
         }
-
-        const data: ComunicadoServ[] = await response.json();
-        setComunicadosServ(data);
-      } catch (error) {
-        console.error(error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchComunicados();
-  }, []);
+    fetchDashboardData();
+  }, [user, apiUrl]);
 
   const handleTrocarSenha = async () => {
     if (!novaSenha.trim()) {
-      setErro('Digite uma nova senha.');
+      setErroTrocaSenha('Digite uma nova senha.');
       return;
+    }
+    if (!user?.cpf) {
+        setErroTrocaSenha('CPF do usuário não disponível.');
+        return;
     }
 
     try {
-      const response = await fetch('http://localhost:3000/api/trocar-senha', {
+      const response = await fetch(`${apiUrl}/trocar-senha`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          // Inclua o token aqui se este endpoint também exigir autenticação
+          // 'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify({
-          cpf: user?.cpf,
+          cpf: user.cpf,
           novaSenha,
         }),
       });
 
       if (response.ok) {
         setTrocaSucesso(true);
-        setErro('');
+        setErroTrocaSenha('');
         localStorage.setItem('changePassword', 'false');
-        window.location.reload(); // recarrega a página para refletir mudança
+        window.location.reload();
       } else {
         const data = await response.json();
-        setErro(data?.mensagem || 'Erro ao trocar senha.');
+        setErroTrocaSenha(data?.mensagem || 'Erro ao trocar senha.');
       }
     } catch (e) {
-      setErro('Erro de conexão.');
+      console.error("Erro de conexão ao trocar senha:", e);
+      setErroTrocaSenha('Erro de conexão ao servidor ao tentar trocar a senha.');
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <p className="text-gray-700 text-lg">Carregando dados do dashboard...</p>
+      </div>
+    );
+  }
+
+  if (errorDashboard) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-red-100 text-red-700 p-4">
+        <p>{errorDashboard}</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <p className="text-gray-700 text-lg">Usuário não autenticado. Redirecionando para o login...</p>
+        </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -101,7 +172,7 @@ const DashboardEstudante = () => {
               value={novaSenha}
               onChange={(e) => setNovaSenha(e.target.value)}
             />
-            {erro && <p className="text-red-600 text-sm mb-2">{erro}</p>}
+            {erroTrocaSenha && <p className="text-red-600 text-sm mb-2">{erroTrocaSenha}</p>}
             {trocaSucesso && <p className="text-green-600 text-sm mb-2">Senha alterada com sucesso!</p>}
             <button
               onClick={handleTrocarSenha}
@@ -112,14 +183,13 @@ const DashboardEstudante = () => {
           </div>
         )}
 
-        {/* Cards principais */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="flex items-center gap-3 mb-4">
               <BookOpen className="text-blue-600" size={24} />
               <h3 className="text-lg font-semibold text-gray-800">Disciplinas</h3>
             </div>
-            <p className="text-2xl font-bold text-blue-600">8</p>
+            <p className="text-2xl font-bold text-blue-600">{disciplinasAtivas}</p>
             <p className="text-gray-600 text-sm">Disciplinas ativas</p>
           </div>
 
@@ -128,7 +198,7 @@ const DashboardEstudante = () => {
               <Award className="text-green-600" size={24} />
               <h3 className="text-lg font-semibold text-gray-800">Média Geral</h3>
             </div>
-            <p className="text-2xl font-bold text-green-600">8.5</p>
+            <p className="text-2xl font-bold text-green-600">{mediaGeral.toFixed(2)}</p>
             <p className="text-gray-600 text-sm">Nota média</p>
           </div>
 
@@ -137,55 +207,37 @@ const DashboardEstudante = () => {
               <Calendar className="text-purple-600" size={24} />
               <h3 className="text-lg font-semibold text-gray-800">Frequência</h3>
             </div>
-            <p className="text-2xl font-bold text-purple-600">92%</p>
+            <p className="text-2xl font-bold text-purple-600">{presencaPorcentagem}%</p>
             <p className="text-gray-600 text-sm">Presença média</p>
           </div>
         </div>
 
-        {/* Comunicados */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-lg font-bold text-gray-800 mb-4">Próximas Aulas</h2>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-blue-50 rounded">
-                <div>
-                  <p className="font-semibold text-gray-800">Matemática</p>
-                  <p className="text-sm text-gray-600">Prof. João Silva</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-semibold text-blue-600">14:00</p>
-                  <p className="text-xs text-gray-600">Sala 201</p>
-                </div>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-green-50 rounded">
-                <div>
-                  <p className="font-semibold text-gray-800">História</p>
-                  <p className="text-sm text-gray-600">Prof. Maria Santos</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-semibold text-green-600">16:00</p>
-                  <p className="text-xs text-gray-600">Sala 105</p>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-lg font-bold text-gray-800 mb-4">Comunicados</h2>
+          <div className="space-y-3">
+            {comunicados.length > 0 ? (
+              comunicados.map((comunicado) => {
+                const dataObj = new Date(comunicado.dataPublicacao);
+                const dataFormatada = new Intl.DateTimeFormat('pt-BR', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: false
+                }).format(dataObj);
 
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="space-y-3">
-              {ComunicadosServ.map(({ id, titulo, mensagem, data }) => (
-                <div key={id} className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-bold text-gray-800">{titulo}</h4>
-                      <p className="text-gray-600 mt-1">{mensagem}</p>
-                      <p className="text-sm text-gray-500 mt-2">
-                        Administração - {new Date(data + 'Z').toLocaleDateString('pt-BR')}
-                      </p>
-                    </div>
+                return (
+                  <div key={comunicado.id} className="p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+                    <p className="font-semibold text-gray-800 text-sm">{comunicado.titulo}</p>
+                    <p className="text-xs text-gray-600">{comunicado.mensagem}</p>
+                    <p className="text-xs text-gray-600">{dataFormatada}</p>
                   </div>
-                </div>
-              ))}
-            </div>
+                );
+              })
+            ) : (
+              <p className="text-gray-600">Nenhum comunicado no momento.</p>
+            )}
           </div>
         </div>
       </main>
