@@ -13,6 +13,6 @@ import java.util.Optional;
 public interface PresencaRepository extends JpaRepository<Presenca, Long> {
     Optional<Presenca> findByAlunoAndTurma(Aluno aluno, Turma turma);
 
-    @Query("SELECT m.horasRegistradas FROM Presenca m WHERE m.aluno.id = :alunoId AND m.turma.id IN :turmaIds")
+    @Query("SELECT p FROM Presenca p WHERE p.aluno.id = :alunoId AND p.turma.id IN :turmaIds")
     List<Presenca> findByAlunoAndTurmas(@Param("alunoId") Long alunoId, @Param("turmaIds") List<Long> turmaIds);
 }
