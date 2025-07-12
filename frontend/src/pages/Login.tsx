@@ -47,7 +47,7 @@ const Login = () => {
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Sistema Acadêmico</h1>
           <p className="text-gray-600">Faça login para acessar o sistema</p>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -92,7 +92,7 @@ const Login = () => {
                   className="w-4 h-4"
                 />
                 <Users className="text-blue-600" size={20} />
-                <span className="font-medium text-gray-700">Estudante</span>
+                <span className="font-medium text-gray-700">Aluno</span>
               </label>
               <label className="flex items-center gap-2 p-3 border-2 border-gray-200 rounded cursor-pointer hover:bg-gray-50">
                 <input

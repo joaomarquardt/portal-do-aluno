@@ -1,16 +1,16 @@
-import { useEffect, useState } from 'react';
-import { Users, MessageSquarePlus, X } from 'lucide-react';
-import StudentCard from '../components/StudentCard';
-import AddStudentForm from '../components/AddStudentForm';
+import { useEffect, useState, useCallback } from 'react';
+import { Users, MessageSquarePlus, X, ChevronLeft, ChevronRight } from 'lucide-react'; // Remove ChevronsRight se não for usar um botão só pra ele
+import AlunoCard from '../components/AlunoCard';
+import AddAlunoForm from '../components/AddAlunoForm';
 import Stats from '../components/Stats';
 
-interface Student {
+interface Aluno {
   id: number;
   cpf: string;
-  name: string;
+  nome: string;
   email: string;
-  institucionalEmail: string;
-  cellphone: string;
+  emailInstitucional: string;
+  telefone: string;
   CursoId: number;
 }
 
@@ -18,33 +18,124 @@ interface Comunicado {
   id: number;
   titulo: string;
   mensagem: string;
+  dataPublicacao: string;
 }
 
-interface ComunicadoServ{
-  id: number;
-  titulo: string;
-  mensagem:string;
-  data:string;
+interface PaginatedResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
 }
+
+const apiUrl = import.meta.env.VITE_URL_API;
+
 const Index = () => {
-  const [Allstudents, setStudents] = useState<Student[]>([]);
-  const [newStudent,setNewStudent] = useState(false);
-  const [comunicados, setComunicados] = useState<Comunicado[]>([])
-  const [ComunicadosServ, setComunicadosServ] = useState<ComunicadoServ[]>([
-
-  ]);
-
-  const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+  const [alunos, setAlunos] = useState<Aluno[]>([]);
+  const [comunicados, setComunicados] = useState<Comunicado[]>([]);
+  const [editingAluno, setEditingAluno] = useState<Aluno | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showComunicadoForm, setShowComunicadoForm] = useState(false);
   const [comunicadoForm, setComunicadoForm] = useState({ titulo: '', mensagem: '' });
+  const [totalAlunos, setTotalAlunos] = useState(0);
+  const [crMedio, setCrMedio] = useState<number | null>(null);
+  const [numAlunosAltoDesempenho, setNumAlunosAltoDesempenho] = useState(0);
+  const [periodoMaisComum, setPeriodoMaisComum] = useState(0);
+  const [errorDashboard, setErrorDashboard] = useState<string | null>(null);
 
-  useEffect(() => {
-  const fetchComunicados = async () => {
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize] = useState(9);
+  const [totalPages, setTotalPages] = useState(0);
+
+  const goToPage = useCallback((pageNumber: number) => {
+    const newPage = Math.max(0, Math.min(pageNumber, totalPages > 0 ? totalPages - 1 : 0));
+    setCurrentPage(newPage);
+  }, [totalPages]);
+
+  const goToNextPage = useCallback(() => {
+    goToPage(currentPage + 1);
+  }, [currentPage, goToPage]);
+
+  const goToPrevPage = useCallback(() => {
+    goToPage(currentPage - 1);
+  }, [currentPage, goToPage]);
+
+  const fetchAlunos = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:3000/comunicados', {
+      const token = localStorage.getItem('token');
+      const queryParams = new URLSearchParams({
+        page: currentPage.toString(),
+        size: pageSize.toString(),
+        ...(searchTerm && { nome: searchTerm })
+      }).toString();
+
+      const response = await fetch(`${apiUrl}/alunos/paginacao?${queryParams}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro ao buscar alunos: ${response.status}`);
+      }
+
+      const data: PaginatedResponse<Aluno> = await response.json();
+      setAlunos(data.content);
+      setTotalPages(data.totalPages);
+
+      if (data.totalPages > 0 && currentPage >= data.totalPages) {
+        setCurrentPage(data.totalPages - 1);
+      } else if (data.totalPages === 0 && currentPage !== 0) {
+        setCurrentPage(0);
+      }
+
+    } catch (error) {
+      console.error('Falha ao buscar alunos:', error);
+    }
+  }, [currentPage, pageSize, searchTerm]);
+
+  const fetchDashboardData = useCallback(async () => {
+  try {
+    debugger;
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${apiUrl}/turmas/sumario-dashboard`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Erro desconhecido no servidor.' }));
+      throw new Error(`Erro ao buscar dados do dashboard: ${response.status} - ${errorData.message || 'Erro desconhecido.'}`);
+    }
+
+    const data = await response.json();
+    setTotalAlunos(data.totalAlunos);
+    setCrMedio(data.crMedio);
+    setNumAlunosAltoDesempenho(data.numAlunosAltoDesempenho);
+    setPeriodoMaisComum(data.periodoMaisComum);
+    setErrorDashboard(null);
+  } catch (err: any) {
+    console.error('Erro ao buscar dados do dashboard:', err);
+    if (err instanceof Error && err.message.startsWith('Erro ao buscar dados do dashboard:')) {
+      setErrorDashboard(err.message);
+    }
+    else if (err instanceof TypeError && err.message === 'Failed to fetch') {
+      setErrorDashboard("Erro de rede: Não foi possível conectar ao servidor. Verifique sua conexão ou o servidor.");
+    }
+    else {
+      setErrorDashboard('Um erro inesperado ocorreu: ' + (err.message || 'Erro desconhecido.'));
+    }
+  }
+}, []);
+
+  const fetchComunicados = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${apiUrl}/comunicados`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
         },
       });
 
@@ -52,116 +143,200 @@ const Index = () => {
         throw new Error(`Erro ao buscar comunicados: ${response.status}`);
       }
 
-      const data: ComunicadoServ[] = await response.json();
-      setComunicadosServ(data);
+      const data: Comunicado[] = await response.json();
+      setComunicados(data);
     } catch (error) {
-      console.error(error);
-    
+      console.error('Falha ao buscar comunicados:', error);
     }
-  };
-  fetchStudents();
-  fetchComunicados();
-}, [comunicados]);
- const fetchStudents = async () => {
+  }, []);
+
+  useEffect(() => {
+    fetchAlunos();
+    fetchComunicados();
+    fetchDashboardData();
+  }, [fetchAlunos, fetchComunicados, fetchDashboardData]);
+
+  const addAluno = async (data: Omit<Aluno, 'id'>) => {
     try {
-      const res = await fetch('http://localhost:3000/alunos', {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${apiUrl}/alunos`, {
+        method: 'POST',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
+        body: JSON.stringify(data),
       });
 
-      if (!res.ok) {
-        throw new Error(`Erro ao buscar estudantes: ${res.status}`);
+      if (!response.ok) {
+        throw new Error(`Erro ao adicionar aluno: ${response.status}`);
       }
 
-      const data: Student[] = await res.json();
-      console.log(data)
-      setStudents(data);
+      await response.json();
+      alert('Aluno adicionado com sucesso!');
+      fetchAlunos();
     } catch (error) {
-      console.error(error);
+      console.error('Falha ao adicionar aluno:', error);
+      alert('Erro ao adicionar aluno. Tente novamente.');
     }
   };
 
-  const getNextId = (list: { id: number }[]) => Math.max(0, ...list.map(item => item.id)) + 1;
+  const updateAluno = async (updated: Aluno) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${apiUrl}/alunos/${updated.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(updated),
+      });
 
-  const addStudent = (data: Omit<Student, 'id'>) => {
-    const newStudent: Student = { ...data, id: getNextId(Allstudents) };
-    setStudents(prev => [...prev, newStudent]);
-    console.log('Estudante adicionado:', newStudent);
-  };
+      if (!response.ok) {
+        throw new Error(`Erro ao atualizar aluno: ${response.status}`);
+      }
 
-  const updateStudent = (updated: Student) => {
-    setStudents(prev => prev.map(s => s.id === updated.id ? updated : s));
-    setEditingStudent(null);
-    console.log('Estudante atualizado:', updated);
-  };
-
-  const deleteStudent = (id: number) => {
-    if (confirm('Tem certeza que deseja excluir este estudante?')) {
-      setStudents(prev => prev.filter(s => s.id !== id));
-      console.log('Estudante excluído:', id);
+      await response.json();
+      alert('Aluno atualizado com sucesso!');
+      setEditingAluno(null);
+      fetchAlunos();
+    } catch (error) {
+      console.error('Falha ao atualizar aluno:', error);
+      alert('Erro ao atualizar aluno. Tente novamente.');
     }
   };
 
-  const handleEdit = (student: Student) => {
-    setEditingStudent(student);
-    scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  const deleteAluno = async (id: number) => {
+    if (confirm('Tem certeza que deseja excluir este aluno?')) {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${apiUrl}/alunos/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
 
- const handleComunicadoSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+        if (!response.ok) {
+          throw new Error(`Erro ao excluir aluno: ${response.status}`);
+        }
 
-  const novo: Omit<Comunicado, 'id'> = {
-    titulo: comunicadoForm.titulo,
-    mensagem: comunicadoForm.mensagem,
-
-
-  };
-
-  try {
-    const response = await fetch('http://localhost:3000/comunicados', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      },
-      body: JSON.stringify(novo),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Erro ao criar comunicado: ${response.status}`);
+        alert('Aluno excluído com sucesso!');
+        fetchAlunos();
+      } catch (error) {
+        console.error('Falha ao excluir aluno:', error);
+        alert('Erro ao excluir aluno. Tente novamente.');
+      }
     }
+  };
 
-    const comunicadoSalvo: ComunicadoServ = await response.json();
-    setComunicadosServ(prev => [comunicadoSalvo, ...prev]);
+  const handleEdit = (aluno: Aluno) => {
+    setEditingAluno(aluno);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
-    // Resetar formulário
-    setComunicadoForm({ titulo: '', mensagem: '' });
-    setShowComunicadoForm(false);
-    alert('Comunicado criado com sucesso!');
-  } catch (error) {
-    console.error(error);
-    alert('Erro ao criar comunicado. Tente novamente.');
-  }
-};
+  const handleComunicadoSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const deleteComunicado = (id: number) => {
+    const novoComunicado = {
+      titulo: comunicadoForm.titulo,
+      mensagem: comunicadoForm.mensagem,
+    };
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${apiUrl}/comunicados`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(novoComunicado),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro ao criar comunicado: ${response.status}`);
+      }
+
+      await response.json();
+      setComunicadoForm({ titulo: '', mensagem: '' });
+      setShowComunicadoForm(false);
+      alert('Comunicado criado com sucesso!');
+      fetchComunicados();
+    } catch (error) {
+      console.error('Falha ao criar comunicado:', error);
+      alert('Erro ao criar comunicado. Tente novamente.');
+    }
+  };
+
+  const deleteComunicado = async (id: number) => {
     if (confirm('Tem certeza que deseja excluir este comunicado?')) {
-      setComunicados(prev => prev.filter(c => c.id !== id));
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${apiUrl}/comunicados/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Erro ao excluir comunicado: ${response.status}`);
+        }
+
+        alert('Comunicado excluído com sucesso!');
+        fetchComunicados();
+      } catch (error) {
+        console.error('Falha ao excluir comunicado:', error);
+        alert('Erro ao excluir comunicado. Tente novamente.');
+      }
     }
   };
 
-  // const students = Allstudents.filter(({ name, email }) =>
-  //   [name, email].some(field =>
-  //     field.toLowerCase().includes(searchTerm.toLowerCase())
-  //   )
-  // );
+  const getPaginationButtons = () => {
+    if (totalPages <= 1) return [];
+
+    const buttons: (number | string)[] = [];
+    const maxVisiblePageNumbers = 3;
+
+    let startPage = Math.max(0, currentPage - Math.floor(maxVisiblePageNumbers / 2));
+    let endPage = Math.min(totalPages - 1, startPage + maxVisiblePageNumbers - 1);
+
+    if (endPage === totalPages - 1) {
+      startPage = Math.max(0, totalPages - maxVisiblePageNumbers);
+    }
+    else if (startPage === 0) {
+      endPage = Math.min(totalPages - 1, maxVisiblePageNumbers - 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      buttons.push(i);
+    }
+
+    if (endPage < totalPages - 1) {
+        if (endPage + 1 < totalPages - 1) {
+            buttons.push('...');
+        }
+        buttons.push(totalPages - 1);
+    }
+
+    if (startPage > 0 && !buttons.includes(0)) {
+        buttons.unshift(0);
+        if (startPage > 1) {
+            buttons.splice(1, 0, '...');
+        }
+    }
+
+    return buttons;
+  };
+
+  const paginationButtons = getPaginationButtons();
 
   return (
     <div className="p-6">
-      {/* <Stats students={students} /> */}
+      <Stats totalAlunosGlobal={totalAlunos} alunosNaPagina={alunos} crMedio={crMedio} numAlunosAltoDesempenho={numAlunosAltoDesempenho} periodoMaisComum={periodoMaisComum} />
 
-      {/* Comunicados */}
       <section className="bg-white border-2 border-gray-300 rounded-lg p-4 mb-6 shadow-md">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-gray-800">Comunicados</h2>
@@ -214,58 +389,111 @@ const Index = () => {
           </div>
         )}
 
-        {/* Lista de comunicados */}
         <div className="space-y-3">
-          {ComunicadosServ.map(({ id, titulo, mensagem, data }) => (
-            <div key={id} className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h4 className="font-bold text-gray-800">{titulo}</h4>
-                  <p className="text-gray-600 mt-1">{mensagem}</p>
-                  <p className="text-sm text-gray-500 mt-2">Administração - {new Date(data + 'Z').toLocaleDateString('pt-BR')
-                  }</p>
+          {comunicados.length === 0 ? (
+            <p className="text-gray-600 text-center">Nenhum comunicado disponível.</p>
+          ) : (
+            comunicados.map(({ id, titulo, mensagem, dataPublicacao }) => (
+              <div key={id} className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="font-bold text-gray-800">{titulo}</h4>
+                    <p className="text-gray-600 mt-1">{mensagem}</p>
+                    <p className="text-sm text-gray-500 mt-2">
+                      Administração - {new Date(dataPublicacao).toLocaleDateString('pt-BR')}
+                    </p>
+                  </div>
+                  <button onClick={() => deleteComunicado(id)} className="text-red-500 hover:text-red-700 ml-2">
+                    <X size={16} />
+                  </button>
                 </div>
-                <button onClick={() => deleteComunicado(id)} className="text-red-500 hover:text-red-700 ml-2">
-                  <X size={16} />
-                </button>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </section>
 
-      <AddStudentForm
-        onAddStudent={addStudent}
-        editingStudent={editingStudent}
-        onUpdateStudent={updateStudent}
-        onCancel={() => setEditingStudent(null)}
+      <AddAlunoForm
+        onAddAluno={addAluno}
+        editingAluno={editingAluno}
+        onUpdateAluno={updateAluno}
+        onCancel={() => setEditingAluno(null)}
       />
 
-      {/* Lista de Estudantes */}
       <div className="bg-white border-2 border-gray-300 rounded-lg p-4 shadow-md">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-gray-800">
-            Lista de Estudantes ({Allstudents.length})
+            Lista de Alunos ({totalAlunos})
           </h2>
         </div>
 
-        {Allstudents.length === 0 ? (
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Buscar aluno por nome..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(0);
+            }}
+            className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-blue-500"
+          />
+        </div>
+
+        {alunos.length === 0 && !searchTerm ? (
           <div className="text-center py-8">
             <Users size={48} className="mx-auto text-gray-400 mb-4" />
-            <p className="text-gray-600">
-              {searchTerm ? 'Nenhum estudante encontrado.' : 'Nenhum estudante cadastrado ainda.'}
-            </p>
+            <p className="text-gray-600">Nenhum aluno cadastrado ainda.</p>
+          </div>
+        ) : alunos.length === 0 && searchTerm ? (
+          <div className="text-center py-8">
+            <Users size={48} className="mx-auto text-gray-400 mb-4" />
+            <p className="text-gray-600">Nenhum aluno encontrado para "{searchTerm}".</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Allstudents.map((student) => (
-              <StudentCard
-                key={student.id}
-                student={student}
+            {alunos.map((aluno) => (
+              <AlunoCard
+                key={aluno.id}
+                aluno={aluno}
                 onEdit={handleEdit}
-                onDelete={deleteStudent}
+                onDelete={deleteAluno}
               />
             ))}
+          </div>
+        )}
+
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center mt-6 space-x-2">
+            {/* Seta para a esquerda (volta uma página) */}
+            <button
+              onClick={goToPrevPage}
+              disabled={currentPage === 0}
+              className="px-3 py-1 border rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft size={16} />
+            </button>
+
+            {paginationButtons.map((page, index) =>
+              page === '...' ? (
+                <span key={`ellipsis-${index}`} className="px-3 py-1 text-gray-500">...</span>
+              ) : (
+                <button
+                  key={`page-${page}`}
+                  onClick={() => goToPage(page as number)}
+                  className={`px-3 py-1 border rounded ${currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+                >
+                  {(page as number) + 1} {}
+                </button>
+              )
+            )}
+            <button
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages - 1}
+              className="px-3 py-1 border rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronRight size={16} />
+            </button>
           </div>
         )}
       </div>

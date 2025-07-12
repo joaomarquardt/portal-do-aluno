@@ -10,7 +10,7 @@ interface ComunicadoServ {
   dataPublicacao: string;
 }
 
-const DashboardEstudante = () => {
+const DashboardAluno = () => {
   const { user, logout, changePassword } = useAuth();
   const [novaSenha, setNovaSenha] = useState('');
   const [trocaSucesso, setTrocaSucesso] = useState(false);
@@ -94,8 +94,7 @@ const DashboardEstudante = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Inclua o token aqui se este endpoint também exigir autenticação
-          // 'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify({
           cpf: user.cpf,
@@ -147,7 +146,7 @@ const DashboardEstudante = () => {
       <header className="bg-white shadow-sm border-b">
         <div className="flex items-center justify-between px-6 py-4">
           <div>
-            <h1 className="text-xl font-bold text-gray-800">Portal do Estudante</h1>
+            <h1 className="text-xl font-bold text-gray-800">Portal do Aluno</h1>
             <p className="text-gray-600">Bem-vindo, {user?.nome}</p>
           </div>
           <button
@@ -245,4 +244,4 @@ const DashboardEstudante = () => {
   );
 };
 
-export default DashboardEstudante;
+export default DashboardAluno;

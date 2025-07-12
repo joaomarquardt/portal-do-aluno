@@ -11,7 +11,7 @@ import Professores from "./pages/Professores";
 import Turmas from "./pages/Turmas";
 import Periodos from "./pages/Periodos";
 import DashboardProfessor from "./pages/DashboardProfessor";
-import DashboardEstudante from "./pages/DashboardEstudante";
+import DashboardAluno from "./pages/DashboardAluno";
 import NotFound from "./pages/NotFound";
 import Cursos from "./pages/Cursos";
 
@@ -40,7 +40,7 @@ const AppContent = () => {
   }
 
   if (user.role === 'ALUNO') {
-    return <DashboardEstudante />;
+    return <DashboardAluno />;
   }
 
   return (

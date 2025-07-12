@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 
-interface Student {
+interface Aluno {
   id: number;
   cpf: string;
-  name: string;
+  nome: string;
   email: string;
-  institucionalEmail: string;
-  cellphone: string;
+  emailInstitucional: string;
+  telefone: string;
   CursoId: number;
 }
 
@@ -19,42 +19,44 @@ interface Curso {
   departamento: string;
 }
 
-interface AddStudentFormProps {
-  onAddStudent: (student: Omit<Student, 'id'>) => void;
-  editingStudent?: Student | null;
-  onUpdateStudent?: (student: Student) => void;
+interface AddAlunoFormProps {
+  onAddAluno: (aluno: Omit<Aluno, 'id'>) => void;
+  editingAluno?: Aluno | null;
+  onUpdateAluno?: (aluno: Aluno) => void;
   onCancel?: () => void;
 }
 
-const initialFormState: Omit<Student, 'id'> = {
+const apiUrl = import.meta.env.VITE_URL_API
+
+const initialFormState: Omit<Aluno, 'id'> = {
   cpf: '',
-  name: '',
+  nome: '',
   email: '',
-  institucionalEmail: '',
-  cellphone: '',
-  CursoId: 1,
+  emailInstitucional: '',
+  telefone: '',
+  CursoId: 0,
 };
 
-const AddStudentForm = ({
-  editingStudent,
-  onUpdateStudent,
+const AddAlunoForm = ({
+  editingAluno,
+  onUpdateAluno,
   onCancel,
-}: AddStudentFormProps) => {
-  const [formData, setFormData] = useState<Omit<Student, 'id'>>(initialFormState);
+}: AddAlunoFormProps) => {
+  const [formData, setFormData] = useState<Omit<Aluno, 'id'>>(initialFormState);
   const [cursos, setCursos] = useState<Curso[]>([]);
 
-  
+
   useEffect(() => {
-    if (editingStudent) {
-      const { id, ...data } = editingStudent;
+    if (editingAluno) {
+      const { id, ...data } = editingAluno;
       setFormData(data);
     }
-  }, [editingStudent]);
+  }, [editingAluno]);
 
   useEffect(() => {
     const fetchCursos = async () => {
       try {
-        const res = await fetch('http://localhost:3000/Cursos', {
+        const res = await fetch(`${apiUrl}/cursos`, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -81,22 +83,23 @@ const AddStudentForm = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (editingStudent && onUpdateStudent) {
-      onUpdateStudent({ ...editingStudent, ...formData });
+    if (editingAluno && onUpdateAluno) {
+      onUpdateAluno({ ...editingAluno, ...formData });
     } else {
       try {
-        await fetch('http://localhost:3000/register', {
+        debugger;
+        await fetch(`${apiUrl}/auth/register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
           },
           body: JSON.stringify({
-            nome: formData.name,
+            nome: formData.nome,
             cpf: formData.cpf,
             emailPessoal: formData.email,
-            emailInstitucional: formData.institucionalEmail,
-            telefone: formData.cellphone,
+            emailInstitucional: formData.emailInstitucional,
+            telefone: formData.telefone,
             senha: `${formData.cpf}`,
             aluno: { cursoID: Number(formData.CursoId) },
             papeis: ['ALUNO'],
@@ -113,17 +116,18 @@ const AddStudentForm = ({
   return (
     <div className="bg-white border-2 border-gray-300 rounded-lg p-6 mb-6 shadow-md">
       <h2 className="text-xl font-bold mb-4 text-gray-800">
-        {editingStudent ? 'Editar Aluno' : 'Adicionar Aluno'}
+        {editingAluno ? 'Editar Aluno' : 'Adicionar Aluno'}
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
             { name: 'cpf', label: 'CPF *', type: 'text', placeholder: '000.000.000-00' },
-            { name: 'name', label: 'Nome completo *', type: 'text', placeholder: 'Nome do aluno' },
+            { name: 'nome', label: 'Nome completo *', type: 'text', placeholder: 'Nome do aluno' },
             { name: 'email', label: 'Email Pessoal *', type: 'email', placeholder: 'email@gmail.com' },
-            { name: 'institucionalEmail', label: 'Email Institucional *', type: 'email', placeholder: 'aluno@universidade.edu' },
-            { name: 'cellphone', label: 'Telefone *', type: 'text', placeholder: '(00) 00000-0000' },
+            { name: 'emailInstitucional', label: 'Email Institucional *', type: 'email', placeholder: 'aluno@universidade.edu' },
+            { name: 'telefone', label: 'Telefone *', type: 'text', placeholder: '(00) 00000-0000' },
+            { name: 'senha', label: 'Senha *', type: 'password', placeholder: 'Senha' }
           ].map(({ name, label, type, placeholder }) => (
             <div key={name}>
               <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
@@ -163,10 +167,10 @@ const AddStudentForm = ({
             type="submit"
             className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition-colors font-medium"
           >
-            {editingStudent ? 'Atualizar Aluno' : 'Adicionar Aluno'}
+            {editingAluno ? 'Atualizar Aluno' : 'Adicionar Aluno'}
           </button>
 
-          {editingStudent && onCancel && (
+          {editingAluno && onCancel && (
             <button
               type="button"
               onClick={onCancel}
@@ -181,4 +185,4 @@ const AddStudentForm = ({
   );
 };
 
-export default AddStudentForm;
+export default AddAlunoForm;
