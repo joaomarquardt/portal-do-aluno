@@ -15,6 +15,8 @@ import java.util.List;
 public interface AlunoMapper {
     AlunoMapper INSTANCE = Mappers.getMapper(AlunoMapper.class);
 
+    @Mapping(source = "usuario.nome", target = "nome")
+    @Mapping(source = "usuario.emailInstitucional", target = "emailInstitucional")
     AlunoResponseDTO toResponseDTO(Aluno entity);
 
     Aluno toEntity(CreateAlunoRequestDTO dto);
