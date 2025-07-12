@@ -1,16 +1,12 @@
 package com.portal_do_aluno.dtos.responses;
 
-import com.portal_do_aluno.dtos.requests.CreateTurmaRequestDTO;
-
-import java.util.List;
-
 public record AlunoResponseDTO(
-        
+        String nome,
+        String emailInstitucional,
         String matricula,
         int periodoAtual,
         String periodoIngresso,
         CursoResponseDTO curso,
-        List<CreateTurmaRequestDTO> turmas,
         boolean matriculado
 ) {
 }
