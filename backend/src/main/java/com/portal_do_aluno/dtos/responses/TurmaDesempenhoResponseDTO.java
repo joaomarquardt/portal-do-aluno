@@ -2,7 +2,10 @@ package com.portal_do_aluno.dtos.responses;
 
 public record TurmaDesempenhoResponseDTO(
         String codigo,
-        String nome,
-        String periodo
+        String nomeDisciplina,
+        String periodo,
+        String horario,
+        String nomeProfessor,
+        Integer cargaHoraria
 ) {
 }

@@ -105,7 +105,10 @@ public class AlunoService {
                             TurmaDesempenhoResponseDTO turmaDesempenhoResponseDTO = new TurmaDesempenhoResponseDTO(
                                     turma.getCodigo(),
                                     turma.getDisciplina().getNome(),
-                                    turma.getPeriodo()
+                                    turma.getPeriodo(),
+                                    turma.getHorario(),
+                                    turma.getProfessor().getUsuario().getNome(),
+                                    turma.getDisciplina().getCargaHoraria()
                             );
                             return new DesempenhoResponseDTO(turmaDesempenhoResponseDTO, media.getValor(), presenca.getHorasRegistradas());
                         }
@@ -137,7 +140,10 @@ public class AlunoService {
                             TurmaDesempenhoResponseDTO turmaDesempenhoResponseDTO = new TurmaDesempenhoResponseDTO(
                                     turma.getCodigo(),
                                     turma.getDisciplina().getNome(),
-                                    turma.getPeriodo()
+                                    turma.getPeriodo(),
+                                    turma.getHorario(),
+                                    turma.getProfessor().getUsuario().getNome(),
+                                    turma.getDisciplina().getCargaHoraria()
                             );
                             return new DesempenhoResponseDTO(turmaDesempenhoResponseDTO, media.getValor(), presenca.getHorasRegistradas());
                         }
