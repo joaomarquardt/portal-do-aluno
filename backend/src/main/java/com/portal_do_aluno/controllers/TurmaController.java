@@ -22,7 +22,7 @@ public class TurmaController {
 
     @GetMapping
     public ResponseEntity<List<TurmaResponseDTO>> findAll() {
-        List<TurmaResponseDTO> turmasDTO = service.findAll();
+        List<TurmaResponseDTO> turmasDTO = service.findAll();   
         return new ResponseEntity<>(turmasDTO, HttpStatus.OK);
     }
 
