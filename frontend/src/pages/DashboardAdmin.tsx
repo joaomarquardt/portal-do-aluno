@@ -97,7 +97,6 @@ const Index = () => {
 
   const fetchDashboardData = useCallback(async () => {
   try {
-    debugger;
     const token = localStorage.getItem('token');
     const response = await fetch(`${apiUrl}/turmas/sumario-dashboard`, {
       headers: {
@@ -465,7 +464,6 @@ const Index = () => {
 
         {totalPages > 1 && (
           <div className="flex justify-center items-center mt-6 space-x-2">
-            {/* Seta para a esquerda (volta uma página) */}
             <button
               onClick={goToPrevPage}
               disabled={currentPage === 0}

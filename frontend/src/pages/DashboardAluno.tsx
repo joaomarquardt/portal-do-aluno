@@ -1,9 +1,15 @@
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
+<<<<<<< HEAD
 import { LogOut, BookOpen, Calendar, Award } from 'lucide-react';
 import {  Users,  Edit, Trash2, Plus, Clock } from "lucide-react";
 import { useEffect, useState } from 'react';
 import Turmas from './Turmas';
+=======
+import { LogOut, BookOpen, Calendar, Award, User as UserIcon} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+>>>>>>> ae3c29b54b7c6735e2e76d5cfa3f9bdceb622fcc
 
 interface ComunicadoServ {
   id: number;
@@ -25,6 +31,7 @@ interface Turma {
 
 const DashboardAluno = () => {
   const { user, logout, changePassword } = useAuth();
+  const navigate = useNavigate();
   const [novaSenha, setNovaSenha] = useState('');
   const [trocaSucesso, setTrocaSucesso] = useState(false);
   const [erroTrocaSenha, setErroTrocaSenha] = useState('');
@@ -194,13 +201,23 @@ const handleTrocarSenha = async () => {
             <h1 className="text-xl font-bold text-gray-800">Portal do Aluno</h1>
             <p className="text-gray-600">Bem-vindo, {user?.nome}</p>
           </div>
-          <button
-            onClick={logout}
-            className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-          >
-            <LogOut size={16} />
-            Sair
-          </button>
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={() => navigate(`/meu-perfil/editar`)}
+              className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            >
+              <UserIcon size={16} />
+              Meu Perfil
+            </button>
+
+            <button
+              onClick={logout}
+              className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+            >
+              <LogOut size={16} />
+              Sair
+            </button>
+          </div>
         </div>
       </header>
 

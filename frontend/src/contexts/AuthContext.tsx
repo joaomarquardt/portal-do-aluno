@@ -12,10 +12,11 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (cpf: string, senha: string) => Promise<{ success: boolean; needsPasswordChange: boolean }>;
+  login: (cpf: string, senha: string) => Promise<{ success: boolean; needsPasswordChange: boolean; message?: string }>;
   logout: () => void;
   loading: boolean;
   changePassword: boolean;
+  isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,6 +34,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [changePassword, setChangePassword] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const isAuthenticated = !!user;
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
@@ -49,7 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setLoading(false);
   }, []);
 
-  const login = async (cpf: string, senha: string): Promise<{ success: boolean; needsPasswordChange: boolean }> => {
+  const login = async (cpf: string, senha: string): Promise<{ success: boolean; needsPasswordChange: boolean; message?: string }> => {
     try {
       setLoading(true);
       const response = await fetch(`${apiUrl}/auth/login`, {
@@ -57,10 +59,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cpf, senha })
       });
+<<<<<<< HEAD
       console.log(cpf)
       
       console.log(senha)
       const userData = await response.json();
+=======
+
+      const userData = await response.json(); // Sempre tente ler o JSON
+
+      if (!response.ok) {
+        const errorMessage = userData?.message || `Erro ${response.status}: Falha na autenticação.`;
+        return { success: false, needsPasswordChange: false, message: errorMessage };
+      }
+>>>>>>> ae3c29b54b7c6735e2e76d5cfa3f9bdceb622fcc
 
       await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -86,12 +98,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         localStorage.setItem('changePassword', precisaRedefinirSenha.toString());
 
         return { success: true, needsPasswordChange: precisaRedefinirSenha };
+      } else {
+        return { success: false, needsPasswordChange: false, message: 'Resposta de login inválida.' };
       }
 
-      return { success: false, needsPasswordChange: false };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro no login:', error);
-      return { success: false, needsPasswordChange: false };
+      return { success: false, needsPasswordChange: false, message: 'Erro de conexão ou inesperado. Tente novamente.' };
     } finally {
       setLoading(false);
     }
@@ -119,7 +132,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading, changePassword }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, changePassword, isAuthenticated }}>
       {children}
     </AuthContext.Provider>
   );

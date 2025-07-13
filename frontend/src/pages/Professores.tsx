@@ -1,89 +1,179 @@
-
-import { useState, useEffect} from 'react';
-import { GraduationCap, Edit, Trash2, Plus, User, Mail, BookOpen } from "lucide-react";
+import { useState, useEffect, useCallback } from 'react';
+import { GraduationCap, Edit, Trash2, Plus, User, Mail, BookOpen, X } from "lucide-react";
+import test from 'node:test';
 
 interface Professor {
   id: number;
   nome: string;
-  cpf:string;
-  emailPessoal:string;
+  cpf: string;
+  emailPessoal: string;
   emailInstitucional: string;
   departamento: string;
   telefone: string;
-  siape:string;
-  
+  siape: string;
 }
 
-const Professores = () => {
-  const [cpfFormated,setCpfFormated] = useState('')
+interface ProfessorFormData {
+  nome: string;
+  emailInstitucional: string;
+  emailPessoal: string;
+  siape: string;
+  cpf: string;
+  departamento: string;
+  telefone: string;
+}
 
+const initialFormData: ProfessorFormData = {
+  nome: '',
+  emailInstitucional: '',
+  emailPessoal: '',
+  siape: '',
+  cpf: '',
+  departamento: '',
+  telefone: '',
+};
+
+const apiUrl = import.meta.env.VITE_URL_API;
+
+const Professores = () => {
+  const [professores, setProfessores] = useState<Professor[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingProfessor, setEditingProfessor] = useState<Professor | null>(null);
+  const [formData, setFormData] = useState<ProfessorFormData>(initialFormData);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [cpfFormated, setCpfFormated] = useState('');
 
-  // ⬇️ Atualizado com novos campos
-  const [formData, setFormData] = useState({
-    nome: '',
-    emailInstitucional: '',
-    emailPessoal: '',
-    siape: '',
-    cpf: '',
-    departamento: '',
-    telefone: '',
-  });
+  const fetchProfessores = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${apiUrl}/professores`, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-
-    if (editingProfessor) {
-      setProfessores(professores.map(prof =>
-        prof.id === editingProfessor.id
-          ? { ...prof, ...formData }
-          : prof
-      ));
-    } else {
-      try {
-        const res = await fetch("http://localhost:3000/register", {
-          method: "POST",
-          headers: {
-            "Content-type": "application/json",
-            "Authorization": `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify({
-            nome: formData.nome,
-            emailInstitucional: formData.emailInstitucional,
-            emailPessoal: formData.emailPessoal,
-            senha: formData.nome + " " + formData.telefone,
-            professor: { siape: Number(formData.siape) },
-            cpf: formData.cpf,
-            telefone: formData.telefone,
-            papeis: ['PROFESSOR']
-          })
-        });
-        const professorSalvo:Professor = await res.json()
-        setProfessores(prev => [...prev, professorSalvo]);
-
-      } catch (error) {
-        console.error("Erro ao cadastrar professor:", error);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Erro desconhecido.' }));
+        throw new Error(`Erro HTTP ${response.status}: ${errorData.message || 'Falha ao buscar professores.'}`);
       }
-    }
 
-    resetForm();
+      const data: Professor[] = await response.json();
+      setProfessores(data);
+    } catch (err: any) {
+      console.error("Erro ao buscar os professores:", err);
+      setError(err.message || "Erro ao carregar lista de professores.");
+    } finally {
+      setLoading(false);
+    }
+  }, [apiUrl]);
+
+  useEffect(() => {
+    fetchProfessores();
+  }, [fetchProfessores]);
+
+  const formatCPF = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+  };
+
+  const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 11) {
+      setCpfFormated(formatCPF(numbers));
+      setFormData(prev => ({ ...prev, cpf: numbers }));
+    }
   };
 
   const resetForm = () => {
-    setFormData({
-      nome: '',
-      emailInstitucional: '',
-      emailPessoal: '',
-      siape: '',
-      cpf: '',
-      departamento: '',
-      telefone: '',
-
-    });
+    setFormData(initialFormData);
+    setCpfFormated('');
     setShowForm(false);
     setEditingProfessor(null);
+    setFormError(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setFormError(null);
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error("Token de autenticação não encontrado.");
+
+      let res;
+      let url: string;
+      let method: string;
+      let bodyData: any;
+
+      if (editingProfessor) {
+        url = `${apiUrl}/professores/${editingProfessor.id}`;
+        method = "PUT";
+        bodyData = {
+          departamento: formData.departamento,
+          telefone: formData.telefone,
+          emailPessoal: formData.emailPessoal
+        };
+      } else {
+        url = `${apiUrl}/auth/register`;
+        method = "POST";
+        bodyData = {
+          nome: formData.nome,
+          cpf: formData.cpf,
+          emailPessoal: formData.emailPessoal,
+          emailInstitucional: formData.emailInstitucional,
+          telefone: formData.telefone,
+          senha: formData.cpf.substring(0, 4),
+          aluno: null,
+          professor: { siape: formData.siape, departamento: formData.departamento },
+          papeis: ['PROFESSOR']
+        };
+      }
+
+      res = await fetch(url, {
+      method: method,
+      headers: {
+        "Content-type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(bodyData)
+    });
+    
+    let responseData: any = {};
+    const contentType = res.headers.get('content-type');
+    if (res.status !== 204 && contentType && contentType.includes('application/json')) {
+        try {
+            responseData = await res.json();
+        } catch (jsonParseError) {
+            console.warn("Aviso: Falha ao parsear JSON, mas o Content-Type indicava JSON. Corpo pode estar vazio ou malformado.", jsonParseError);
+            responseData = { message: await res.text().catch(() => 'Corpo vazio ou ilegível.') };
+        }
+    } else if (res.status === 201 || res.status === 204) { // Adicionado 201 Created aqui!
+        responseData = { message: 'Operação realizada com sucesso (sem conteúdo de resposta).' };
+    } else {
+        responseData = { message: await res.text().catch(() => 'Corpo vazio ou ilegível.') };
+    }
+
+    if (!res.ok) {
+      throw new Error(responseData.message || `Erro ${res.status}: Falha na operação.`);
+    }
+
+      alert(`Professor ${editingProfessor ? 'atualizado' : 'adicionado'} com sucesso!`);
+      resetForm();
+      fetchProfessores();
+    } catch (err: any) {
+      console.error("Erro ao processar professor:", err);
+      setFormError(err.message || "Erro na operação. Verifique os dados e tente novamente.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleEdit = (professor: Professor) => {
@@ -97,50 +187,75 @@ const Professores = () => {
       departamento: professor.departamento,
       telefone: professor.telefone
     });
+    setCpfFormated(formatCPF(professor.cpf));
     setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDelete = (id: number) => {
-    if (window.confirm('Tem certeza que deseja excluir este professor?')) {
-      setProfessores(professores.filter(prof => prof.id !== id));
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('Tem certeza que deseja excluir este professor? Esta ação é irreversível.')) {
+      return;
     }
-  };
-
-const [professores, setProfessores] = useState<Professor[]>([]); // Removido mock
-
-useEffect(() => {
-  const fetchProfessores = async () => {
     try {
-      const response = await fetch("http://localhost:3000/professores", {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Token de autenticação não encontrado.");
+
+      const response = await fetch(`${apiUrl}/professores/${id}`, {
+        method: "DELETE",
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          "Authorization": `Bearer ${token}`
         },
       });
 
-      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Erro desconhecido.' }));
+        throw new Error(errorData.message || `Erro ${response.status}: Falha ao excluir professor.`);
+      }
 
-      const data: any[] = await response.json();
-
-      const parsedProfessores: Professor[] = data.map((p, index) => ({
-        id: p.id ?? index, // fallback se id não vier
-        nome: p.nome,
-        cpf: p.cpf,
-        emailPessoal: p.emailPessoal,
-        emailInstitucional: p.emailInstitucional,
-        departamento: p.departamento,
-        telefone: p.telefone,
-        siape: p.siape
-      }));
-
-      setProfessores(parsedProfessores);
-    } catch (error) {
-      console.error("Erro ao buscar os professores:", error);
+      alert("Professor excluído com sucesso!");
+      fetchProfessores();
+    } catch (err: any) {
+      console.error("Erro ao excluir professor:", err);
+      alert(err.message || "Erro ao excluir professor. Tente novamente.");
     }
   };
 
-  fetchProfessores();
-}, []);
+  if (loading) {
+    return (
+      <div className="p-6 text-center text-gray-600">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+        Carregando professores...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 bg-red-100 border-l-4 border-red-500 text-red-700 rounded shadow">
+        <p className="font-bold">Erro ao carregar professores:</p>
+        <p>{error}</p>
+      </div>
+    );
+  }
+
+  // Lógica para desabilitar e estilizar campos
+  const isEditing = !!editingProfessor; // true se estiver editando, false se adicionando
+
+  // Função auxiliar para classes CSS de campos desabilitados
+  const getDisabledClass = (fieldToExclude: string) => {
+    return isEditing && !['emailPessoal', 'departamento'].includes(fieldToExclude) ? 'bg-gray-100 cursor-not-allowed' : '';
+  };
+  // Função auxiliar para o atributo disabled
+  const getDisabledAttr = (fieldToExclude: string) => {
+    return isEditing && !['emailPessoal', 'departamento'].includes(fieldToExclude);
+  };
+  // Função auxiliar para o atributo required
+  const getRequiredAttr = (fieldToExclude: string, isOptional: boolean = false) => {
+      // Se não estiver editando E o campo não for opcional, então é required
+      return !isEditing && !isOptional;
+  };
+
+
   return (
     <div className="p-6">
       <div className="mb-6">
@@ -162,101 +277,119 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* Formulário */}
       {showForm && (
         <div className="bg-white border-2 border-green-300 rounded-lg p-4 mb-6 shadow-md">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">
-            {editingProfessor ? 'Editar Professor' : 'Adicionar Novo Professor'}
-          </h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold text-gray-800">
+              {editingProfessor ? 'Editar Professor' : 'Adicionar Novo Professor'}
+            </h2>
+            <button onClick={resetForm} className="text-gray-500 hover:text-gray-700">
+              <X size={20} />
+            </button>
+          </div>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nome Completo *</label>
               <input
                 type="text"
+                name="nome"
                 value={formData.nome}
-                onChange={(e) => setFormData({...formData, nome: e.target.value})}
-                className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500"
-                required
+                onChange={(e) => setFormData(prev => ({...prev, nome: e.target.value}))}
+                className={`w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500 ${getDisabledClass('nome')}`}
+                required={getRequiredAttr('nome')}
+                disabled={getDisabledAttr('nome')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email Pessoal</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email Pessoal *</label>
               <input
                 type="email"
+                name="emailPessoal"
                 value={formData.emailPessoal}
-                onChange={(e) => setFormData({...formData, emailPessoal: e.target.value})}
-                className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500"
-                required
+                onChange={(e) => setFormData(prev => ({...prev, emailPessoal: e.target.value}))}
+                className={`w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500 ${getDisabledClass('emailPessoal')}`}
+                required={getRequiredAttr('emailPessoal')}
+                disabled={getDisabledAttr('emailPessoal')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email Institucional</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email Institucional *</label>
               <input
                 type="email"
+                name="emailInstitucional"
                 value={formData.emailInstitucional}
-                onChange={(e) => setFormData({...formData, emailInstitucional: e.target.value})}
-                className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500"
-                required
+                onChange={(e) => setFormData(prev => ({...prev, emailInstitucional: e.target.value}))}
+                className={`w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500 ${getDisabledClass('emailInstitucional')}`}
+                required={getRequiredAttr('emailInstitucional')}
+                disabled={getDisabledAttr('emailInstitucional')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Departamento *</label>
               <input
                 type="text"
+                name="departamento"
                 value={formData.departamento}
-                onChange={(e) => setFormData({...formData, departamento: e.target.value})}
-                className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500"
-                required
+                onChange={(e) => setFormData(prev => ({...prev, departamento: e.target.value}))}
+                className={`w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500 ${getDisabledClass('departamento')}`}
+                required={getRequiredAttr('departamento')}
+                disabled={getDisabledAttr('departamento')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">SIAPE</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">SIAPE *</label>
               <input
                 type="text"
+                name="siape"
                 value={formData.siape}
-                onChange={(e) => setFormData({...formData, siape: e.target.value})}
-                className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500"
-                required
+                onChange={(e) => setFormData(prev => ({...prev, siape: e.target.value}))}
+                className={`w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500 ${getDisabledClass('siape')}`}
+                required={getRequiredAttr('siape')}
+                disabled={getDisabledAttr('siape')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Telefone *</label>
               <input
-                type="text"
+                type="tel"
+                name="telefone"
                 value={formData.telefone}
-                onChange={(e) => setFormData({...formData, telefone: e.target.value})}
-                className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500"
+                onChange={(e) => setFormData(prev => ({...prev, telefone: e.target.value}))}
+                className={`w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500`}
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">CPF </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">CPF *</label>
               <input
                 type="text"
+                name="cpf"
                 value={cpfFormated}
-                onChange={(e) => {
-                  if(e.target.value.length <= 11){
-                    const numbers = e.target.value.replace(/\D/g, '');
-                    const cpfFormated =  numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-                    setCpfFormated(cpfFormated)
-                    setFormData({...formData, cpf:numbers})
-                  }
-                  
-                }}
-                className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500"
+                onChange={handleCPFChange}
+                className={`w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500 ${getDisabledClass('cpf')}`}
                 placeholder="Ex: 000.000.000-00"
+                maxLength={14}
+                required={getRequiredAttr('cpf')}
+                disabled={getDisabledAttr('cpf')} // Desabilita CPF se estiver editando
               />
             </div>
+            {formError && (
+              <div className="md:col-span-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded">
+                {formError}
+              </div>
+            )}
             <div className="md:col-span-2 flex gap-2">
               <button
                 type="submit"
-                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                disabled={submitting}
+                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {editingProfessor ? 'Atualizar' : 'Adicionar'}
+                {submitting ? (editingProfessor ? 'Atualizando...' : 'Adicionando...') : (editingProfessor ? 'Atualizar' : 'Adicionar')}
               </button>
               <button
                 type="button"
                 onClick={resetForm}
-                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={submitting}
               >
                 Cancelar
               </button>
@@ -265,12 +398,11 @@ useEffect(() => {
         </div>
       )}
 
-      {/* Lista de Professores */}
       <div className="bg-white border-2 border-gray-300 rounded-lg p-4 shadow-md">
         <h2 className="text-xl font-bold text-gray-800 mb-4">
           Lista de Professores ({professores.length})
         </h2>
-        
+
         {professores.length === 0 ? (
           <div className="text-center py-8">
             <GraduationCap className="mx-auto text-gray-400 mb-4" size={48} />
@@ -300,7 +432,7 @@ useEffect(() => {
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center">
                     <Mail className="text-gray-500 mr-2" size={16} />

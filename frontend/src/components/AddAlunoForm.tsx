@@ -87,7 +87,6 @@ const AddAlunoForm = ({
       onUpdateAluno({ ...editingAluno, ...formData });
     } else {
       try {
-        debugger;
         await fetch(`${apiUrl}/auth/register`, {
           method: 'POST',
           headers: {

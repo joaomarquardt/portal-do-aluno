@@ -1,28 +1,44 @@
-
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Mantenha useNavigate aqui
 import { useAuth } from '../contexts/AuthContext';
 import { Users, GraduationCap } from 'lucide-react';
 
 const Login = () => {
   const [cpf, setCpf] = useState('');
-  const [cpfView,setCpfView] = useState("")
+  const [cpfView, setCpfView] = useState("");
   const [senha, setSenha] = useState('');
-  const [tipoUsuario, setTipoUsuario] = useState<'PROFESSOR' | 'ALUNO'>('ALUNO');
-  const [error, setError] = useState('');
-  const { login, loading } = useAuth();
+  const [tipoUsuario, setTipoUsuario] = useState<'PROFESSOR' | 'ALUNO'>('ALUNO'); // Este estado não é usado na chamada de login do AuthContext
+  const [error, setError] = useState<string | null>(null);
+
+  const { login: authLogin, loading: authLoading } = useAuth();
+  const navigate = useNavigate(); // Mantenha useNavigate aqui
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError(null);
 
     if (!cpf || !senha) {
-      setError('Por favor, preencha todos os campos');
+      setError('Por favor, preencha todos os campos.');
       return;
     }
 
-    const success = await login(cpf, senha);
-    if (!success) {
-      setError('CPF, senha ou tipo de usuário incorretos');
+    try {
+      // A função login agora retorna um objeto com 'success' e 'message' (se houver)
+      const result = await authLogin(cpf, senha);
+
+      if (result.success) {
+        // Redireciona para a rota raiz.
+        // O RoleBasedRedirect em App.tsx vai interceptar e redirecionar para o dashboard correto.
+        navigate('/');
+      } else {
+        // Exibe a mensagem de erro que veio do AuthContext ou uma padrão
+        setError(result.message || 'CPF ou senha incorretos.');
+      }
+    } catch (err) {
+      // Este catch é para erros inesperados que o AuthContext não tratou e lançou.
+      // Com as mudanças no AuthContext, este catch deve ser menos acionado.
+      console.error("Erro inesperado durante o login:", err);
+      setError("Ocorreu um erro inesperado. Tente novamente mais tarde.");
     }
   };
 
@@ -59,6 +75,7 @@ const Login = () => {
               onChange={handleCPFChange}
               className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-blue-500"
               placeholder="000.000.000-00"
+              maxLength={14}
               required
             />
           </div>
@@ -117,10 +134,10 @@ const Login = () => {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={authLoading}
             className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 disabled:bg-gray-400"
           >
-            {loading ? 'Entrando...' : 'Entrar'}
+            {authLoading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
       </div>
