@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { AppSidebar } from "@/components/AppSidebar";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { LogOut, User as UserIcon} from 'lucide-react';
 
 import Login from "./pages/Login";
 import DashboardAdmin from "./pages/DashboardAdmin";
@@ -15,6 +16,7 @@ import Cursos from "./pages/Cursos";
 import NotFound from "./pages/NotFound";
 import UserProfileEditForm from "./pages/PerfilUsuarioForm";
 import Disciplinas from "./pages/Disciplina";
+import { useNavigate } from 'react-router-dom';
 
 const queryClient = new QueryClient();
 
@@ -34,6 +36,41 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                     {children}
                 </main>
             </div>
+        </div>
+    );
+};
+
+const AlunoLayout = ({ children }: { children: React.ReactNode }) => {
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
+
+    return (
+        <div className="min-h-screen bg-gray-100">
+          <header className="bg-white shadow-sm border-b">
+              <div className="flex items-center justify-between px-6 py-4">
+                  <div>
+                      <h1 className="text-xl font-bold text-gray-800">Portal do Aluno</h1>
+                      <p className="text-gray-600">Bem-vindo, {user?.nome}</p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                      <button
+                          onClick={() => navigate(`/meu-perfil/editar`)}
+                          className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                      >
+                          <UserIcon size={16} />
+                          Meu Perfil
+                      </button>
+                      <button
+                          onClick={logout}
+                          className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                      >
+                          <LogOut size={16} />
+                          Sair
+                      </button>
+                  </div>
+              </div>
+          </header>
+          {children}
         </div>
     );
 };
@@ -61,7 +98,32 @@ const AppContent = () => {
     }
 
     if (user.role === 'ALUNO') {
-        return <DashboardAluno />;
+        return (
+            <Routes>
+                <Route
+                    path="/dashboard/aluno"
+                    element={
+                        <ProtectedRoute allowedRoles={['ALUNO']}>
+                            <AlunoLayout>
+                                <DashboardAluno />
+                            </AlunoLayout>
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/meu-perfil/editar"
+                    element={
+                        <ProtectedRoute allowedRoles={['ALUNO']}>
+                            <AlunoLayout>
+                                <UserProfileEditForm />
+                            </AlunoLayout>
+                        </ProtectedRoute>
+                    }
+                />
+                <Route path="/" element={<Navigate to="/dashboard/aluno" replace />} />
+                <Route path="*" element={<NotFound />} />
+            </Routes>
+        );
     }
     if (user.role === 'ADMIN') {
         return (
@@ -92,6 +154,13 @@ const AppContent = () => {
                         </AdminLayout>
                     </ProtectedRoute>
                 } />
+                <Route path="/disciplinas" element={
+                    <ProtectedRoute allowedRoles={['ADMIN']}>
+                        <AdminLayout>
+                            <Disciplinas />
+                        </AdminLayout>
+                    </ProtectedRoute>
+                } />
                 <Route path="/periodos" element={
                     <ProtectedRoute allowedRoles={['ADMIN']}>
                         <AdminLayout>
@@ -116,7 +185,7 @@ const AppContent = () => {
                 <Route
                     path="/meu-perfil/editar"
                     element={
-                        <ProtectedRoute allowedRoles={['ALUNO', 'PROFESSOR', 'ADMIN']}>
+                        <ProtectedRoute allowedRoles={['ALUNO']}>
                             <UserProfileEditForm />
                         </ProtectedRoute>
                     }

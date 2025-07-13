@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 
 interface User {
-  
+
   nome: string;
   cpf: string;
   idUsuario: number;
@@ -60,10 +60,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cpf, senha })
       });
-      console.log(cpf)
-      
-      console.log(senha)
-      const userData = await response.json();
+
+      const userData = await response.json(); // Sempre tente ler o JSON
+
+
+      if (!response.ok) {
+        const errorMessage = userData?.message || `Erro ${response.status}: Falha na autenticação.`;
+        return { success: false, needsPasswordChange: false, message: errorMessage };
+      }
 
       await new Promise(resolve => setTimeout(resolve, 1000));
 
