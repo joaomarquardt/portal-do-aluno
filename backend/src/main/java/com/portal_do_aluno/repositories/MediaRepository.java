@@ -24,4 +24,6 @@ public interface MediaRepository extends JpaRepository<Media, Long> {
     HAVING AVG(m.valor) >= 8.5
     """)
     Long countHighPerformanceStudents();
+
+    List<Media> findByTurmaIdIn(List<Long> idsTurmas);
 }
