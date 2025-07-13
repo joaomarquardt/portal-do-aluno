@@ -73,7 +73,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (userData?.token) {
         const decoded: any = jwtDecode(userData.token);
-        console.log(decoded)
         const payload: User = {
           cpf: decoded.sub,
           nome: decoded.nome,

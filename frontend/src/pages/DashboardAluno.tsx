@@ -188,7 +188,6 @@ const DashboardAluno = () => {
   };
 
   const handleInscrever = async (turmaId: number) => {
-    console.log(user?.idAluno)
     if (!user?.idUsuario) {
       alert("Usuário não autenticado.");
       return;
@@ -203,7 +202,6 @@ const DashboardAluno = () => {
         },
         body: JSON.stringify({ idAlunos: [user.idAluno] })
       });
-      console.log(user)
       if (!response.ok) {
         const erro = await response.json();
         alert(`Erro ao se inscrever: ${erro?.mensagem || "erro desconhecido"}`);
