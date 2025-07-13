@@ -1,7 +1,7 @@
 
     import { useEffect, useState } from 'react';
     import { BookOpen, Users, Calendar, Edit, Trash2, Plus, Clock } from "lucide-react";
-
+    const apiUrl = import.meta.env.VITE_URL_API;
     interface Curso {
     id: number;
     nome: string;
@@ -34,7 +34,7 @@
     useEffect(() => {
     const fetchCursos = async () => {
         try {
-        const response = await fetch("http://localhost:3000/Cursos", {
+        const response = await fetch(`${apiUrl}/cursos`, {
             headers: {
             "Content-type": "application/json",
             "Authorization": `Bearer ${localStorage.getItem("token")}`
@@ -64,7 +64,7 @@
         ));
     } else {
         try {
-        const response = await fetch("http://localhost:3000/Cursos", {
+        const response = await fetch(`${apiUrl}/cursos`, {
             method: "POST",
             headers: {
             "Content-Type": "application/json",
@@ -262,17 +262,17 @@
                   </div>
                   <div className="flex items-center">
                     <Users className="text-gray-500 mr-2" size={16} />
-                    <span className="text-gray-600">Duração {Curso.anosDuracao} anos</span>
+                    <span className="text-gray-600">{Curso.departamento} </span>
                   </div>
                   <div className="flex items-center">
                     <Clock className="text-gray-500 mr-2" size={16} />
-                    <span className="text-gray-600">{Curso.departamento}</span>
+                    <span className="text-gray-600">{Curso.anosDuracao} anos ou {Number(Curso.anosDuracao) * 2} Periodos</span>
                   </div>
 
 
                   <div className="mt-2">
                     <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
-                      {Curso.turno}
+                      Turno: {Curso.turno}
                     </span>
                   </div>
                 </div>

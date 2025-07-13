@@ -102,9 +102,10 @@ const AddAlunoForm = ({
             telefone: formData.telefone,
             senha: `${formData.cpf}`,
             aluno: { cursoID: Number(formData.CursoId) },
-            papeis: ['ALUNO'],
+            papeis: ['ALUNO']
           }),
         });
+        
       } catch (err) {
         console.error('Erro ao adicionar aluno:', err);
       }

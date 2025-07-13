@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { LogOut, BookOpen, Calendar, Award } from 'lucide-react';
+import {  Users,  Edit, Trash2, Plus, Clock } from "lucide-react";
 import { useEffect, useState } from 'react';
+import Turmas from './Turmas';
 
 interface ComunicadoServ {
   id: number;
@@ -10,11 +12,23 @@ interface ComunicadoServ {
   dataPublicacao: string;
 }
 
+interface Turma {
+  id: number;
+  nome: string;
+  disciplina: string;
+  professor: string;
+  alunos: number;
+  semestre: string;
+  horario: string;
+  sala: string;
+}
+
 const DashboardAluno = () => {
   const { user, logout, changePassword } = useAuth();
   const [novaSenha, setNovaSenha] = useState('');
   const [trocaSucesso, setTrocaSucesso] = useState(false);
   const [erroTrocaSenha, setErroTrocaSenha] = useState('');
+  const [senhaAtual,setSenhaAtual] = useState('')
 
   const [disciplinasAtivas, setDisciplinasAtivas] = useState(0);
   const [mediaGeral, setMediaGeral] = useState(0.0);
@@ -22,8 +36,10 @@ const DashboardAluno = () => {
   const [comunicados, setComunicados] = useState<ComunicadoServ[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorDashboard, setErrorDashboard] = useState<string | null>(null);
-
+  const [turmas, setTurmas] = useState<Turma[]>([])
   const apiUrl = import.meta.env.VITE_URL_API;
+
+  const [mostrarDisciplina, setMostrarDisciplina] = useState(false)
 
   useEffect(() => {
     if (!apiUrl) {
@@ -57,7 +73,6 @@ const DashboardAluno = () => {
           },
         });
         setComunicados(announcementsResponse.data);
-        debugger;
       } catch (err) {
         console.error('Erro ao buscar dados do dashboard:', err);
         if (axios.isAxiosError(err)) {
@@ -78,44 +93,74 @@ const DashboardAluno = () => {
 
     fetchDashboardData();
   }, [user, apiUrl]);
-
-  const handleTrocarSenha = async () => {
-    if (!novaSenha.trim()) {
-      setErroTrocaSenha('Digite uma nova senha.');
-      return;
-    }
-    if (!user?.cpf) {
-        setErroTrocaSenha('CPF do usuário não disponível.');
-        return;
-    }
-
-    try {
-      const response = await fetch(`${apiUrl}/trocar-senha`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify({
-          cpf: user.cpf,
-          novaSenha,
-        }),
+  useEffect(() => {
+  const fetchCursos = async () => {
+      try {
+      const response = await fetch(`${apiUrl}/cursos`, {
+          headers: {
+          "Content-type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+          }
       });
 
-      if (response.ok) {
-        setTrocaSucesso(true);
-        setErroTrocaSenha('');
-        localStorage.setItem('changePassword', 'false');
-        window.location.reload();
-      } else {
-        const data = await response.json();
-        setErroTrocaSenha(data?.mensagem || 'Erro ao trocar senha.');
+      if (!response.ok) {
+          throw new Error(`Erro HTTP: ${response.status}`);
       }
-    } catch (e) {
-      console.error("Erro de conexão ao trocar senha:", e);
-      setErroTrocaSenha('Erro de conexão ao servidor ao tentar trocar a senha.');
-    }
+
+      const data: Turma[] = await response.json();
+      setTurmas(data); 
+      } catch (error) {
+      console.error("Erro ao buscar os Cursos:", error);
+      }
   };
+
+  fetchCursos();
+  }, []);
+const handleTrocarSenha = async () => {
+
+
+  if (!novaSenha.trim()) {
+    setErroTrocaSenha('Digite uma nova senha.');
+    return;
+  }
+
+  if (!user?.cpf) {
+    setErroTrocaSenha('CPF do usuário não disponível.');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${apiUrl}/auth/${user.idAluno}/senha`, {
+      method: 'POST',
+      headers: {
+        "Content-type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      },
+      body: JSON.stringify({
+        senhaAtual: senhaAtual,
+        novaSenha: novaSenha,
+      }),
+    });
+
+    if (response.ok) {
+      setTrocaSucesso(true);
+      setErroTrocaSenha('');
+      localStorage.setItem('changePassword', 'false');
+      window.location.reload();
+    } else {
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
+      setErroTrocaSenha(data?.mensagem || 'Erro ao trocar senha.');
+    }
+  } catch (e) {
+    console.error("Erro de conexão ao trocar senha:", e);
+    setErroTrocaSenha('Erro de conexão ao servidor ao tentar trocar a senha.');
+  }
+};
 
   if (loading) {
     return (
@@ -164,6 +209,13 @@ const DashboardAluno = () => {
           <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-6 rounded mb-6 shadow-md">
             <h2 className="text-lg font-bold mb-2">Você precisa alterar sua senha</h2>
             <p className="mb-4">Por favor, digite uma nova senha para continuar utilizando o sistema.</p>
+             <input
+              type="password"
+              placeholder="Senha Atual"
+              className="w-full p-2 border rounded mb-2"
+              value={senhaAtual}
+              onChange={(e) => setSenhaAtual(e.target.value)}
+            />
             <input
               type="password"
               placeholder="Nova senha"
@@ -239,6 +291,74 @@ const DashboardAluno = () => {
             )}
           </div>
         </div>
+      <div className="p-6">
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center">
+            <BookOpen className="text-purple-600 mr-3" size={32} />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800">Inscrição em turmas</h1>
+              <p className="text-sm text-gray-600">Se inscrecva em alguma disciplina</p>
+            </div>
+          </div>
+          <button
+            onClick={() => (setMostrarDisciplina(!mostrarDisciplina))}
+            className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 flex items-center gap-2"
+          >
+            Entrar em disciplina
+          </button>
+        </div>
+      </div>
+      </div>
+      {mostrarDisciplina &&(
+          <div className="bg-white border-2 border-purple-300 rounded-lg p-4 mb-6 shadow-md">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">
+            {turmas.map((turma) => (
+              <div key={turma.id} className="bg-white border-2 border-purple-200 rounded-lg p-4 m-2 shadow-md hover:shadow-lg transition-shadow">
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex items-center">
+                    <BookOpen className="text-purple-500 mr-2" size={20} />
+                    <h3 className="text-lg font-bold text-gray-800">{turma.nome}</h3>
+                  </div>
+    
+                </div>
+                
+                <div className="space-y-2 text-sm">
+                  <div className="mt-2">
+                    <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-medium">
+                      {turma.disciplina}
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <Users className="text-gray-500 mr-2" size={16} />
+                    <span className="text-gray-600">{turma.alunos} alunos</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Clock className="text-gray-500 mr-2" size={16} />
+                    <span className="text-gray-600">{turma.horario}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Calendar className="text-gray-500 mr-2" size={16} />
+                    <span className="text-gray-600">Sala: {turma.sala}</span>
+                  </div>
+                  <div className="mt-2">
+                    <span className="text-gray-600 text-xs">
+                      Professor: {turma.professor}
+                    </span>
+                  </div>
+                  <div className="mt-2">
+                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
+                      {turma.semestre}
+                    </span>
+                  </div>
+                  <button>inscrever-se</button>
+                </div>
+              </div>
+            ))}
+          </h2>
+        </div>
+      )}
+
       </main>
     </div>
   );

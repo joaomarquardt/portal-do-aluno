@@ -57,7 +57,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cpf, senha })
       });
-
+      console.log(cpf)
+      
+      console.log(senha)
       const userData = await response.json();
 
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -95,7 +97,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const exit = async () =>{
+    const res = fetch(`${apiUrl}/auth/logout`,{
+      method:"POST",
+      headers:{
+        "content-type":"Application/json",
+        "Authorization":`Bearer ${localStorage.getItem("token")}`
+      },
+      body:JSON.stringify({})
+    })
+  }
+
   const logout = () => {
+
+    exit()
     setUser(null);
     setChangePassword(false);
     localStorage.removeItem('user');

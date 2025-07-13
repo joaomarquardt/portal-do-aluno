@@ -2,52 +2,55 @@
 import { useEffect, useState } from 'react';
 import { BookOpen, Users, Calendar, Edit, Trash2, Plus, Clock } from "lucide-react";
 
+
+interface Disciplina{
+	id:number,
+	codigo: string,
+	nome: string,
+	periodo: number,
+	cargaHoraria:number;
+}
 interface Turma {
   id: number;
-  nome: string;
+  horario: string;
+  vagasTotais: number;
   disciplina: string;
   professor: string;
-  alunos: number;
-  semestre: string;
+}
+
+interface TurmaServ {
+  id:number;
+  codigo: string;
   horario: string;
-  sala: string;
+  periodo: string;
+  vagasTotais: number;
+  professor: string;
+  disciplina:Disciplina;
 }
 interface Professor {
-  siape: string;
-  departamento: string | null;
-  turmas: any[];
+  id:number;
+  nome:string;
 }
+const apiUrl = import.meta.env.VITE_URL_API;
 const Turmas = () => {
-  const [turmas, setTurmas] = useState<Turma[]>([
-    {
-      id: 1,
-      nome: "Turma A - Matemática I",
-      disciplina: "Matemática I",
-      professor: "Prof. João Silva",
-      alunos: 25,
-      semestre: "2024.1",
-      horario: "08:00 - 10:00",
-      sala: "A101"
-    },
+  const [turmas, setTurmas] = useState<TurmaServ[]>([
 
   ]);
-
+  const [disciplinas,setDisciplinas] = useState<Disciplina[]>([])
   const [showForm, setShowForm] = useState(false);
   const [editingTurma, setEditingTurma] = useState<Turma | null>(null);
   const [professores, setProfessores] = useState<Professor[]>([]);
   const [formData, setFormData] = useState({
-    nome: '',
     disciplina: '',
     professor: '',
-    alunos: 0,
-    semestre: '',
+    vagasTotais: 0,
     horario: '',
-    sala: ''
+    
   });
 useEffect(() => {
   const fetchProfessores = async () => {
     try {
-      const response = await fetch("http://localhost:3000/professores", {
+      const response = await fetch(`${apiUrl}/professores/select`, {
         headers: {
           "Content-type": "application/json",
           "Authorization": `Bearer ${localStorage.getItem("token")}`
@@ -67,28 +70,101 @@ useEffect(() => {
 
   fetchProfessores();
 }, []);
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (editingTurma) {
-      setTurmas(turmas.map(turma => 
-        turma.id === editingTurma.id 
-          ? { ...turma, ...formData }
-          : turma
-      ));
-    } else {
-      const newTurma = {
-        id: Math.max(...turmas.map(t => t.id), 0) + 1,
-        ...formData
-      };
-      setTurmas([...turmas, newTurma]);
+useEffect(() => {
+  const fetchDisciplinas = async () => {
+    try {
+      const response = await fetch(`${apiUrl}/disciplinas`, {
+        headers: {
+          "Content-type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro HTTP: ${response.status}`);
+      }
+
+      const data: Disciplina[] = await response.json();
+      setDisciplinas(data); // ✅ armazena exatamente como a API envia
+    } catch (error) {
+      console.error("Erro ao buscar os Disciplinas:", error);
     }
-    
-    resetForm();
   };
 
+  fetchDisciplinas();
+}, []);
+useEffect(() => {
+  const fetchTurmas = async () => {
+    try {
+      const response = await fetch(`${apiUrl}/turmas`, {
+        headers: {
+          "Content-type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro HTTP: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const turmasTratadas = data.map((turma: any) => ({
+        ...turma,
+        professor: turma.professor?.nome || 'Desconhecido'
+      }));
+      setTurmas(turmasTratadas);
+    } catch (error) {
+      console.error("Erro ao buscar os professores:", error);
+    }
+  };
+
+  fetchTurmas();
+}, []);
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  // Encontrar os IDs com base nos nomes selecionados no formData
+  const disciplinaSelecionada = disciplinas.find(d => d.id === Number(formData.disciplina));
+  const professorSelecionado = professores.find(p => p.id === Number(formData.professor));
+  console.log(disciplinaSelecionada)
+  console.log(professores)
+  if (!disciplinaSelecionada || !professorSelecionado) {
+    alert("Disciplina ou professor inválido.");
+    return;
+  }
+
+  const dto = {
+    disciplinaID: disciplinaSelecionada.id,
+    professorID: professorSelecionado.id,
+    vagasTotais: formData.vagasTotais,
+    horario: formData.horario
+  };
+
+  try {
+    const response = await fetch(`${apiUrl}/turmas`, {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      },
+      body: JSON.stringify(dto)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Erro ao criar turma: ${response.status}`);
+    }
+
+    // Atualiza a lista de turmas após criação com sucesso
+    const novaTurma: TurmaServ = await response.json();
+    setTurmas([...turmas, novaTurma]);
+    resetForm();
+  } catch (error) {
+    console.error("Erro ao criar a turma:", error);
+  }
+};
+
   const resetForm = () => {
-    setFormData({ nome: '', disciplina: '', professor: '', alunos: 0, semestre: '', horario: '', sala: '' });
+    setFormData({ disciplina: '', professor: '', vagasTotais: 0,  horario: ''});
     setShowForm(false);
     setEditingTurma(null);
   };
@@ -96,13 +172,11 @@ useEffect(() => {
   const handleEdit = (turma: Turma) => {
     setEditingTurma(turma);
     setFormData({
-      nome: turma.nome,
       disciplina: turma.disciplina,
       professor: turma.professor,
-      alunos: turma.alunos,
-      semestre: turma.semestre,
-      horario: turma.horario,
-      sala: turma.sala
+      vagasTotais: turma.vagasTotais,
+      horario: turma.horario
+    
     });
     setShowForm(true);
   };
@@ -142,24 +216,20 @@ useEffect(() => {
           </h2>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nome da Turma</label>
-              <input
-                type="text"
-                value={formData.nome}
-                onChange={(e) => setFormData({...formData, nome: e.target.value})}
-                className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-purple-500"
-                required
-              />
-            </div>
-            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Disciplina</label>
-              <input
-                type="text"
+              <select
                 value={formData.disciplina}
-                onChange={(e) => setFormData({...formData, disciplina: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, disciplina: e.target.value })}
                 className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-purple-500"
                 required
-              />
+              >
+                <option value="">Selecione uma disciplina</option>
+                {disciplinas.map((disc) => (
+                  <option key={disc.id} value={disc.id}>
+                    {disc.nome ?? 'Sem disciplina'}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
             <div>
@@ -172,34 +242,24 @@ useEffect(() => {
               >
                 <option value="">Selecione um professor</option>
                 {professores.map((prof) => (
-                  <option key={prof.siape} value={prof.siape}>
-                    {prof.siape} — {prof.departamento ?? 'Sem departamento'}
+                  <option key={prof.id} value={prof.id}>
+                    {prof.nome ?? 'Sem professor'}
                   </option>
                 ))}
               </select>
             </div>
           </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Número de Alunos</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Vagas totais</label>
               <input
                 type="number"
-                value={formData.alunos}
-                onChange={(e) => setFormData({...formData, alunos: parseInt(e.target.value) || 0})}
+                value={formData.vagasTotais}
+                onChange={(e) => setFormData({...formData, vagasTotais: parseInt(e.target.value) || 0})}
                 className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-purple-500"
                 min="0"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Semestre</label>
-              <input
-                type="text"
-                value={formData.semestre}
-                onChange={(e) => setFormData({...formData, semestre: e.target.value})}
-                className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-purple-500"
-                placeholder="Ex: 2024.1"
-                required
-              />
-            </div>
+            
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Horário</label>
               <input
@@ -208,17 +268,6 @@ useEffect(() => {
                 onChange={(e) => setFormData({...formData, horario: e.target.value})}
                 className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-purple-500"
                 placeholder="Ex: 08:00 - 10:00"
-                required
-              />
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Sala</label>
-              <input
-                type="text"
-                value={formData.sala}
-                onChange={(e) => setFormData({...formData, sala: e.target.value})}
-                className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-purple-500"
-                placeholder="Ex: A101"
                 required
               />
             </div>
@@ -259,15 +308,9 @@ useEffect(() => {
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex items-center">
                     <BookOpen className="text-purple-500 mr-2" size={20} />
-                    <h3 className="text-lg font-bold text-gray-800">{turma.nome}</h3>
+                    <h3 className="text-lg font-bold text-gray-800">TURMA {turma.codigo} - {turma.disciplina.nome}</h3>
                   </div>
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => handleEdit(turma)}
-                      className="text-blue-500 hover:text-blue-700 p-1"
-                    >
-                      <Edit size={16} />
-                    </button>
                     <button
                       onClick={() => handleDelete(turma.id)}
                       className="text-red-500 hover:text-red-700 p-1"
@@ -280,29 +323,16 @@ useEffect(() => {
                 <div className="space-y-2 text-sm">
                   <div className="mt-2">
                     <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-medium">
-                      {turma.disciplina}
+                      {turma.disciplina.nome}
                     </span>
-                  </div>
-                  <div className="flex items-center">
-                    <Users className="text-gray-500 mr-2" size={16} />
-                    <span className="text-gray-600">{turma.alunos} alunos</span>
                   </div>
                   <div className="flex items-center">
                     <Clock className="text-gray-500 mr-2" size={16} />
                     <span className="text-gray-600">{turma.horario}</span>
                   </div>
-                  <div className="flex items-center">
-                    <Calendar className="text-gray-500 mr-2" size={16} />
-                    <span className="text-gray-600">Sala: {turma.sala}</span>
-                  </div>
                   <div className="mt-2">
                     <span className="text-gray-600 text-xs">
                       Professor: {turma.professor}
-                    </span>
-                  </div>
-                  <div className="mt-2">
-                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
-                      {turma.semestre}
                     </span>
                   </div>
                 </div>

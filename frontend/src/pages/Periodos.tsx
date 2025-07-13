@@ -9,7 +9,7 @@ interface Periodo {
   dataFim: string;
   ativo: boolean;
 }
-
+const apiUrl = import.meta.env.VITE_URL_API;
 const Periodos = () => {
   const [periodos, setPeriodos] = useState<Periodo[]>([
   ]);
@@ -39,7 +39,7 @@ const Periodos = () => {
       alert('Período atualizado localmente!');
     } else {
       // Criar novo período via POST
-      const response = await fetch("http://localhost:3000/periodo-letivo", {
+      const response = await fetch(`${apiUrl}/periodos-letivos`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -109,7 +109,7 @@ const Periodos = () => {
   useEffect(() => {
     const fetchPeriods = async () => {
       try {
-        const response = await fetch("http://localhost:3000/periodo-letivo",{
+        const response = await fetch(`${apiUrl}/periodos-letivos`,{
           headers:{
             "Content-type":"application/json",
             "Authorization":`Bearer ${localStorage.getItem("token")}` 

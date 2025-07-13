@@ -14,6 +14,7 @@ import DashboardProfessor from "./pages/DashboardProfessor";
 import DashboardAluno from "./pages/DashboardAluno";
 import NotFound from "./pages/NotFound";
 import Cursos from "./pages/Cursos";
+import Disciplinas from "./pages/Disciplina";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,11 @@ const AppContent = () => {
             <Route path="/periodos" element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
                 <Periodos />
+              </ProtectedRoute>
+            } />
+            <Route path="/disciplinas" element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <Disciplinas />
               </ProtectedRoute>
             } />
              <Route path="/cursos" element={

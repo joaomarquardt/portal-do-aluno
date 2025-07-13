@@ -29,6 +29,11 @@ const menuItems = [
     url: "/cursos",
     icon: Calendar
   },
+    {
+    title: "Disciplinas",
+    url: "/disciplinas",
+    icon: BookOpen
+  },
 ];
 
 export function AppSidebar() {
