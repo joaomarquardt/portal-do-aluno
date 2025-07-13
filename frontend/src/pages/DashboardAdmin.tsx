@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Users, MessageSquarePlus, X, ChevronLeft, ChevronRight } from 'lucide-react'; // Remove ChevronsRight se não for usar um botão só pra ele
+import { Users, MessageSquarePlus, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import AlunoCard from '../components/AlunoCard';
 import AddAlunoForm from '../components/AddAlunoForm';
 import Stats from '../components/Stats';

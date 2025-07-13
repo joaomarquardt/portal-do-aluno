@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { Users, Edit, Trash2, Plus, Clock } from "lucide-react";
-import { useEffect, useState, useCallback } from 'react'; // Adicionado useCallback para fetchTurmas
-import { LogOut, BookOpen, Calendar, Award, User as UserIcon } from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
+import { LogOut, BookOpen, Calendar, Award} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface ComunicadoServ {
@@ -29,7 +29,7 @@ interface TurmaServ {
   horario: string;
   periodo: string;
   vagasTotais: number;
-  professor: string; // Nome do professor
+  professor: string;
   disciplina: Disciplina;
 }
 
@@ -61,7 +61,6 @@ const DashboardAluno = () => {
 
   const [mostrarDisciplina, setMostrarDisciplina] = useState(false)
 
-  // Função para buscar dados do dashboard (sumário e comunicados)
   const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
@@ -110,9 +109,8 @@ const DashboardAluno = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, apiUrl]); // user e apiUrl como dependências
+  }, [user, apiUrl])
 
-  // Função para buscar turmas (separado do dashboardData)
   const fetchTurmas = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
@@ -123,24 +121,21 @@ const DashboardAluno = () => {
       });
       const turmasTratadas = res.data.map((turma: any) => ({
         ...turma,
-        professor: turma.professor?.nome || 'Desconhecido' // Garante que professor.nome exista
+        professor: turma.professor?.nome || 'Desconhecido'
       }));
       setTurmas(turmasTratadas);
     } catch (err) {
       console.error('Erro ao buscar turmas:', err);
-      // Você pode adicionar um estado de erro específico para turmas aqui se quiser
     }
-  }, [apiUrl]); // apiUrl como dependência
+  }, [apiUrl]);
 
-  // useEffect para carregar dados do dashboard na montagem
   useEffect(() => {
     fetchDashboardData();
-  }, [fetchDashboardData]); // fetchDashboardData como dependência
+  }, [fetchDashboardData]);
 
-  // useEffect para carregar turmas na montagem
   useEffect(() => {
     fetchTurmas();
-  }, [fetchTurmas]); // fetchTurmas como dependência
+  }, [fetchTurmas]);
 
 
   const handleTrocarSenha = async () => {
