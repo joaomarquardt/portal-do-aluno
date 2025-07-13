@@ -9,6 +9,7 @@ import com.portal_do_aluno.dtos.requests.UpdateProfessorRequestDTO;
 import com.portal_do_aluno.dtos.responses.DashboardProfessorResponseDTO;
 import com.portal_do_aluno.dtos.responses.ProfessorResponseDTO;
 import com.portal_do_aluno.dtos.responses.ProfessorSelectResponseDTO;
+import com.portal_do_aluno.dtos.responses.TurmaNotasResponseDTO;
 import com.portal_do_aluno.mappers.ProfessorMapper;
 import com.portal_do_aluno.repositories.MediaRepository;
 import com.portal_do_aluno.repositories.ProfessorRepository;
@@ -88,5 +89,17 @@ public class ProfessorService {
                 .average()
                 .orElse(0.0);
         return new DashboardProfessorResponseDTO(numTurmasAtivas, totalAlunosGerenciados, mediaAlunosGerenciados);
+    }
+
+    public List<TurmaNotasResponseDTO> getActiveClassesByProfessor(Long id) {
+        Professor professor = findByIdOrThrowEntity(id);
+        return professor.getTurmas().stream()
+                .filter(turma -> turma.getStatus() == TurmaStatus.ATIVA)
+                .map(turma -> {
+                        Long idTurma = turma.getId();
+                        String nomeDisciplina = turma.getDisciplina().getNome();
+                        String codigoTurma = turma.getCodigo();
+                        return new TurmaNotasResponseDTO(idTurma, nomeDisciplina, codigoTurma);
+                }).toList();
     }
 }
