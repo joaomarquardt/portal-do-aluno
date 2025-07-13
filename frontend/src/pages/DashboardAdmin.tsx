@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback } from 'react';
 import { Users, MessageSquarePlus, X, ChevronLeft, ChevronRight } from 'lucide-react'; // Remove ChevronsRight se não for usar um botão só pra ele
 import AlunoCard from '../components/AlunoCard';
 import AddAlunoForm from '../components/AddAlunoForm';
-import { AppSidebar } from "@/components/AppSidebar";
 import Stats from '../components/Stats';
 
 interface Aluno {
@@ -98,7 +97,6 @@ const Index = () => {
 
   const fetchDashboardData = useCallback(async () => {
   try {
-    debugger;
     const token = localStorage.getItem('token');
     const response = await fetch(`${apiUrl}/turmas/sumario-dashboard`, {
       headers: {

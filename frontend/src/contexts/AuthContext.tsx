@@ -12,7 +12,6 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  // A função login agora pode lançar um erro para falhas de autenticação/servidor
   login: (cpf: string, senha: string) => Promise<{ success: boolean; needsPasswordChange: boolean; message?: string }>;
   logout: () => void;
   loading: boolean;
@@ -55,23 +54,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = async (cpf: string, senha: string): Promise<{ success: boolean; needsPasswordChange: boolean; message?: string }> => {
     try {
       setLoading(true);
-      debugger;
       const response = await fetch(`${apiUrl}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cpf, senha })
       });
 
-      // --- MUDANÇA CRUCIAL AQUI ---
       const userData = await response.json(); // Sempre tente ler o JSON
 
-      if (!response.ok) { // Se a resposta não for HTTP 2xx
-        // Lança um erro com a mensagem do backend, se disponível
+      if (!response.ok) {
         const errorMessage = userData?.message || `Erro ${response.status}: Falha na autenticação.`;
         return { success: false, needsPasswordChange: false, message: errorMessage };
       }
 
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulação de delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       if (userData?.token) {
         const decoded: any = jwtDecode(userData.token);
@@ -96,13 +92,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         return { success: true, needsPasswordChange: precisaRedefinirSenha };
       } else {
-        // Caso não haja token na resposta bem-sucedida (cenário inesperado)
         return { success: false, needsPasswordChange: false, message: 'Resposta de login inválida.' };
       }
 
     } catch (error: any) {
       console.error('Erro no login:', error);
-      // Erro de rede ou erro inesperado antes da resposta HTTP
       return { success: false, needsPasswordChange: false, message: 'Erro de conexão ou inesperado. Tente novamente.' };
     } finally {
       setLoading(false);
