@@ -74,22 +74,6 @@ const DashboardLayout = ({ children, menuItems, user, logout, navigate }: {
               <h1 className="text-xl font-bold text-gray-800">{getHeaderTitle()}</h1>
               <p className="text-gray-600">Bem-vindo, {user?.nome || 'Usuário'}</p>
             </div>
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={() => navigate(`/meu-perfil/editar`)}
-                className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-              >
-                <UserIcon size={16} />
-                Meu Perfil
-              </button>
-              <button
-                onClick={logout}
-                className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-              >
-                <LogOut size={16} />
-                Sair
-              </button>
-            </div>
           </div>
         </header>
         <main className="flex-1 bg-gray-100 overflow-y-auto">
