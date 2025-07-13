@@ -17,6 +17,9 @@ import Cursos from "./pages/Cursos";
 import Disciplinas from "./pages/Disciplina";
 import NotFound from "./pages/NotFound";
 import UserProfileEditForm from "./pages/PerfilUsuarioForm";
+import MinhasDisciplinas from "./pages/MinhasDisciplinas";
+import CadastrarNotaDisc from "./pages/CadastrarNotaDisc";
+import AcompanharDesempenho from "./pages/AcompanharDesempenho";
 
 const queryClient = new QueryClient();
 
@@ -135,14 +138,14 @@ const AppContent = () => {
           <Route path="/minhas-disciplinas" element={
             <ProtectedRoute allowedRoles={['PROFESSOR']}>
               <DashboardLayout menuItems={professorMenuItems} user={user} logout={logout} navigate={navigate}>
-                <p>Página Minhas Disciplinas do Professor</p>
+                <MinhasDisciplinas/>
               </DashboardLayout>
             </ProtectedRoute>
           } />
           <Route path="/lancar-notas" element={
             <ProtectedRoute allowedRoles={['PROFESSOR']}>
               <DashboardLayout menuItems={professorMenuItems} user={user} logout={logout} navigate={navigate}>
-                <p>Página Lançar Notas do Professor</p>
+                <CadastrarNotaDisc></CadastrarNotaDisc>
               </DashboardLayout>
             </ProtectedRoute>
           } />
@@ -175,7 +178,7 @@ const AppContent = () => {
           <Route path="/minhas-turmas" element={
             <ProtectedRoute allowedRoles={['ALUNO']}>
               <DashboardLayout menuItems={alunoMenuItems} user={user} logout={logout} navigate={navigate}>
-                <p>Página Minhas Turmas do Aluno</p>
+                <AcompanharDesempenho/>
               </DashboardLayout>
             </ProtectedRoute>
           } />
