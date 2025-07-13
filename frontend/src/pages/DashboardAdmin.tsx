@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Users, MessageSquarePlus, X, ChevronLeft, ChevronRight } from 'lucide-react'; // Remove ChevronsRight se não for usar um botão só pra ele
 import AlunoCard from '../components/AlunoCard';
 import AddAlunoForm from '../components/AddAlunoForm';
+import { AppSidebar } from "@/components/AppSidebar";
 import Stats from '../components/Stats';
 
 interface Aluno {
@@ -465,7 +466,6 @@ const Index = () => {
 
         {totalPages > 1 && (
           <div className="flex justify-center items-center mt-6 space-x-2">
-            {/* Seta para a esquerda (volta uma página) */}
             <button
               onClick={goToPrevPage}
               disabled={currentPage === 0}

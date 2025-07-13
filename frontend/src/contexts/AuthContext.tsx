@@ -12,10 +12,12 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (cpf: string, senha: string) => Promise<{ success: boolean; needsPasswordChange: boolean }>;
+  // A função login agora pode lançar um erro para falhas de autenticação/servidor
+  login: (cpf: string, senha: string) => Promise<{ success: boolean; needsPasswordChange: boolean; message?: string }>;
   logout: () => void;
   loading: boolean;
   changePassword: boolean;
+  isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,6 +35,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [changePassword, setChangePassword] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const isAuthenticated = !!user;
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
@@ -49,18 +52,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setLoading(false);
   }, []);
 
-  const login = async (cpf: string, senha: string): Promise<{ success: boolean; needsPasswordChange: boolean }> => {
+  const login = async (cpf: string, senha: string): Promise<{ success: boolean; needsPasswordChange: boolean; message?: string }> => {
     try {
       setLoading(true);
+      debugger;
       const response = await fetch(`${apiUrl}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cpf, senha })
       });
 
-      const userData = await response.json();
+      // --- MUDANÇA CRUCIAL AQUI ---
+      const userData = await response.json(); // Sempre tente ler o JSON
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (!response.ok) { // Se a resposta não for HTTP 2xx
+        // Lança um erro com a mensagem do backend, se disponível
+        const errorMessage = userData?.message || `Erro ${response.status}: Falha na autenticação.`;
+        return { success: false, needsPasswordChange: false, message: errorMessage };
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulação de delay
 
       if (userData?.token) {
         const decoded: any = jwtDecode(userData.token);
@@ -84,12 +95,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         localStorage.setItem('changePassword', precisaRedefinirSenha.toString());
 
         return { success: true, needsPasswordChange: precisaRedefinirSenha };
+      } else {
+        // Caso não haja token na resposta bem-sucedida (cenário inesperado)
+        return { success: false, needsPasswordChange: false, message: 'Resposta de login inválida.' };
       }
 
-      return { success: false, needsPasswordChange: false };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro no login:', error);
-      return { success: false, needsPasswordChange: false };
+      // Erro de rede ou erro inesperado antes da resposta HTTP
+      return { success: false, needsPasswordChange: false, message: 'Erro de conexão ou inesperado. Tente novamente.' };
     } finally {
       setLoading(false);
     }
@@ -104,7 +118,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading, changePassword }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, changePassword, isAuthenticated }}>
       {children}
     </AuthContext.Provider>
   );
