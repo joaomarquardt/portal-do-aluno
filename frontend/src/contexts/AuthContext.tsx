@@ -2,18 +2,17 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 
 interface User {
-
   nome: string;
   cpf: string;
   idUsuario: number;
-  idAluno: number;
+  idAluno?: number;
   idProfessor?: number;
   role: 'ADMIN' | 'PROFESSOR' | 'ALUNO';
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (cpf: string, senha: string) => Promise<{ success: boolean; needsPasswordChange: boolean; message?: string }>;
+  login: (cpf: string, senha: string, tipoUsuario: 'PROFESSOR' | 'ALUNO') => Promise<{ success: boolean; needsPasswordChange: boolean; message?: string }>;
   logout: () => void;
   loading: boolean;
   changePassword: boolean;
@@ -52,7 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setLoading(false);
   }, []);
 
-  const login = async (cpf: string, senha: string): Promise<{ success: boolean; needsPasswordChange: boolean; message?: string }> => {
+  const login = async (cpf: string, senha: string, tipoUsuario: 'PROFESSOR' | 'ALUNO'): Promise<{ success: boolean; needsPasswordChange: boolean; message?: string }> => {
     try {
       setLoading(true);
       const response = await fetch(`${apiUrl}/auth/login`, {
@@ -61,18 +60,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         body: JSON.stringify({ cpf, senha })
       });
 
-      const userData = await response.json(); // Sempre tente ler o JSON
+      const userData = await response.json();
 
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       if (!response.ok) {
         const errorMessage = userData?.message || `Erro ${response.status}: Falha na autenticação.`;
         return { success: false, needsPasswordChange: false, message: errorMessage };
       }
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
       if (userData?.token) {
         const decoded: any = jwtDecode(userData.token);
+
         const payload: User = {
           cpf: decoded.sub,
           nome: decoded.nome,
@@ -81,6 +80,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           idProfessor: decoded.idProfessor,
           role: decoded.roles?.[0] ?? 'ALUNO'
         };
+
+        if (payload.role !== 'ADMIN' && payload.role !== tipoUsuario) {
+          return {
+            success: false,
+            needsPasswordChange: false,
+            message: `Você tentou logar como ${tipoUsuario}, mas suas credenciais são de ${payload.role}. Por favor, selecione o tipo correto.`
+          };
+        }
 
         setUser(payload);
         localStorage.setItem('user', JSON.stringify(payload));
@@ -92,10 +99,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         localStorage.setItem('changePassword', precisaRedefinirSenha.toString());
 
         return { success: true, needsPasswordChange: precisaRedefinirSenha };
-      } else {
-        return { success: false, needsPasswordChange: false, message: 'Resposta de login inválida.' };
       }
 
+      return { success: false, needsPasswordChange: false, message: 'Resposta de login inválida: Token não encontrado.' };
     } catch (error: any) {
       console.error('Erro no login:', error);
       return { success: false, needsPasswordChange: false, message: 'Erro de conexão ou inesperado. Tente novamente.' };
@@ -104,20 +110,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const exit = async () =>{
-    const res = fetch(`${apiUrl}/auth/logout`,{
-      method:"POST",
-      headers:{
-        "content-type":"Application/json",
-        "Authorization":`Bearer ${localStorage.getItem("token")}`
-      },
-      body:JSON.stringify({})
-    })
-  }
-
   const logout = () => {
-
-    exit()
     setUser(null);
     setChangePassword(false);
     localStorage.removeItem('user');

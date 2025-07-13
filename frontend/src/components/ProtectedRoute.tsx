@@ -10,7 +10,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const { user } = useAuth();
 
   if (!user) {
-    return null; // O App.tsx vai redirecionar para login
+    return null;
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
