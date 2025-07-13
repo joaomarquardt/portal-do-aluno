@@ -1,58 +1,127 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Mantenha useNavigate aqui
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Users, GraduationCap } from 'lucide-react';
+
+// Interface para os erros de validação do formulário de login
+interface LoginFormErrors {
+  cpf?: string;
+  senha?: string;
+  general?: string; // Para erros gerais como "CPF ou senha incorretos"
+}
 
 const Login = () => {
   const [cpf, setCpf] = useState('');
   const [cpfView, setCpfView] = useState("");
   const [senha, setSenha] = useState('');
-  const [tipoUsuario, setTipoUsuario] = useState<'PROFESSOR' | 'ALUNO'>('ALUNO'); // Este estado não é usado na chamada de login do AuthContext
-  const [error, setError] = useState<string | null>(null);
+  // O estado tipoUsuario não é usado na chamada de login do AuthContext,
+  // mas é mantido para a UI de seleção.
+  const [tipoUsuario, setTipoUsuario] = useState<'PROFESSOR' | 'ALUNO'>('ALUNO');
+  const [loginErrors, setLoginErrors] = useState<LoginFormErrors>({}); // NOVO: Estado para erros de validação
 
   const { login: authLogin, loading: authLoading } = useAuth();
-  const navigate = useNavigate(); // Mantenha useNavigate aqui
+  const navigate = useNavigate();
+
+  // Função para validar os campos do formulário
+  const validateForm = () => {
+    let newErrors: LoginFormErrors = {};
+    let isValid = true;
+
+    // Validação do CPF
+    if (!cpf.trim()) {
+      newErrors.cpf = 'O CPF é obrigatório.';
+      isValid = false;
+    } else if (cpf.replace(/\D/g, '').length !== 11) {
+      newErrors.cpf = 'O CPF deve conter 11 dígitos.';
+      isValid = false;
+    }
+
+    // Validação da Senha
+    if (!senha.trim()) {
+      newErrors.senha = 'A senha é obrigatória.';
+      isValid = false;
+    } else if (senha.length < 6) { // Exemplo: senha mínima de 6 caracteres
+      newErrors.senha = 'A senha deve ter pelo menos 6 caracteres.';
+      isValid = false;
+    }
+
+    setLoginErrors(newErrors);
+    return isValid;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setLoginErrors({}); // Limpa erros anteriores ao tentar submeter
 
-    if (!cpf || !senha) {
-      setError('Por favor, preencha todos os campos.');
-      return;
+    // Executa a validação local
+    if (!validateForm()) {
+      return; // Se a validação falhar, impede o envio
     }
 
     try {
-      // A função login agora retorna um objeto com 'success' e 'message' (se houver)
       const result = await authLogin(cpf, senha);
 
       if (result.success) {
-        // Redireciona para a rota raiz.
-        // O RoleBasedRedirect em App.tsx vai interceptar e redirecionar para o dashboard correto.
-        navigate('/');
+        navigate('/'); // Redireciona para a rota raiz.
       } else {
         // Exibe a mensagem de erro que veio do AuthContext ou uma padrão
-        setError(result.message || 'CPF ou senha incorretos.');
+        setLoginErrors(prev => ({ ...prev, general: result.message || 'CPF ou senha incorretos.' }));
       }
     } catch (err) {
-      // Este catch é para erros inesperados que o AuthContext não tratou e lançou.
-      // Com as mudanças no AuthContext, este catch deve ser menos acionado.
       console.error("Erro inesperado durante o login:", err);
-      setError("Ocorreu um erro inesperado. Tente novamente mais tarde.");
+      setLoginErrors(prev => ({ ...prev, general: "Ocorreu um erro inesperado. Tente novamente mais tarde." }));
     }
   };
 
   const formatCPF = (value: string) => {
     const numbers = value.replace(/\D/g, '');
-    return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    // Aplica a máscara apenas se houver dígitos suficientes
+    if (numbers.length > 9) {
+      return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    } else if (numbers.length > 6) {
+      return numbers.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+    } else if (numbers.length > 3) {
+      return numbers.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+    }
+    return numbers;
   };
 
   const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    const numbers = value.replace(/\D/g, '');
+    const numbers = value.replace(/\D/g, ''); // Remove tudo que não é dígito
+
     if (numbers.length <= 11) {
-      setCpfView(formatCPF(numbers));
-      setCpf(numbers);
+      setCpf(numbers); // Armazena apenas os números no estado 'cpf'
+      setCpfView(formatCPF(numbers)); // Armazena a versão formatada para exibição
+
+      // Limpa o erro do CPF ao começar a digitar
+      if (loginErrors.cpf) {
+        setLoginErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors.cpf;
+          return newErrors;
+        });
+      }
+      // Limpa erro geral ao digitar
+      if (loginErrors.general) {
+        setLoginErrors(prev => ({ ...prev, general: undefined }));
+      }
+    }
+  };
+
+  const handleSenhaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSenha(e.target.value);
+    // Limpa o erro da senha ao começar a digitar
+    if (loginErrors.senha) {
+      setLoginErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.senha;
+        return newErrors;
+      });
+    }
+    // Limpa erro geral ao digitar
+    if (loginErrors.general) {
+      setLoginErrors(prev => ({ ...prev, general: undefined }));
     }
   };
 
@@ -67,31 +136,33 @@ const Login = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              CPF
+              CPF *
             </label>
             <input
               type="text"
               value={cpfView}
               onChange={handleCPFChange}
-              className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-blue-500"
+              className={`w-full px-3 py-2 border-2 rounded focus:border-blue-500 ${loginErrors.cpf ? 'border-red-500' : 'border-gray-300'}`}
               placeholder="000.000.000-00"
               maxLength={14}
               required
             />
+            {loginErrors.cpf && <p className="text-red-500 text-xs mt-1">{loginErrors.cpf}</p>}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Senha
+              Senha *
             </label>
             <input
               type="password"
               value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-blue-500"
+              onChange={handleSenhaChange} // Usando o novo handler
+              className={`w-full px-3 py-2 border-2 rounded focus:border-blue-500 ${loginErrors.senha ? 'border-red-500' : 'border-gray-300'}`}
               placeholder="Digite sua senha"
               required
             />
+            {loginErrors.senha && <p className="text-red-500 text-xs mt-1">{loginErrors.senha}</p>}
           </div>
 
           <div>
@@ -126,9 +197,9 @@ const Login = () => {
             </div>
           </div>
 
-          {error && (
+          {loginErrors.general && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded">
-              {error}
+              {loginErrors.general}
             </div>
           )}
 

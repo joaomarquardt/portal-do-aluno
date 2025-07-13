@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Calendar, Plus, Edit, Trash2 } from "lucide-react";
 
@@ -9,14 +8,20 @@ interface Periodo {
   dataFim: string;
   ativo: boolean;
 }
-const apiUrl = import.meta.env.VITE_URL_API;
-const Periodos = () => {
-  const [periodos, setPeriodos] = useState<Periodo[]>([
-  ]);
 
+// Interface para os erros de validação do formulário
+interface PeriodoFormErrors {
+  nome?: string;
+  dataInicio?: string;
+  dataFim?: string;
+  submit?: string; // Para erros gerais de submissão/API
+}
+
+const apiUrl = import.meta.env.VITE_URL_API;
+
+const Periodos = () => {
+  const [periodos, setPeriodos] = useState<Periodo[]>([]);
   const [editingPeriodo, setEditingPeriodo] = useState<Periodo | null>(null);
-  const [year, setYear] = useState<Number>(2025)
-  const [period,setPeriod] = useState<Number>(1)
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     nome: '',
@@ -24,53 +29,138 @@ const Periodos = () => {
     dataFim: '',
     ativo: false
   });
+  const [formErrors, setFormErrors] = useState<PeriodoFormErrors>({}); // NOVO: Estado para erros de validação
 
- const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  // Função para validar o nome do período (AAAA.S) e extrair ano/semestre
+  const parsePeriodoName = (name: string) => {
+    const regex = /^(\d{4})\.(1|2)$/;
+    const match = name.match(regex);
+    if (match) {
+      return { year: Number(match[1]), semester: Number(match[2]) };
+    }
+    return null;
+  };
 
-  try {
-    if (editingPeriodo) {
-      // Atualização futura: PUT para editar
-      const updatedPeriodo = { ...editingPeriodo, ...formData };
-      setPeriodos(prev =>
-        prev.map(p => (p.id === editingPeriodo.id ? updatedPeriodo : p))
-      );
-      setEditingPeriodo(null);
-      alert('Período atualizado localmente!');
+  // Função de validação do formulário
+  const validateForm = () => {
+    let newErrors: PeriodoFormErrors = {};
+    let isValid = true;
+
+    // Validação do Nome do Período
+    if (!formData.nome.trim()) {
+      newErrors.nome = 'O nome do período é obrigatório.';
+      isValid = false;
     } else {
-      // Criar novo período via POST
-      const response = await fetch(`${apiUrl}/periodos-letivos`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          ano: year,
-          semestre: period,
-          ativo: formData.ativo,
-          dataInicio: formData.dataInicio,
-          dataFim: formData.dataFim
-        })
+      const parsed = parsePeriodoName(formData.nome);
+      if (!parsed) {
+        newErrors.nome = 'Formato inválido. Use AAAA.S (ex: 2024.1).';
+        isValid = false;
+      }
+    }
+
+    // Validação da Data de Início
+    if (!formData.dataInicio) {
+      newErrors.dataInicio = 'A data de início é obrigatória.';
+      isValid = false;
+    }
+
+    // Validação da Data de Fim
+    if (!formData.dataFim) {
+      newErrors.dataFim = 'A data de fim é obrigatória.';
+      isValid = false;
+    } else if (formData.dataInicio && new Date(formData.dataFim) <= new Date(formData.dataInicio)) {
+      newErrors.dataFim = 'A data de fim deve ser posterior à data de início.';
+      isValid = false;
+    }
+
+    setFormErrors(newErrors);
+    return isValid;
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+
+    // Limpa o erro do campo assim que o usuário começa a digitar/interagir
+    if (formErrors[name as keyof PeriodoFormErrors]) {
+      setFormErrors(prev => {
+        const updatedErrors = { ...prev };
+        delete updatedErrors[name as keyof PeriodoFormErrors];
+        return updatedErrors;
       });
+    }
+    setFormErrors(prev => ({ ...prev, submit: undefined })); // Limpa erro de submit ao interagir
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormErrors({}); // Limpa erros anteriores ao tentar submeter
+
+    if (!validateForm()) {
+      return; // Impede o envio se a validação falhar
+    }
+
+    const parsedName = parsePeriodoName(formData.nome);
+    if (!parsedName) { // Esta verificação já foi feita em validateForm, mas é um fallback
+      setFormErrors(prev => ({ ...prev, nome: 'Formato inválido. Use AAAA.S (ex: 2024.1).' }));
+      return;
+    }
+
+    const payload = {
+      ano: parsedName.year,
+      semestre: parsedName.semester,
+      ativo: formData.ativo,
+      dataInicio: formData.dataInicio,
+      dataFim: formData.dataFim
+    };
+
+    try {
+      let response;
+      if (editingPeriodo) {
+        // Lógica de EDIÇÃO (PUT)
+        response = await fetch(`${apiUrl}/periodos-letivos/${editingPeriodo.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        // Lógica de CRIAÇÃO (POST)
+        response = await fetch(`${apiUrl}/periodos-letivos`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify(payload)
+        });
+      }
 
       if (!response.ok) {
-        throw new Error(`Erro ao criar período: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Erro: ${response.status}`);
       }
 
       const savedPeriodo: Periodo = await response.json();
-      setPeriodos(prev => [...prev, savedPeriodo]);
-
-      alert('Período criado com sucesso!');
+      if (editingPeriodo) {
+        setPeriodos(prev => prev.map(p => (p.id === savedPeriodo.id ? savedPeriodo : p)));
+        alert('Período atualizado com sucesso!');
+      } else {
+        setPeriodos(prev => [...prev, savedPeriodo]);
+        alert('Período criado com sucesso!');
+      }
+    } catch (error: any) {
+      console.error("Erro no envio do período:", error);
+      setFormErrors(prev => ({ ...prev, submit: error.message || "Erro ao salvar o período. Tente novamente." }));
     }
-  } catch (error) {
-    console.error("Erro no envio do período:", error);
-    alert("Erro ao salvar o período.");
-  }
 
-  setFormData({ nome: '', dataInicio: '', dataFim: '', ativo: false });
-  setShowForm(false);
-};
+    resetForm();
+  };
 
   const handleEdit = (periodo: Periodo) => {
     setEditingPeriodo(periodo);
@@ -81,42 +171,52 @@ const Periodos = () => {
       ativo: periodo.ativo
     });
     setShowForm(true);
+    setFormErrors({}); // Limpa erros ao abrir para edição
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (window.confirm('Tem certeza que deseja excluir este período?')) {
-      setPeriodos(periodos.filter(p => p.id !== id));
-      alert('Período excluído com sucesso!');
+      try {
+        const response = await fetch(`${apiUrl}/periodos-letivos/${id}`, {
+          method: "DELETE",
+          headers: {
+            "Authorization": `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `Erro ao excluir período: ${response.status}`);
+        }
+
+        setPeriodos(prev => prev.filter(p => p.id !== id));
+        alert('Período excluído com sucesso!');
+      } catch (error: any) {
+        console.error("Erro ao excluir período:", error);
+        alert(error.message || "Erro ao excluir período. Tente novamente.");
+      }
     }
   };
-  const validateName = (name:string) =>{
-      const regex = /^\d{4}\.(1|2)$/;
-      const test =  regex.test(name);
-      if (test){
-        setYear(Number.parseInt(name.substring(0,3)))
-        setPeriod(Number.parseInt(name[5]))
-      }
-  }
-  const cancelForm = () => {
+
+  const resetForm = () => {
+    setFormData({ nome: '', dataInicio: '', dataFim: '', ativo: false });
     setShowForm(false);
     setEditingPeriodo(null);
-    setFormData({ nome: '', dataInicio: '', dataFim: '', ativo: false });
+    setFormErrors({}); // Limpa todos os erros ao resetar o formulário
   };
-
-
 
   useEffect(() => {
     const fetchPeriods = async () => {
       try {
-        const response = await fetch(`${apiUrl}/periodos-letivos`,{
-          headers:{
-            "Content-type":"application/json",
-            "Authorization":`Bearer ${localStorage.getItem("token")}` 
+        const response = await fetch(`${apiUrl}/periodos-letivos`, {
+          headers: {
+            "Content-type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("token")}`
           }
         });
-        const data:Periodo[] = await response.json();
-        setPeriodos(data)
+        const data: Periodo[] = await response.json();
+        setPeriodos(data);
       } catch (error) {
         console.error("Erro ao buscar os períodos:", error);
       }
@@ -134,7 +234,7 @@ const Periodos = () => {
             Gestão de Períodos Letivos
           </h1>
           <button
-            onClick={() => setShowForm(!showForm)}
+            onClick={() => { setShowForm(!showForm); setEditingPeriodo(null); setFormErrors({}); }}
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex items-center gap-2"
           >
             <Plus size={16} />
@@ -156,56 +256,62 @@ const Periodos = () => {
                   </label>
                   <input
                     type="text"
-                    value={year +'.'+ period}
-                    onChange={(e) => {
-                      validateName(e.target.value)
-                      setFormData({...formData, nome:e.target.value })
-                    }}
-                    className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-blue-500"
+                    name="nome"
+                    value={formData.nome}
+                    onChange={handleChange}
+                    className={`w-full px-3 py-2 border-2 rounded focus:border-blue-500 ${formErrors.nome ? 'border-red-500' : 'border-gray-300'}`}
                     placeholder="Ex: 2024.1"
                     required
                   />
+                  {formErrors.nome && <p className="text-red-500 text-xs mt-1">{formErrors.nome}</p>}
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Data de Início *
                   </label>
                   <input
                     type="date"
+                    name="dataInicio"
                     value={formData.dataInicio}
-                    onChange={(e) => setFormData({...formData, dataInicio: e.target.value})}
-                    className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-blue-500"
+                    onChange={handleChange}
+                    className={`w-full px-3 py-2 border-2 rounded focus:border-blue-500 ${formErrors.dataInicio ? 'border-red-500' : 'border-gray-300'}`}
                     required
                   />
+                  {formErrors.dataInicio && <p className="text-red-500 text-xs mt-1">{formErrors.dataInicio}</p>}
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Data de Fim *
                   </label>
                   <input
                     type="date"
+                    name="dataFim"
                     value={formData.dataFim}
-                    onChange={(e) => setFormData({...formData, dataFim: e.target.value})}
-                    className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-blue-500"
+                    onChange={handleChange}
+                    className={`w-full px-3 py-2 border-2 rounded focus:border-blue-500 ${formErrors.dataFim ? 'border-red-500' : 'border-gray-300'}`}
                     required
                   />
+                  {formErrors.dataFim && <p className="text-red-500 text-xs mt-1">{formErrors.dataFim}</p>}
                 </div>
-                
+
                 <div className="flex items-center">
                   <label className="flex items-center gap-2">
                     <input
                       type="checkbox"
+                      name="ativo"
                       checked={formData.ativo}
-                      onChange={(e) => setFormData({...formData, ativo: e.target.checked})}
+                      onChange={handleChange}
                       className="w-4 h-4"
                     />
                     <span className="text-sm font-medium text-gray-700">Período Ativo</span>
                   </label>
                 </div>
               </div>
-              
+
+              {formErrors.submit && <p className="text-red-500 text-sm mb-3">{formErrors.submit}</p>}
+
               <div className="flex gap-2">
                 <button
                   type="submit"
@@ -215,7 +321,7 @@ const Periodos = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={cancelForm}
+                  onClick={resetForm}
                   className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
                 >
                   Cancelar

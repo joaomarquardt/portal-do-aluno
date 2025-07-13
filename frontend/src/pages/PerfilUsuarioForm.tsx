@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Save, Calendar, UserCheck } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
+// Interface que define a estrutura dos dados do perfil do usuário
 interface UserProfileData {
   id: number;
   cpf: string;
@@ -16,79 +17,180 @@ interface UserProfileData {
   periodoIngresso: string;
 }
 
+// Interface para os erros de validação do formulário
+interface ProfileFormErrors {
+  emailPessoal?: string;
+  telefone?: string;
+  submit?: string; // Para erros gerais de submissão/API
+}
+
 const UserProfileEditForm = () => {
+  // Obtenção de dados do usuário e funções de autenticação/navegação
   const { user } = useAuth();
   const navigate = useNavigate();
+  // idAluno pode ser undefined se o usuário não estiver autenticado ou os dados não carregarem
   const idAluno = user?.idAluno;
 
+  // Estados para gerenciar o formulário, carregamento, salvamento e mensagens
   const [formData, setFormData] = useState<UserProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<ProfileFormErrors>({}); // NOVO: Estado para erros de validação
+  const [generalError, setGeneralError] = useState<string | null>(null); // Erro geral de carregamento/API
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  // URL da API obtida das variáveis de ambiente do Vite
   const apiUrl = import.meta.env.VITE_URL_API;
+
+  // Função para formatar o telefone (00) 00000-0000
+  const formatTelefone = (value: string) => {
+    value = value.replace(/\D/g, ''); // Remove tudo que não é dígito
+    if (value.length > 11) value = value.slice(0, 11); // Limita a 11 dígitos
+    return value.replace(/^(\d{2})(\d)/g, '($1) $2') // Adiciona parênteses ao DDD
+      .replace(/(\d{5})(\d)/, '$1-$2'); // Adiciona o hífen
+  };
+
+  // Função de validação do formulário
+  const validateForm = () => {
+    let newErrors: ProfileFormErrors = {};
+    let isValid = true;
+
+    if (!formData) return false; // Não valida se formData é nulo
+
+    // Validação de Email Pessoal
+    if (!formData.emailPessoal.trim()) {
+      newErrors.emailPessoal = 'O email pessoal é obrigatório.';
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(formData.emailPessoal)) {
+      newErrors.emailPessoal = 'Formato de email pessoal inválido.';
+      isValid = false;
+    }
+
+    // Validação de Telefone
+    const cleanedTelefone = formData.telefone.replace(/\D/g, '');
+    if (!cleanedTelefone.trim()) {
+      newErrors.telefone = 'O telefone é obrigatório.';
+      isValid = false;
+    } else if (cleanedTelefone.length !== 11) {
+      newErrors.telefone = 'O telefone deve conter 11 dígitos (incluindo DDD).';
+      isValid = false;
+    }
+
+    setFormErrors(newErrors);
+    return isValid;
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
       setLoading(true);
-      setError(null);
+      setGeneralError(null); // Limpa erros anteriores
       try {
         const token = localStorage.getItem('token');
         if (!token) {
-          throw new Error('Token de autenticação não encontrado.');
+          throw new Error('Token de autenticação não encontrado. Por favor, faça login novamente.');
         }
-        const targetId = user?.idAluno;
+        // Garante que idAluno existe antes de fazer a requisição
+        if (!idAluno) {
+          throw new Error('ID do aluno não disponível para buscar o perfil.');
+        }
 
-        const response = await axios.get<UserProfileData>(`${apiUrl}/alunos/${targetId}`, {
+        const response = await axios.get<UserProfileData>(`${apiUrl}/alunos/${idAluno}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
         });
 
-        setFormData(response.data);
-      } catch (err) {
+        // Formata o telefone ao carregar os dados
+        setFormData({
+          ...response.data,
+          telefone: formatTelefone(response.data.telefone)
+        });
+      } catch (err: unknown) { // Captura o erro como 'unknown' para segurança de tipo
         console.error('Erro ao buscar dados do perfil:', err);
-        if (axios.isAxiosError(err)) {
-          setError(err.response?.data?.message || 'Erro ao carregar perfil.');
-        } else {
-          setError('Ocorreu um erro inesperado ao carregar seu perfil.');
+        // Verifica se o erro é uma instância de AxiosError de forma robusta
+        if (
+          typeof err === 'object' &&
+          err !== null &&
+          'isAxiosError' in err &&
+          (err as { isAxiosError: boolean }).isAxiosError // Asserção para 'isAxiosError'
+        ) {
+          // Se for um AxiosError, tenta acessar a mensagem de erro da resposta da API
+          const axiosError = err as { response?: { data?: { message?: string } } };
+          setGeneralError(axiosError.response?.data?.message || 'Erro ao carregar perfil. Tente novamente.');
+        } else if (err instanceof Error) { // Para outros erros JS padrão
+          setGeneralError(err.message || 'Ocorreu um erro inesperado ao carregar seu perfil.');
+        } else { // Para qualquer outro tipo de erro
+          setGeneralError('Ocorreu um erro desconhecido ao carregar seu perfil.');
         }
       } finally {
-        setLoading(false);
+        setLoading(false); // Finaliza o estado de carregamento
       }
     };
 
-    if (user) {
+    // Só busca o perfil se o usuário e a URL da API estiverem disponíveis
+    if (user && apiUrl) {
       fetchProfile();
     } else {
       setLoading(false);
-      setError("Usuário não autenticado.");
+      setGeneralError("Usuário não autenticado ou URL da API não configurada.");
     }
-  }, [idAluno, user, apiUrl]);
+  }, [idAluno, user, apiUrl]); // Dependências do useEffect
 
+  // Handler para atualizar os dados do formulário conforme o usuário digita
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => (prev ? { ...prev, [name]: value } : null));
+    let newValue = value;
+
+    // Aplica a formatação para o telefone
+    if (name === 'telefone') {
+      newValue = formatTelefone(value);
+    }
+
+    setFormData(prev => (prev ? { ...prev, [name]: newValue } : null));
+
+    // Limpa o erro do campo assim que o usuário começa a digitar
+    if (formErrors[name as keyof ProfileFormErrors]) {
+      setFormErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name as keyof ProfileFormErrors];
+        return newErrors;
+      });
+    }
+    setGeneralError(null); // Limpa erro geral ao digitar
+    setSuccessMessage(null); // Limpa mensagem de sucesso ao digitar
   };
 
+  // Handler para submeter o formulário de atualização de perfil
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData) return;
+    e.preventDefault(); // Previne o comportamento padrão de recarregar a página
+    if (!formData) return; // Não faz nada se os dados do formulário estiverem vazios
 
-    setSaving(true);
-    setError(null);
+    setSaving(true); // Ativa o estado de salvamento
+    setFormErrors({}); // Limpa erros de validação anteriores
+    setGeneralError(null); // Limpa erro geral de API
     setSuccessMessage(null);
+
+    // Executa a validação local
+    if (!validateForm()) {
+      setSaving(false);
+      return; // Impede o envio se a validação falhar
+    }
 
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        throw new Error('Token de autenticação não encontrado.');
+        throw new Error('Token de autenticação não encontrado. Por favor, faça login novamente.');
       }
 
       const targetId = user?.idAluno;
 
-      await axios.put(`${apiUrl}/alunos/${targetId}`, formData, {
+      // Cria um payload com os dados formatados para envio à API
+      const payload = {
+        ...formData,
+        telefone: formData.telefone.replace(/\D/g, ''), // Remove formatação para enviar apenas números
+      };
+
+      await axios.put(`${apiUrl}/alunos/${targetId}`, payload, { // Usa o payload formatado
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
@@ -97,18 +199,28 @@ const UserProfileEditForm = () => {
       setSuccessMessage('Perfil atualizado com sucesso!');
       setTimeout(() => navigate('/dashboard/aluno'), 2000);
 
-    } catch (err) {
+    } catch (err: unknown) { // Captura o erro como 'unknown' para segurança de tipo
       console.error('Erro ao atualizar perfil:', err);
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || 'Erro ao atualizar perfil.');
-      } else {
-        setError('Ocorreu um erro inesperado ao atualizar seu perfil.');
+      if (
+        typeof err === 'object' &&
+        err !== null &&
+        'isAxiosError' in err &&
+        (err as { isAxiosError: boolean }).isAxiosError
+      ) {
+        // Se for um AxiosError, tenta acessar a mensagem de erro da resposta da API
+        const axiosError = err as { response?: { data?: { message?: string } } };
+        setFormErrors(prev => ({ ...prev, submit: axiosError.response?.data?.message || 'Erro ao atualizar perfil.' }));
+      } else if (err instanceof Error) { // Para outros erros JS padrão
+        setFormErrors(prev => ({ ...prev, submit: err.message || 'Ocorreu um erro inesperado ao atualizar seu perfil.' }));
+      } else { // Para qualquer outro tipo de erro
+        setFormErrors(prev => ({ ...prev, submit: 'Ocorreu um erro desconhecido ao atualizar seu perfil.' }));
       }
     } finally {
-      setSaving(false);
+      setSaving(false); // Finaliza o estado de salvamento
     }
   };
 
+  // Renderização condicional baseada nos estados de carregamento e erro
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -117,11 +229,11 @@ const UserProfileEditForm = () => {
     );
   }
 
-  if (error) {
+  if (generalError) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-red-100 text-red-700 p-4">
         <p className="text-lg font-semibold mb-4">Erro:</p>
-        <p className="mb-4">{error}</p>
+        <p className="mb-4">{generalError}</p>
         <button
           onClick={() => navigate('/dashboard/aluno')}
           className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 flex items-center gap-2"
@@ -134,12 +246,13 @@ const UserProfileEditForm = () => {
 
   if (!formData) {
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-            <p className="text-gray-700 text-lg">Perfil não encontrado.</p>
-        </div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <p className="text-gray-700 text-lg">Perfil não encontrado ou dados inválidos.</p>
+      </div>
     );
   }
 
+  // Componente principal: formulário de edição de perfil
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="bg-white rounded-lg shadow-md p-6 max-w-2xl mx-auto">
@@ -153,6 +266,7 @@ const UserProfileEditForm = () => {
           </button>
         </div>
 
+        {/* Seção de Informações da Matrícula */}
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
             <div className="flex items-center gap-2 text-gray-700 mb-3">
                 <UserCheck size={20} className="text-blue-600" />
@@ -180,6 +294,7 @@ const UserProfileEditForm = () => {
             </div>
         </div>
 
+        {/* Formulário Principal de Edição */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="nome" className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
@@ -206,7 +321,7 @@ const UserProfileEditForm = () => {
             />
           </div>
           <div>
-            <label htmlFor="matricula" className="block text-sm font-medium text-gray-700 mb-1">Matricula</label>
+            <label htmlFor="matricula" className="block text-sm font-medium text-gray-700 mb-1">Matrícula</label>
             <input
               type="text"
               id="matricula"
@@ -218,16 +333,17 @@ const UserProfileEditForm = () => {
             />
           </div>
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email Pessoal</label>
+            <label htmlFor="emailPessoal" className="block text-sm font-medium text-gray-700 mb-1">Email Pessoal *</label>
             <input
               type="email"
-              id="email"
-              name="email"
+              id="emailPessoal"
+              name="emailPessoal"
               value={formData.emailPessoal}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${formErrors.emailPessoal ? 'border-red-500' : 'border-gray-300'}`}
               required
             />
+            {formErrors.emailPessoal && <p className="text-red-500 text-xs mt-1">{formErrors.emailPessoal}</p>}
           </div>
           <div>
             <label htmlFor="emailInstitucional" className="block text-sm font-medium text-gray-700 mb-1">Email Institucional</label>
@@ -242,18 +358,21 @@ const UserProfileEditForm = () => {
             />
           </div>
           <div>
-            <label htmlFor="telefone" className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+            <label htmlFor="telefone" className="block text-sm font-medium text-gray-700 mb-1">Telefone *</label>
             <input
               type="tel"
               id="telefone"
               name="telefone"
               value={formData.telefone}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${formErrors.telefone ? 'border-red-500' : 'border-gray-300'}`}
+              placeholder="(00) 00000-0000"
+              maxLength={15} // (00) 00000-0000 tem 15 caracteres
               required
             />
+            {formErrors.telefone && <p className="text-red-500 text-xs mt-1">{formErrors.telefone}</p>}
           </div>
-          {error && <p className="text-red-600 text-sm">{error}</p>}
+          {formErrors.submit && <p className="text-red-600 text-sm">{formErrors.submit}</p>}
           {successMessage && <p className="text-green-600 text-sm">{successMessage}</p>}
 
           <button

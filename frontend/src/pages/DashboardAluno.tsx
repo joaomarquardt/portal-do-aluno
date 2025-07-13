@@ -1,10 +1,11 @@
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
   LogOut, BookOpen, Calendar, Award, User as UserIcon, Clock
 } from 'lucide-react';
+
 
 interface ComunicadoServ {
   id: number;
@@ -31,33 +32,69 @@ interface TurmaServ {
   disciplina: Disciplina;
 }
 
+interface SumarioDashboard {
+  numDisciplinasAtivas: number;
+  mediaGeral: number;
+  presencaPorcentagem: string;
+}
+
+// NOVO: Adicionado tipo para os erros do formulário de troca de senha
+interface TrocaSenhaErrors {
+  senhaAtual?: string;
+  novaSenha?: string;
+  submit?: string;
+}
+
 const TrocaSenhaCard = ({
   senhaAtual,
   novaSenha,
   setSenhaAtual,
   setNovaSenha,
-  erroTrocaSenha,
+  erroTrocaSenha, // Este erro é um erro geral, mantido para compatibilidade
   trocaSucesso,
-  handleTrocarSenha
-}: any) => (
+  handleTrocarSenha,
+  errors, // NOVO: Prop para passar os erros de validação granular
+  handleInputChange // NOVO: Prop para lidar com a mudança nos inputs
+}: {
+  senhaAtual: string;
+  novaSenha: string;
+  setSenhaAtual: (value: string) => void;
+  setNovaSenha: (value: string) => void;
+  erroTrocaSenha: string; // Erro geral de submit, pode ser usado para API
+  trocaSucesso: boolean;
+  handleTrocarSenha: () => void;
+  errors: TrocaSenhaErrors; // Tipagem para os erros
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void; // Tipagem para o handler
+}) => (
   <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-6 rounded mb-6 shadow-md">
     <h2 className="text-lg font-bold mb-2">Você precisa alterar sua senha</h2>
     <p className="mb-4">Por favor, digite uma nova senha para continuar utilizando o sistema.</p>
-    <input
-      type="password"
-      placeholder="Senha Atual"
-      className="w-full p-2 border rounded mb-2"
-      value={senhaAtual}
-      onChange={(e) => setSenhaAtual(e.target.value)}
-    />
-    <input
-      type="password"
-      placeholder="Nova senha"
-      className="w-full p-2 border rounded mb-2"
-      value={novaSenha}
-      onChange={(e) => setNovaSenha(e.target.value)}
-    />
-    {erroTrocaSenha && <p className="text-red-600 text-sm mb-2">{erroTrocaSenha}</p>}
+    <div>
+      <input
+        type="password"
+        name="senhaAtual" // Adicionado name para o handleInputChange
+        placeholder="Senha Atual *"
+        className={`w-full p-2 border rounded mb-1 ${errors.senhaAtual ? 'border-red-500' : 'border-gray-300'}`}
+        value={senhaAtual}
+        onChange={handleInputChange}
+        required
+      />
+      {errors.senhaAtual && <p className="text-red-600 text-xs mb-2">{errors.senhaAtual}</p>}
+    </div>
+    <div>
+      <input
+        type="password"
+        name="novaSenha" // Adicionado name
+        placeholder="Nova senha *"
+        className={`w-full p-2 border rounded mb-1 ${errors.novaSenha ? 'border-red-500' : 'border-gray-300'}`}
+        value={novaSenha}
+        onChange={handleInputChange}
+        required
+      />
+      {errors.novaSenha && <p className="text-red-600 text-xs mb-2">{errors.novaSenha}</p>}
+    </div>
+    {/* erroTrocaSenha é para erros de API, errors.submit é para erros de validação local ou API mais geral */}
+    {(erroTrocaSenha || errors.submit) && <p className="text-red-600 text-sm mb-2">{erroTrocaSenha || errors.submit}</p>}
     {trocaSucesso && <p className="text-green-600 text-sm mb-2">Senha alterada com sucesso!</p>}
     <button
       onClick={handleTrocarSenha}
@@ -76,8 +113,9 @@ const DashboardAluno = () => {
 
   const [senhaAtual, setSenhaAtual] = useState('');
   const [novaSenha, setNovaSenha] = useState('');
-  const [erroTrocaSenha, setErroTrocaSenha] = useState('');
+  const [erroTrocaSenha, setErroTrocaSenha] = useState(''); // Erro de API para troca de senha
   const [trocaSucesso, setTrocaSucesso] = useState(false);
+  const [trocaSenhaErrors, setTrocaSenhaErrors] = useState<TrocaSenhaErrors>({}); // NOVO: Erros de validação local para a troca de senha
 
   const [disciplinasAtivas, setDisciplinasAtivas] = useState(0);
   const [mediaGeral, setMediaGeral] = useState(0.0);
@@ -89,17 +127,60 @@ const DashboardAluno = () => {
   const [errorDashboard, setErrorDashboard] = useState<string | null>(null);
   const [mostrarDisciplina, setMostrarDisciplina] = useState(false);
 
+  // NOVO: Função de validação para o formulário de troca de senha
+  const validateTrocaSenhaForm = useCallback(() => {
+    let newErrors: TrocaSenhaErrors = {};
+    let isValid = true;
+
+    if (!senhaAtual.trim()) {
+      newErrors.senhaAtual = 'A senha atual é obrigatória.';
+      isValid = false;
+    }
+    if (!novaSenha.trim()) {
+      newErrors.novaSenha = 'A nova senha é obrigatória.';
+      isValid = false;
+    } else if (novaSenha.length < 6) { // Exemplo de comprimento mínimo
+      newErrors.novaSenha = 'A nova senha deve ter pelo menos 6 caracteres.';
+      isValid = false;
+    }
+
+    setTrocaSenhaErrors(newErrors);
+    return isValid;
+  }, [senhaAtual, novaSenha]);
+
+  // NOVO: Handler genérico para os inputs do TrocaSenhaCard
+  const handleTrocaSenhaInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    if (name === 'senhaAtual') {
+      setSenhaAtual(value);
+    } else if (name === 'novaSenha') {
+      setNovaSenha(value);
+    }
+
+    // Limpa o erro do campo assim que o usuário começa a digitar
+    if (trocaSenhaErrors[name as keyof TrocaSenhaErrors]) {
+      setTrocaSenhaErrors(prev => {
+        const updatedErrors = { ...prev };
+        delete updatedErrors[name as keyof TrocaSenhaErrors];
+        return updatedErrors;
+      });
+    }
+    setErroTrocaSenha(''); // Limpa o erro geral de API ao digitar
+    setTrocaSucesso(false); // Limpa o sucesso ao digitar
+  }, [trocaSenhaErrors]);
+
+
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const { data } = await axios.get(`${apiUrl}/alunos/${user?.idAluno}/sumario-dashboard`, {
+        const { data } = await axios.get<SumarioDashboard>(`${apiUrl}/alunos/${user?.idAluno}/sumario-dashboard`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setDisciplinasAtivas(data.numDisciplinasAtivas);
         setMediaGeral(data.mediaGeral);
         setPresencaPorcentagem(data.presencaPorcentagem);
 
-        const comunicadosRes = await axios.get(`${apiUrl}/comunicados`, {
+        const comunicadosRes = await axios.get<ComunicadoServ[]>(`${apiUrl}/comunicados`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setComunicados(comunicadosRes.data);
@@ -111,41 +192,44 @@ const DashboardAluno = () => {
       }
     };
 
+    const fetchTurmasInscritas = async () => {
+      try {
+        if (!user?.idAluno) return; // Garante que idAluno existe
+
+        const response = await fetch(`${apiUrl}/alunos/${user.idAluno}/turmas`, {
+          headers: {
+            "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          }
+        });
+
+        if (!response.ok) throw new Error("Erro ao buscar turmas inscritas.");
+
+        const data: TurmaServ[] = await response.json();
+        const ids = data.map(t => t.id);
+        setTurmasInscritas(new Set(ids));
+      } catch (err) {
+        console.error("Erro ao buscar turmas já inscritas:", err);
+      }
+    };
+
     if (user?.idAluno && apiUrl) {
       fetchDashboardData();
+      fetchTurmasInscritas(); // Chama aqui também, dentro do useEffect
     } else {
       setLoading(false);
     }
-     const fetchTurmasInscritas = async () => {
-    try {
-      const response = await fetch(`${apiUrl}/alunos/${user.idAluno}/turmas`, {
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
-        }
-      });
-
-      if (!response.ok) throw new Error("Erro ao buscar turmas inscritas.");
-
-      const data: TurmaServ[] = await response.json();
-      const ids = data.map(t => t.id);
-      setTurmasInscritas(new Set(ids));
-    } catch (err) {
-      console.error("Erro ao buscar turmas já inscritas:", err);
-    }
-  };
-  }, [user, apiUrl]);
+  }, [user, apiUrl]); // Dependências do useEffect
 
   useEffect(() => {
     const fetchTurmas = async () => {
       try {
-        const res = await axios.get(`${apiUrl}/turmas`, {
+        const res = await axios.get<TurmaServ[]>(`${apiUrl}/turmas`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
-        const turmasTratadas = res.data.map((turma: any) => ({
+        const turmasTratadas = res.data.map((turma) => ({
           ...turma,
-          professor: turma.professor?.nome || 'Desconhecido'
+          professor: turma.professor || 'Desconhecido' // Assume que 'professor' pode vir direto como string ou nulo
         }));
-        console.log(turmasTratadas)
         setTurmas(turmasTratadas);
       } catch (err) {
         console.error('Erro ao buscar turmas:', err);
@@ -154,9 +238,16 @@ const DashboardAluno = () => {
     fetchTurmas();
   }, [apiUrl]);
 
-  const handleTrocarSenha = async () => {
-    if (!novaSenha.trim()) return setErroTrocaSenha('Digite uma nova senha.');
-    if (!user?.idAluno) return setErroTrocaSenha('ID do aluno não encontrado.');
+  const handleTrocarSenhaSubmit = async () => { // Renomeado para evitar conflito com a prop
+    // Primeiramente, validação local
+    if (!validateTrocaSenhaForm()) {
+      return; // Interrompe se a validação local falhar
+    }
+
+    if (!user?.idAluno) {
+      setErroTrocaSenha('ID do aluno não encontrado.');
+      return;
+    }
 
     try {
       const res = await axios.post(`${apiUrl}/auth/${user.idAluno}/senha`, {
@@ -168,48 +259,51 @@ const DashboardAluno = () => {
 
       if (res.status === 200) {
         setTrocaSucesso(true);
-        setErroTrocaSenha('');
+        setErroTrocaSenha(''); // Limpa erro de API
+        setTrocaSenhaErrors({}); // Limpa erros de validação local
         localStorage.setItem('changePassword', 'false');
+        // Uma recarga completa pode ser desejável para re-inicializar o estado de autenticação
         window.location.reload();
       }
     } catch (err: any) {
-      setErroTrocaSenha(err?.response?.data?.mensagem || 'Erro ao trocar senha.');
+      // Captura e exibe erros da API
+      const errorMessage = err?.response?.data?.message || err?.response?.data?.mensagem || 'Erro ao trocar senha. Verifique sua senha atual.';
+      setErroTrocaSenha(errorMessage);
+      setTrocaSucesso(false);
     }
   };
 
-const handleInscrever = async (turmaId: number) => {
-  console.log(user.idUsuario)
-  if (!user?.idUsuario) {
-    alert("Usuário não autenticado.");
-    return;
-  }
-
-  try {
-    const response = await fetch(`${apiUrl}/turmas/${turmaId}/alunos`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem("token")}`
-      },
-      body: JSON.stringify({ idAlunos:[user.idAluno] }) // ou remova se a API não exige
-    });
-    console.log(user)
-    if (!response.ok) {
-      const erro = await response.json();
-      alert(`Erro ao se inscrever: ${erro?.mensagem || "erro desconhecido"}`);
+  const handleInscrever = async (turmaId: number) => {
+    if (!user?.idUsuario) {
+      alert("Usuário não autenticado.");
       return;
     }
 
-    alert("Inscrição realizada com sucesso!");
+    try {
+      const response = await fetch(`${apiUrl}/turmas/${turmaId}/alunos`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        },
+        body: JSON.stringify({ idAlunos: [user.idAluno] })
+      });
 
-    // Atualiza o set de turmas inscritas
-    setTurmasInscritas(prev => new Set(prev).add(turmaId));
+      if (!response.ok) {
+        const erro = await response.json();
+        alert(`Erro ao se inscrever: ${erro?.mensagem || "erro desconhecido"}`);
+        return;
+      }
 
-  } catch (err) {
-    console.error("Erro ao se inscrever:", err);
-    alert("Erro de conexão ao tentar se inscrever.");
-  }
-};
+      alert("Inscrição realizada com sucesso!");
+
+      setTurmasInscritas(prev => new Set(prev).add(turmaId));
+
+    } catch (err) {
+      console.error("Erro ao se inscrever:", err);
+      alert("Erro de conexão ao tentar se inscrever.");
+    }
+  };
 
 
   if (loading) return <div className="min-h-screen flex justify-center items-center">Carregando...</div>;
@@ -242,15 +336,17 @@ const handleInscrever = async (turmaId: number) => {
             setNovaSenha={setNovaSenha}
             erroTrocaSenha={erroTrocaSenha}
             trocaSucesso={trocaSucesso}
-            handleTrocarSenha={handleTrocarSenha}
+            handleTrocarSenha={handleTrocarSenhaSubmit} // Usando o novo handler
+            errors={trocaSenhaErrors} // Passando os erros de validação
+            handleInputChange={handleTrocaSenhaInputChange} // Passando o handler de input
           />
         )}
 
         {/* Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <InfoCard icon={<BookOpen className="text-blue-600" />} title="Disciplinas" value={disciplinasAtivas} />
-          <InfoCard icon={<Award className="text-green-600" />} title="Média Geral" value={mediaGeral.toFixed(2)} />
-          <InfoCard icon={<Calendar className="text-purple-600" />} title="Frequência" value={`${presencaPorcentagem}%`} />
+          <InfoCard icon={<BookOpen className="text-blue-600" />} title="Disciplinas Ativas" value={disciplinasAtivas} />
+          <InfoCard icon={<Award className="text-green-600" />} title="Média Geral (CR)" value={mediaGeral.toFixed(2)} />
+          <InfoCard icon={<Calendar className="text-purple-600" />} title="Frequência Total" value={`${presencaPorcentagem}%`} />
         </div>
 
         {/* Comunicados */}
@@ -260,7 +356,7 @@ const handleInscrever = async (turmaId: number) => {
             <div key={c.id} className="p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded mb-2">
               <p className="font-semibold">{c.titulo}</p>
               <p className="text-sm">{c.mensagem}</p>
-              <p className="text-xs text-gray-500">{new Date(c.dataPublicacao).toLocaleString()}</p>
+              <p className="text-xs text-gray-500">{new Date(c.dataPublicacao).toLocaleString('pt-BR')}</p>
             </div>
           )) : <p className="text-gray-600">Nenhum comunicado.</p>}
         </div>
@@ -271,18 +367,18 @@ const handleInscrever = async (turmaId: number) => {
             <div className="flex items-center gap-3">
               <BookOpen className="text-purple-600" size={32} />
               <div>
-                <h1 className="text-xl font-bold">Inscrição em turmas</h1>
-                <p className="text-sm text-gray-600">Escolha uma disciplina</p>
+                <h1 className="text-xl font-bold">Inscrição em Turmas</h1>
+                <p className="text-sm text-gray-600">Escolha uma disciplina para se inscrever</p>
               </div>
             </div>
             <button onClick={() => setMostrarDisciplina(!mostrarDisciplina)} className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
-              {mostrarDisciplina ? "Ocultar" : "Entrar em disciplina"}
+              {mostrarDisciplina ? "Ocultar Turmas" : "Ver Turmas Disponíveis"}
             </button>
           </div>
 
           {mostrarDisciplina && (
             turmas.length === 0 ? (
-              <div className="text-center text-gray-600 py-8">Nenhuma turma disponível.</div>
+              <div className="text-center text-gray-600 py-8">Nenhuma turma disponível para inscrição.</div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {turmas.map((turma) => (
@@ -294,9 +390,8 @@ const handleInscrever = async (turmaId: number) => {
                       <Clock className="inline mr-1" size={14} />
                       Horário das aulas: {turma.horario}
                     </p>
-                     <p className="text-sm text-gray-600 mb-1">
-                
-                       Periodo minimo para se inscrever: {turma.disciplina.periodo}º
+                    <p className="text-sm text-gray-600 mb-1">
+                      Período mínimo para se inscrever: {turma.disciplina.periodo}º
                     </p>
                     {turmasInscritas.has(turma.id) ? (
                       <button
@@ -314,7 +409,6 @@ const handleInscrever = async (turmaId: number) => {
                       </button>
                     )}
                   </div>
-                  
                 ))}
               </div>
             )

@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { GraduationCap, Edit, Trash2, Plus, User, Mail, BookOpen, X } from "lucide-react";
-import test from 'node:test';
+import { GraduationCap, Edit, Trash2, Plus, User, Mail, X } from "lucide-react";
 
 interface Professor {
   id: number;
@@ -23,6 +22,18 @@ interface ProfessorFormData {
   telefone: string;
 }
 
+// Interface para os erros de validação do formulário
+interface ProfessorFormErrors {
+  nome?: string;
+  emailInstitucional?: string;
+  emailPessoal?: string;
+  siape?: string;
+  cpf?: string;
+  departamento?: string;
+  telefone?: string;
+  submit?: string; // Para erros gerais de submissão/API
+}
+
 const initialFormData: ProfessorFormData = {
   nome: '',
   emailInstitucional: '',
@@ -42,9 +53,83 @@ const Professores = () => {
   const [formData, setFormData] = useState<ProfessorFormData>(initialFormData);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null); // Erro para a lista de professores
+  const [formErrors, setFormErrors] = useState<ProfessorFormErrors>({}); // NOVO: Erros para o formulário
+
+  // Estado para o CPF formatado na exibição
   const [cpfFormated, setCpfFormated] = useState('');
+  // Estado para o telefone formatado na exibição
+  const [telefoneFormated, setTelefoneFormated] = useState('');
+  // Estado para o siape formatado na exibição (apenas números)
+  const [siapeFormated, setSiapeFormated] = useState('');
+
+  // Funções de formatação
+  const formatCPF = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length > 9) {
+      return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    } else if (numbers.length > 6) {
+      return numbers.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+    } else if (numbers.length > 3) {
+      return numbers.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+    }
+    return numbers;
+  };
+
+  const formatTelefone = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length > 11) return numbers.slice(0, 11); // Limita a 11 dígitos
+    return numbers.replace(/^(\d{2})(\d)/g, '($1) $2') // Adiciona parênteses ao DDD
+      .replace(/(\d{5})(\d)/, '$1-$2'); // Adiciona o hífen
+  };
+
+  const formatSiape = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length > 7) return numbers.slice(0, 7); // Limita a 7 dígitos
+    return numbers;
+  };
+
+  // Função de validação do formulário
+  const validateForm = () => {
+    let newErrors: ProfessorFormErrors = {};
+    let isValid = true;
+
+    // Validações para campos de ADIÇÃO (todos obrigatórios e com formato específico)
+    if (!editingProfessor) {
+      if (!formData.nome.trim()) { newErrors.nome = 'Nome completo é obrigatório.'; isValid = false; }
+      if (!formData.cpf.trim()) {
+        newErrors.cpf = 'CPF é obrigatório.'; isValid = false;
+      } else if (formData.cpf.replace(/\D/g, '').length !== 11) {
+        newErrors.cpf = 'CPF deve conter 11 dígitos.'; isValid = false;
+      }
+      if (!formData.emailInstitucional.trim()) {
+        newErrors.emailInstitucional = 'Email institucional é obrigatório.'; isValid = false;
+      } else if (!/\S+@\S+\.\S+/.test(formData.emailInstitucional)) {
+        newErrors.emailInstitucional = 'Email institucional inválido.'; isValid = false;
+      }
+      if (!formData.siape.trim()) {
+        newErrors.siape = 'SIAPE é obrigatório.'; isValid = false;
+      } else if (!/^\d{7}$/.test(formData.siape)) {
+        newErrors.siape = 'SIAPE deve conter 7 dígitos numéricos.'; isValid = false;
+      }
+    }
+
+    // Validações para campos editáveis (aplicam-se tanto em adição quanto em edição)
+    if (!formData.emailPessoal.trim()) {
+      newErrors.emailPessoal = 'Email pessoal é obrigatório.'; isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(formData.emailPessoal)) {
+      newErrors.emailPessoal = 'Email pessoal inválido.'; isValid = false;
+    }
+    if (!formData.departamento.trim()) { newErrors.departamento = 'Departamento é obrigatório.'; isValid = false; }
+    if (!formData.telefone.trim()) {
+      newErrors.telefone = 'Telefone é obrigatório.'; isValid = false;
+    } else if (formData.telefone.replace(/\D/g, '').length !== 11) {
+      newErrors.telefone = 'Telefone deve conter 11 dígitos (incluindo DDD).'; isValid = false;
+    }
+
+    setFormErrors(newErrors);
+    return isValid;
+  };
 
   const fetchProfessores = useCallback(async () => {
     setLoading(true);
@@ -77,32 +162,57 @@ const Professores = () => {
     fetchProfessores();
   }, [fetchProfessores]);
 
-  const formatCPF = (value: string) => {
-    const numbers = value.replace(/\D/g, '');
-    return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+  // Handler genérico para inputs, incluindo formatação e limpeza de erros
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    let newValue = value;
+
+    // Aplica formatação e atualiza estados auxiliares
+    if (name === 'cpf') {
+      const numbers = value.replace(/\D/g, '');
+      setCpfFormated(formatCPF(numbers));
+      newValue = numbers; // Armazena apenas números para o formData
+    } else if (name === 'telefone') {
+      setTelefoneFormated(formatTelefone(value));
+      newValue = value.replace(/\D/g, ''); // Armazena apenas números para o formData
+    } else if (name === 'siape') {
+      setSiapeFormated(formatSiape(value));
+      newValue = value.replace(/\D/g, ''); // Armazena apenas números para o formData
+    }
+
+    setFormData(prev => ({ ...prev, [name]: newValue }));
+
+    // Limpa o erro do campo assim que o usuário começa a digitar
+    if (formErrors[name as keyof ProfessorFormErrors]) {
+      setFormErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name as keyof ProfessorFormErrors];
+        return newErrors;
+      });
+    }
+    setFormErrors(prev => ({ ...prev, submit: undefined })); // Limpa erro de submit ao interagir
   };
 
-  const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const numbers = value.replace(/\D/g, '');
-    if (numbers.length <= 11) {
-      setCpfFormated(formatCPF(numbers));
-      setFormData(prev => ({ ...prev, cpf: numbers }));
-    }
-  };
 
   const resetForm = () => {
     setFormData(initialFormData);
     setCpfFormated('');
+    setTelefoneFormated('');
+    setSiapeFormated('');
     setShowForm(false);
     setEditingProfessor(null);
-    setFormError(null);
+    setFormErrors({}); // Limpa todos os erros ao resetar
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    setFormError(null);
+    setFormErrors({}); // Limpa erros anteriores ao tentar submeter
+
+    if (!validateForm()) {
+      setSubmitting(false);
+      return; // Impede o envio se a validação falhar
+    }
 
     try {
       const token = localStorage.getItem('token');
@@ -116,9 +226,10 @@ const Professores = () => {
       if (editingProfessor) {
         url = `${apiUrl}/professores/${editingProfessor.id}`;
         method = "PUT";
+        // Apenas campos editáveis são enviados no PUT
         bodyData = {
           departamento: formData.departamento,
-          telefone: formData.telefone,
+          telefone: formData.telefone, // Já está limpo de formatação pelo handleInputChange
           emailPessoal: formData.emailPessoal
         };
       } else {
@@ -126,51 +237,51 @@ const Professores = () => {
         method = "POST";
         bodyData = {
           nome: formData.nome,
-          cpf: formData.cpf,
+          cpf: formData.cpf, // Já está limpo de formatação
           emailPessoal: formData.emailPessoal,
           emailInstitucional: formData.emailInstitucional,
-          telefone: formData.telefone,
-          senha: formData.cpf.substring(0, 4),
+          telefone: formData.telefone, // Já está limpo de formatação
+          senha: formData.cpf.substring(0, 4), // Senha inicial baseada no CPF
           aluno: null,
-          professor: { siape: formData.siape, departamento: formData.departamento },
+          professor: { siape: formData.siape, departamento: formData.departamento }, // Siape já está limpo
           papeis: ['PROFESSOR']
         };
       }
 
       res = await fetch(url, {
-      method: method,
-      headers: {
-        "Content-type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify(bodyData)
-    });
-    
-    let responseData: any = {};
-    const contentType = res.headers.get('content-type');
-    if (res.status !== 204 && contentType && contentType.includes('application/json')) {
-        try {
-            responseData = await res.json();
-        } catch (jsonParseError) {
-            console.warn("Aviso: Falha ao parsear JSON, mas o Content-Type indicava JSON. Corpo pode estar vazio ou malformado.", jsonParseError);
-            responseData = { message: await res.text().catch(() => 'Corpo vazio ou ilegível.') };
-        }
-    } else if (res.status === 201 || res.status === 204) { // Adicionado 201 Created aqui!
-        responseData = { message: 'Operação realizada com sucesso (sem conteúdo de resposta).' };
-    } else {
-        responseData = { message: await res.text().catch(() => 'Corpo vazio ou ilegível.') };
-    }
+        method: method,
+        headers: {
+          "Content-type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(bodyData)
+      });
 
-    if (!res.ok) {
-      throw new Error(responseData.message || `Erro ${res.status}: Falha na operação.`);
-    }
+      let responseData: any = {};
+      const contentType = res.headers.get('content-type');
+      if (res.status !== 204 && contentType && contentType.includes('application/json')) {
+        try {
+          responseData = await res.json();
+        } catch (jsonParseError) {
+          console.warn("Aviso: Falha ao parsear JSON, mas o Content-Type indicava JSON. Corpo pode estar vazio ou malformado.", jsonParseError);
+          responseData = { message: await res.text().catch(() => 'Corpo vazio ou ilegível.') };
+        }
+      } else if (res.status === 201 || res.status === 204) {
+        responseData = { message: 'Operação realizada com sucesso (sem conteúdo de resposta).' };
+      } else {
+        responseData = { message: await res.text().catch(() => 'Corpo vazio ou ilegível.') };
+      }
+
+      if (!res.ok) {
+        throw new Error(responseData.message || `Erro ${res.status}: Falha na operação.`);
+      }
 
       alert(`Professor ${editingProfessor ? 'atualizado' : 'adicionado'} com sucesso!`);
       resetForm();
       fetchProfessores();
     } catch (err: any) {
       console.error("Erro ao processar professor:", err);
-      setFormError(err.message || "Erro na operação. Verifique os dados e tente novamente.");
+      setFormErrors(prev => ({ ...prev, submit: err.message || "Erro na operação. Verifique os dados e tente novamente." }));
     } finally {
       setSubmitting(false);
     }
@@ -187,8 +298,13 @@ const Professores = () => {
       departamento: professor.departamento,
       telefone: professor.telefone
     });
+    // Define os estados formatados para exibição
     setCpfFormated(formatCPF(professor.cpf));
+    setTelefoneFormated(formatTelefone(professor.telefone));
+    setSiapeFormated(formatSiape(professor.siape));
+
     setShowForm(true);
+    setFormErrors({}); // Limpa erros ao abrir para edição
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -242,19 +358,24 @@ const Professores = () => {
   const isEditing = !!editingProfessor; // true se estiver editando, false se adicionando
 
   // Função auxiliar para classes CSS de campos desabilitados
-  const getDisabledClass = (fieldToExclude: string) => {
-    return isEditing && !['emailPessoal', 'departamento'].includes(fieldToExclude) ? 'bg-gray-100 cursor-not-allowed' : '';
+  const getDisabledClass = (fieldName: keyof ProfessorFormData) => {
+    // Campos desabilitados na edição: nome, cpf, emailInstitucional, siape
+    return isEditing && (fieldName === 'nome' || fieldName === 'cpf' || fieldName === 'emailInstitucional' || fieldName === 'siape') ? 'bg-gray-100 cursor-not-allowed' : '';
   };
   // Função auxiliar para o atributo disabled
-  const getDisabledAttr = (fieldToExclude: string) => {
-    return isEditing && !['emailPessoal', 'departamento'].includes(fieldToExclude);
+  const getDisabledAttr = (fieldName: keyof ProfessorFormData) => {
+    return isEditing && (fieldName === 'nome' || fieldName === 'cpf' || fieldName === 'emailInstitucional' || fieldName === 'siape');
   };
   // Função auxiliar para o atributo required
-  const getRequiredAttr = (fieldToExclude: string, isOptional: boolean = false) => {
-      // Se não estiver editando E o campo não for opcional, então é required
-      return !isEditing && !isOptional;
+  const getRequiredAttr = (fieldName: keyof ProfessorFormData) => {
+    // Se estiver adicionando (não editando), todos os campos são obrigatórios.
+    // Se estiver editando, apenas emailPessoal, departamento e telefone são obrigatórios.
+    if (!isEditing) {
+      return true;
+    } else {
+      return (fieldName === 'emailPessoal' || fieldName === 'departamento' || fieldName === 'telefone');
+    }
   };
-
 
   return (
     <div className="p-6">
@@ -268,7 +389,7 @@ const Professores = () => {
             </div>
           </div>
           <button
-            onClick={() => setShowForm(true)}
+            onClick={() => { setShowForm(true); setEditingProfessor(null); resetForm(); }} // Limpa o formulário e erros ao clicar em "Adicionar"
             className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 flex items-center gap-2"
           >
             <Plus size={16} />
@@ -294,11 +415,12 @@ const Professores = () => {
                 type="text"
                 name="nome"
                 value={formData.nome}
-                onChange={(e) => setFormData(prev => ({...prev, nome: e.target.value}))}
-                className={`w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500 ${getDisabledClass('nome')}`}
+                onChange={handleInputChange}
+                className={`w-full px-3 py-2 border-2 rounded focus:border-green-500 ${getDisabledClass('nome')} ${formErrors.nome ? 'border-red-500' : 'border-gray-300'}`}
                 required={getRequiredAttr('nome')}
                 disabled={getDisabledAttr('nome')}
               />
+              {formErrors.nome && <p className="text-red-500 text-xs mt-1">{formErrors.nome}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Email Pessoal *</label>
@@ -306,11 +428,12 @@ const Professores = () => {
                 type="email"
                 name="emailPessoal"
                 value={formData.emailPessoal}
-                onChange={(e) => setFormData(prev => ({...prev, emailPessoal: e.target.value}))}
-                className={`w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500 ${getDisabledClass('emailPessoal')}`}
+                onChange={handleInputChange}
+                className={`w-full px-3 py-2 border-2 rounded focus:border-green-500 ${formErrors.emailPessoal ? 'border-red-500' : 'border-gray-300'}`}
                 required={getRequiredAttr('emailPessoal')}
                 disabled={getDisabledAttr('emailPessoal')}
               />
+              {formErrors.emailPessoal && <p className="text-red-500 text-xs mt-1">{formErrors.emailPessoal}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Email Institucional *</label>
@@ -318,11 +441,12 @@ const Professores = () => {
                 type="email"
                 name="emailInstitucional"
                 value={formData.emailInstitucional}
-                onChange={(e) => setFormData(prev => ({...prev, emailInstitucional: e.target.value}))}
-                className={`w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500 ${getDisabledClass('emailInstitucional')}`}
+                onChange={handleInputChange}
+                className={`w-full px-3 py-2 border-2 rounded focus:border-green-500 ${getDisabledClass('emailInstitucional')} ${formErrors.emailInstitucional ? 'border-red-500' : 'border-gray-300'}`}
                 required={getRequiredAttr('emailInstitucional')}
                 disabled={getDisabledAttr('emailInstitucional')}
               />
+              {formErrors.emailInstitucional && <p className="text-red-500 text-xs mt-1">{formErrors.emailInstitucional}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Departamento *</label>
@@ -330,51 +454,60 @@ const Professores = () => {
                 type="text"
                 name="departamento"
                 value={formData.departamento}
-                onChange={(e) => setFormData(prev => ({...prev, departamento: e.target.value}))}
-                className={`w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500 ${getDisabledClass('departamento')}`}
+                onChange={handleInputChange}
+                className={`w-full px-3 py-2 border-2 rounded focus:border-green-500 ${formErrors.departamento ? 'border-red-500' : 'border-gray-300'}`}
                 required={getRequiredAttr('departamento')}
                 disabled={getDisabledAttr('departamento')}
               />
+              {formErrors.departamento && <p className="text-red-500 text-xs mt-1">{formErrors.departamento}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">SIAPE *</label>
               <input
                 type="text"
                 name="siape"
-                value={formData.siape}
-                onChange={(e) => setFormData(prev => ({...prev, siape: e.target.value}))}
-                className={`w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500 ${getDisabledClass('siape')}`}
+                value={siapeFormated} // Usa o estado formatado
+                onChange={handleInputChange}
+                className={`w-full px-3 py-2 border-2 rounded focus:border-green-500 ${getDisabledClass('siape')} ${formErrors.siape ? 'border-red-500' : 'border-gray-300'}`}
                 required={getRequiredAttr('siape')}
                 disabled={getDisabledAttr('siape')}
+                maxLength={7} // Limita a entrada
               />
+              {formErrors.siape && <p className="text-red-500 text-xs mt-1">{formErrors.siape}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Telefone *</label>
               <input
-                type="tel"
+                type="tel" // Tipo tel para melhor UX em mobile
                 name="telefone"
-                value={formData.telefone}
-                onChange={(e) => setFormData(prev => ({...prev, telefone: e.target.value}))}
-                className={`w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500`}
+                value={telefoneFormated} // Usa o estado formatado
+                onChange={handleInputChange}
+                className={`w-full px-3 py-2 border-2 rounded focus:border-green-500 ${formErrors.telefone ? 'border-red-500' : 'border-gray-300'}`}
+                placeholder="(00) 00000-0000"
+                maxLength={15} // (00) 00000-0000 tem 15 caracteres
+                required={getRequiredAttr('telefone')}
+                disabled={getDisabledAttr('telefone')}
               />
+              {formErrors.telefone && <p className="text-red-500 text-xs mt-1">{formErrors.telefone}</p>}
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">CPF *</label>
               <input
                 type="text"
                 name="cpf"
-                value={cpfFormated}
-                onChange={handleCPFChange}
-                className={`w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500 ${getDisabledClass('cpf')}`}
+                value={cpfFormated} // Usa o estado formatado
+                onChange={handleInputChange}
+                className={`w-full px-3 py-2 border-2 rounded focus:border-green-500 ${getDisabledClass('cpf')} ${formErrors.cpf ? 'border-red-500' : 'border-gray-300'}`}
                 placeholder="Ex: 000.000.000-00"
-                maxLength={14}
+                maxLength={14} // Limita a entrada
                 required={getRequiredAttr('cpf')}
-                disabled={getDisabledAttr('cpf')} // Desabilita CPF se estiver editando
+                disabled={getDisabledAttr('cpf')}
               />
+              {formErrors.cpf && <p className="text-red-500 text-xs mt-1">{formErrors.cpf}</p>}
             </div>
-            {formError && (
+            {formErrors.submit && (
               <div className="md:col-span-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded">
-                {formError}
+                {formErrors.submit}
               </div>
             )}
             <div className="md:col-span-2 flex gap-2">
@@ -448,7 +581,10 @@ const Professores = () => {
                     </span>
                   </div>
                   <div className="mt-2">
-                    <span className="text-gray-600 text-xs">Tel: {professor.telefone}</span>
+                    <span className="text-gray-600 text-xs">Tel: {formatTelefone(professor.telefone)}</span>
+                  </div>
+                  <div className="mt-2">
+                    <span className="text-gray-600 text-xs">SIAPE: {formatSiape(professor.siape)}</span>
                   </div>
                 </div>
               </div>

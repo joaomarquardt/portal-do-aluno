@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Users, MessageSquarePlus, X, ChevronLeft, ChevronRight } from 'lucide-react'; // Remove ChevronsRight se não for usar um botão só pra ele
+import { Users, MessageSquarePlus, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import AlunoCard from '../components/AlunoCard';
 import AddAlunoForm from '../components/AddAlunoForm';
 import Stats from '../components/Stats';
@@ -38,6 +38,8 @@ const Index = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showComunicadoForm, setShowComunicadoForm] = useState(false);
   const [comunicadoForm, setComunicadoForm] = useState({ titulo: '', mensagem: '' });
+  const [comunicadoErrors, setComunicadoErrors] = useState<{ titulo?: string; mensagem?: string; submit?: string }>({}); // Erros para o formulário de comunicado
+
   const [totalAlunos, setTotalAlunos] = useState(0);
   const [crMedio, setCrMedio] = useState<number | null>(null);
   const [numAlunosAltoDesempenho, setNumAlunosAltoDesempenho] = useState(0);
@@ -96,38 +98,36 @@ const Index = () => {
   }, [currentPage, pageSize, searchTerm]);
 
   const fetchDashboardData = useCallback(async () => {
-  try {
-    const token = localStorage.getItem('token');
-    const response = await fetch(`${apiUrl}/turmas/sumario-dashboard`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${apiUrl}/turmas/sumario-dashboard`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: 'Erro desconhecido no servidor.' }));
-      throw new Error(`Erro ao buscar dados do dashboard: ${response.status} - ${errorData.message || 'Erro desconhecido.'}`);
-    }
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Erro desconhecido no servidor.' }));
+        throw new Error(`Erro ao buscar dados do dashboard: ${response.status} - ${errorData.message || 'Erro desconhecido.'}`);
+      }
 
-    const data = await response.json();
-    setTotalAlunos(data.totalAlunos);
-    setCrMedio(data.crMedio);
-    setNumAlunosAltoDesempenho(data.numAlunosAltoDesempenho);
-    setPeriodoMaisComum(data.periodoMaisComum);
-    setErrorDashboard(null);
-  } catch (err: any) {
-    console.error('Erro ao buscar dados do dashboard:', err);
-    if (err instanceof Error && err.message.startsWith('Erro ao buscar dados do dashboard:')) {
-      setErrorDashboard(err.message);
+      const data = await response.json();
+      setTotalAlunos(data.totalAlunos);
+      setCrMedio(data.crMedio);
+      setNumAlunosAltoDesempenho(data.numAlunosAltoDesempenho);
+      setPeriodoMaisComum(data.periodoMaisComum);
+      setErrorDashboard(null);
+    } catch (err: any) {
+      console.error('Erro ao buscar dados do dashboard:', err);
+      if (err instanceof Error && err.message.startsWith('Erro ao buscar dados do dashboard:')) {
+        setErrorDashboard(err.message);
+      } else if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        setErrorDashboard("Erro de rede: Não foi possível conectar ao servidor. Verifique sua conexão ou o servidor.");
+      } else {
+        setErrorDashboard('Um erro inesperado ocorreu: ' + (err.message || 'Erro desconhecido.'));
+      }
     }
-    else if (err instanceof TypeError && err.message === 'Failed to fetch') {
-      setErrorDashboard("Erro de rede: Não foi possível conectar ao servidor. Verifique sua conexão ou o servidor.");
-    }
-    else {
-      setErrorDashboard('Um erro inesperado ocorreu: ' + (err.message || 'Erro desconhecido.'));
-    }
-  }
-}, []);
+  }, []);
 
   const fetchComunicados = useCallback(async () => {
     try {
@@ -168,15 +168,16 @@ const Index = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`Erro ao adicionar aluno: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Erro ao adicionar aluno: ${response.status}`);
       }
 
       await response.json();
       alert('Aluno adicionado com sucesso!');
       fetchAlunos();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Falha ao adicionar aluno:', error);
-      alert('Erro ao adicionar aluno. Tente novamente.');
+      alert('Erro ao adicionar aluno: ' + (error.message || 'Tente novamente.'));
     }
   };
 
@@ -193,16 +194,17 @@ const Index = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`Erro ao atualizar aluno: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Erro ao atualizar aluno: ${response.status}`);
       }
 
       await response.json();
       alert('Aluno atualizado com sucesso!');
       setEditingAluno(null);
       fetchAlunos();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Falha ao atualizar aluno:', error);
-      alert('Erro ao atualizar aluno. Tente novamente.');
+      alert('Erro ao atualizar aluno: ' + (error.message || 'Tente novamente.'));
     }
   };
 
@@ -218,14 +220,15 @@ const Index = () => {
         });
 
         if (!response.ok) {
-          throw new Error(`Erro ao excluir aluno: ${response.status}`);
+          const errorData = await response.json();
+          throw new Error(errorData.message || `Erro ao excluir aluno: ${response.status}`);
         }
 
         alert('Aluno excluído com sucesso!');
         fetchAlunos();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Falha ao excluir aluno:', error);
-        alert('Erro ao excluir aluno. Tente novamente.');
+        alert('Erro ao excluir aluno: ' + (error.message || 'Tente novamente.'));
       }
     }
   };
@@ -235,8 +238,44 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Validação para o formulário de comunicado
+  const validateComunicadoForm = () => {
+    let newErrors: { titulo?: string; mensagem?: string; submit?: string } = {};
+    let isValid = true;
+
+    if (!comunicadoForm.titulo.trim()) {
+      newErrors.titulo = 'O título é obrigatório.';
+      isValid = false;
+    }
+    if (!comunicadoForm.mensagem.trim()) {
+      newErrors.mensagem = 'A mensagem é obrigatória.';
+      isValid = false;
+    }
+
+    setComunicadoErrors(newErrors);
+    return isValid;
+  };
+
+  const handleComunicadoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setComunicadoForm({ ...comunicadoForm, [name]: value });
+
+    // Limpa o erro do campo assim que o usuário começa a digitar
+    if (comunicadoErrors[name as keyof typeof comunicadoErrors]) {
+      setComunicadoErrors(prev => {
+        const updatedErrors = { ...prev };
+        delete updatedErrors[name as keyof typeof comunicadoErrors];
+        return updatedErrors;
+      });
+    }
+  };
+
   const handleComunicadoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateComunicadoForm()) {
+      return; // Impede o envio se a validação falhar
+    }
 
     const novoComunicado = {
       titulo: comunicadoForm.titulo,
@@ -255,17 +294,19 @@ const Index = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`Erro ao criar comunicado: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Erro ao criar comunicado: ${response.status}`);
       }
 
       await response.json();
       setComunicadoForm({ titulo: '', mensagem: '' });
       setShowComunicadoForm(false);
+      setComunicadoErrors({}); // Limpa erros após sucesso
       alert('Comunicado criado com sucesso!');
       fetchComunicados();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Falha ao criar comunicado:', error);
-      alert('Erro ao criar comunicado. Tente novamente.');
+      setComunicadoErrors(prev => ({ ...prev, submit: error.message || 'Erro ao criar comunicado. Tente novamente.' }));
     }
   };
 
@@ -281,14 +322,15 @@ const Index = () => {
         });
 
         if (!response.ok) {
-          throw new Error(`Erro ao excluir comunicado: ${response.status}`);
+          const errorData = await response.json();
+          throw new Error(errorData.message || `Erro ao excluir comunicado: ${response.status}`);
         }
 
         alert('Comunicado excluído com sucesso!');
         fetchComunicados();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Falha ao excluir comunicado:', error);
-        alert('Erro ao excluir comunicado. Tente novamente.');
+        alert('Erro ao excluir comunicado: ' + (error.message || 'Tente novamente.'));
       }
     }
   };
@@ -304,8 +346,7 @@ const Index = () => {
 
     if (endPage === totalPages - 1) {
       startPage = Math.max(0, totalPages - maxVisiblePageNumbers);
-    }
-    else if (startPage === 0) {
+    } else if (startPage === 0) {
       endPage = Math.min(totalPages - 1, maxVisiblePageNumbers - 1);
     }
 
@@ -314,17 +355,17 @@ const Index = () => {
     }
 
     if (endPage < totalPages - 1) {
-        if (endPage + 1 < totalPages - 1) {
-            buttons.push('...');
-        }
-        buttons.push(totalPages - 1);
+      if (endPage + 1 < totalPages - 1) {
+        buttons.push('...');
+      }
+      buttons.push(totalPages - 1);
     }
 
     if (startPage > 0 && !buttons.includes(0)) {
-        buttons.unshift(0);
-        if (startPage > 1) {
-            buttons.splice(1, 0, '...');
-        }
+      buttons.unshift(0);
+      if (startPage > 1) {
+        buttons.splice(1, 0, '...');
+      }
     }
 
     return buttons;
@@ -340,7 +381,11 @@ const Index = () => {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-gray-800">Comunicados</h2>
           <button
-            onClick={() => setShowComunicadoForm(true)}
+            onClick={() => {
+              setShowComunicadoForm(true);
+              setComunicadoForm({ titulo: '', mensagem: '' }); // Limpa o formulário ao abrir
+              setComunicadoErrors({}); // Limpa os erros ao abrir
+            }}
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex items-center gap-2"
           >
             <MessageSquarePlus size={16} />
@@ -352,35 +397,40 @@ const Index = () => {
           <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-4">
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-lg font-bold text-gray-800">Novo Comunicado</h3>
-              <button onClick={() => setShowComunicadoForm(false)} className="text-gray-500 hover:text-gray-700">
+              <button onClick={() => { setShowComunicadoForm(false); setComunicadoErrors({}); }} className="text-gray-500 hover:text-gray-700">
                 <X size={20} />
               </button>
             </div>
             <form onSubmit={handleComunicadoSubmit}>
               <div className="mb-3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Título</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Título *</label>
                 <input
                   type="text"
+                  name="titulo"
                   value={comunicadoForm.titulo}
-                  onChange={(e) => setComunicadoForm({ ...comunicadoForm, titulo: e.target.value })}
+                  onChange={handleComunicadoChange}
                   required
-                  className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-blue-500"
+                  className={`w-full px-3 py-2 border-2 rounded focus:border-blue-500 ${comunicadoErrors.titulo ? 'border-red-500' : 'border-gray-300'}`}
                 />
+                {comunicadoErrors.titulo && <p className="text-red-500 text-xs mt-1">{comunicadoErrors.titulo}</p>}
               </div>
               <div className="mb-3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Mensagem</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Mensagem *</label>
                 <textarea
+                  name="mensagem"
                   value={comunicadoForm.mensagem}
-                  onChange={(e) => setComunicadoForm({ ...comunicadoForm, mensagem: e.target.value })}
+                  onChange={handleComunicadoChange}
                   required
-                  className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-blue-500 h-24"
+                  className={`w-full px-3 py-2 border-2 rounded focus:border-blue-500 h-24 ${comunicadoErrors.mensagem ? 'border-red-500' : 'border-gray-300'}`}
                 />
+                {comunicadoErrors.mensagem && <p className="text-red-500 text-xs mt-1">{comunicadoErrors.mensagem}</p>}
               </div>
+              {comunicadoErrors.submit && <p className="text-red-500 text-sm mb-3">{comunicadoErrors.submit}</p>}
               <div className="flex gap-2">
                 <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                   Enviar
                 </button>
-                <button type="button" onClick={() => setShowComunicadoForm(false)} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                <button type="button" onClick={() => { setShowComunicadoForm(false); setComunicadoErrors({}); }} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
                   Cancelar
                 </button>
               </div>
@@ -412,6 +462,7 @@ const Index = () => {
         </div>
       </section>
 
+      {/* AddAlunoForm é um componente separado e já deve ter suas validações */}
       <AddAlunoForm
         onAddAluno={addAluno}
         editingAluno={editingAluno}
@@ -481,7 +532,7 @@ const Index = () => {
                   onClick={() => goToPage(page as number)}
                   className={`px-3 py-1 border rounded ${currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
                 >
-                  {(page as number) + 1} {}
+                  {(page as number) + 1}
                 </button>
               )
             )}
