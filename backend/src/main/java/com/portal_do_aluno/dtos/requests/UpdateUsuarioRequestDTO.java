@@ -1,4 +1,5 @@
 package com.portal_do_aluno.dtos.requests;
+import jakarta.validation.constraints.*;
 
 import jakarta.validation.constraints.Email;   // Importar para validar formato de e-mail
 import jakarta.validation.constraints.NotBlank; // Importar para validar que a string não está vazia ou contém apenas espaços em branco
@@ -20,3 +21,4 @@ public record UpdateUsuarioRequestDTO(
         String telefone
 ) {
 }
+

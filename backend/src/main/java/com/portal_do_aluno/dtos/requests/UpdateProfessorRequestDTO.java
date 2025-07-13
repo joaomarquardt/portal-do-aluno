@@ -1,4 +1,5 @@
 package com.portal_do_aluno.dtos.requests;
+import jakarta.validation.constraints.NotBlank;
 
 import jakarta.validation.constraints.Email;   // Importar para validar formato de e-mail
 import jakarta.validation.constraints.NotBlank; // Importar para validar que a string não está vazia ou contém apenas espaços em branco
@@ -6,6 +7,7 @@ import jakarta.validation.constraints.Pattern;  // Importar para validar formato
 import jakarta.validation.constraints.Size;    // Importar para validar o tamanho da string
 
 public record UpdateProfessorRequestDTO(
+
         @NotBlank(message = "O departamento é obrigatório.")
         String departamento,
 
@@ -19,3 +21,4 @@ public record UpdateProfessorRequestDTO(
         String telefone
 ) {
 }
+

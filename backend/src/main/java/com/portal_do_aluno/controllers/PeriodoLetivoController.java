@@ -4,6 +4,7 @@ import com.portal_do_aluno.dtos.requests.CreatePeriodoLetivoRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdatePeriodoLetivoRequestDTO;
 import com.portal_do_aluno.dtos.responses.PeriodoLetivoResponseDTO;
 import com.portal_do_aluno.services.PeriodoLetivoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,31 +20,30 @@ public class PeriodoLetivoController {
 
     @GetMapping
     public ResponseEntity<List<PeriodoLetivoResponseDTO>> findAll() {
-        List<PeriodoLetivoResponseDTO> periodosLetivosDTO = service.findAll();
-        return new ResponseEntity<>(periodosLetivosDTO, HttpStatus.OK);
+        return ResponseEntity.ok(service.findAll());
     }
 
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<PeriodoLetivoResponseDTO> findById(@PathVariable(value = "id") Long id) {
-        PeriodoLetivoResponseDTO periodoLetivoDTO = service.findById(id);
-        return new ResponseEntity<>(periodoLetivoDTO, HttpStatus.OK);
+    @GetMapping("/{id}")
+    public ResponseEntity<PeriodoLetivoResponseDTO> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findById(id));
     }
 
     @PostMapping
-    public ResponseEntity<PeriodoLetivoResponseDTO> create(@RequestBody CreatePeriodoLetivoRequestDTO periodoLetivoDTO) {
-        PeriodoLetivoResponseDTO periodoLetivoCriadoDTO = service.create(periodoLetivoDTO);
-        return new ResponseEntity<>(periodoLetivoCriadoDTO, HttpStatus.CREATED);
+    public ResponseEntity<PeriodoLetivoResponseDTO> create(@RequestBody @Valid CreatePeriodoLetivoRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
     }
 
-    @PutMapping(value = "/{id}")
-    public ResponseEntity<PeriodoLetivoResponseDTO> update(@PathVariable(value = "id") Long id, @RequestBody UpdatePeriodoLetivoRequestDTO periodoLetivoDTO) {
-        PeriodoLetivoResponseDTO periodoLetivoAtualizadoDTO = service.update(id, periodoLetivoDTO);
-        return new ResponseEntity<>(periodoLetivoAtualizadoDTO, HttpStatus.OK);
+    @PutMapping("/{id}")
+    public ResponseEntity<PeriodoLetivoResponseDTO> update(
+        @PathVariable Long id,
+        @RequestBody @Valid UpdatePeriodoLetivoRequestDTO dto
+    ) {
+        return ResponseEntity.ok(service.update(id, dto));
     }
 
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Void> delete(@PathVariable(value = "id") Long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 }

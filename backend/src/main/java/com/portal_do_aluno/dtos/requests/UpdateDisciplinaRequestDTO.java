@@ -1,4 +1,5 @@
 package com.portal_do_aluno.dtos.requests;
+import jakarta.validation.constraints.*;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -17,3 +18,4 @@ public record UpdateDisciplinaRequestDTO(
         int cargaHoraria
 ) {
 }
+

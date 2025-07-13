@@ -1,4 +1,4 @@
-package com.portal_do_aluno.exceptions.handlers; // Pacote sugerido para seus handlers
+package com.portal_do_aluno.exceptions; // Pacote sugerido para seus handlers
 
 import com.portal_do_aluno.exceptions.InvalidDateRangeException;
 import com.portal_do_aluno.exceptions.TurmaEncerradaException;

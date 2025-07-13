@@ -6,7 +6,11 @@ import com.portal_do_aluno.dtos.responses.AlunoResponseDTO;
 import com.portal_do_aluno.dtos.responses.DashboardAlunoResponseDTO;
 import com.portal_do_aluno.dtos.responses.DesempenhoResponseDTO;
 import com.portal_do_aluno.services.AlunoService;
+<<<<<<< HEAD
 import jakarta.annotation.Nullable;
+=======
+import jakarta.validation.Valid;
+>>>>>>> d81855cfba489097687335b8ecb8674d97f9a414
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,8 +29,7 @@ public class AlunoController {
 
     @GetMapping
     public ResponseEntity<List<AlunoResponseDTO>> findAll() {
-        List<AlunoResponseDTO> alunosDTO = service.findAll();
-        return new ResponseEntity<>(alunosDTO, HttpStatus.OK);
+        return ResponseEntity.ok(service.findAll());
     }
 
     @GetMapping(value = "/paginacao")
@@ -44,21 +47,22 @@ public class AlunoController {
     }
 
     @PostMapping
-    public ResponseEntity<AlunoResponseDTO> create(@RequestBody CreateAlunoRequestDTO alunoDTO) {
-        AlunoResponseDTO alunoCriadoDTO = service.create(alunoDTO);
-        return new ResponseEntity<>(alunoCriadoDTO, HttpStatus.CREATED);
+    public ResponseEntity<AlunoResponseDTO> create(@RequestBody @Valid CreateAlunoRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
     }
 
-    @PutMapping(value = "/{id}")
-    public ResponseEntity<AlunoResponseDTO> update(@PathVariable(value = "id") Long id, @RequestBody UpdateAlunoRequestDTO alunoDTO) {
-        AlunoResponseDTO alunoAtualizadoDTO = service.update(id, alunoDTO);
-        return new ResponseEntity<>(alunoAtualizadoDTO, HttpStatus.OK);
+    @PutMapping("/{id}")
+    public ResponseEntity<AlunoResponseDTO> update(
+        @PathVariable Long id,
+        @RequestBody @Valid UpdateAlunoRequestDTO dto
+    ) {
+        return ResponseEntity.ok(service.update(id, dto));
     }
 
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Void> delete(@PathVariable(value = "id") Long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping(value = "/{id}/desempenho-geral")

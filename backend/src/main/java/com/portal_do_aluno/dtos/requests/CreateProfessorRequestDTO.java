@@ -1,4 +1,5 @@
 package com.portal_do_aluno.dtos.requests;
+import jakarta.validation.constraints.*;
 
 import jakarta.validation.constraints.NotBlank; // Importar para validar que a string não está vazia ou contém apenas espaços em branco
 import jakarta.validation.constraints.Pattern;  // Importar para validar formato com regex
@@ -14,3 +15,4 @@ public record CreateProfessorRequestDTO(
         String departamento
 ) {
 }
+

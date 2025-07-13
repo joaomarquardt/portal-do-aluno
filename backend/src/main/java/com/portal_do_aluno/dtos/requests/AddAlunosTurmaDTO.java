@@ -10,3 +10,4 @@ public record AddAlunosTurmaDTO(
         List<Long> idAlunos
 ) {
 }
+

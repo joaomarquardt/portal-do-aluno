@@ -1,4 +1,5 @@
 package com.portal_do_aluno.dtos.requests;
+import jakarta.validation.constraints.NotNull;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -9,3 +10,4 @@ public record UpdateTurmaRequestDTO(
         Long professorID
 ) {
 }
+

@@ -1,4 +1,5 @@
 package com.portal_do_aluno.dtos.requests;
+import jakarta.validation.constraints.*;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -19,3 +20,4 @@ public record UpdateDesempenhoRequestDTO(
         int presenca
 ) {
 }
+

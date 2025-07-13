@@ -1,5 +1,4 @@
 package com.portal_do_aluno.dtos.requests;
-
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.FutureOrPresent;
 import java.time.LocalDate;
@@ -16,3 +15,4 @@ public record UpdatePeriodoLetivoRequestDTO(
     // A lógica de 'dataFim' ser posterior a 'dataInicio' seria tratada no serviço,
     // onde a data de início original do período seria conhecida.
 }
+

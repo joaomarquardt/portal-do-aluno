@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { Calendar, Plus, Edit, Trash2 } from "lucide-react";
 
 interface Periodo {
-  id: number;
-  nome: string;
-  dataInicio: string;
-  dataFim: string;
-  ativo: boolean;
+    id: number;
+    nome: string;
+    dataInicio: string;
+    dataFim: string;
+    ativo: boolean;
 }
 
 // Interface para os erros de validação do formulário
@@ -222,8 +222,8 @@ const Periodos = () => {
       }
     };
 
-    fetchPeriods();
-  }, []);
+        fetchPeriods();
+    }, []);
 
   return (
     <div className="p-6">
@@ -331,55 +331,55 @@ const Periodos = () => {
           </div>
         )}
 
-        {/* Lista de Períodos */}
-        <div className="space-y-3">
-          {periodos.map((periodo) => (
-            <div key={periodo.id} className="bg-gray-50 border-2 border-gray-200 rounded-lg p-4">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-lg font-bold text-gray-800">{periodo.nome}</h3>
-                    {periodo.ativo && (
-                      <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded">
-                        ATIVO
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-gray-600">
-                    <p><strong>Início:</strong> {new Date(periodo.dataInicio).toLocaleDateString('pt-BR')}</p>
-                    <p><strong>Fim:</strong> {new Date(periodo.dataFim).toLocaleDateString('pt-BR')}</p>
-                  </div>
+                {/* Lista de Períodos */}
+                <div className="space-y-3">
+                    {periodos.map((periodo) => (
+                        <div key={periodo.id} className="bg-gray-50 border-2 border-gray-200 rounded-lg p-4">
+                            <div className="flex justify-between items-start">
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <h3 className="text-lg font-bold text-gray-800">{periodo.nome}</h3>
+                                        {periodo.ativo && (
+                                            <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded">
+                                                ATIVO
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="text-gray-600">
+                                        <p><strong>Início:</strong> {new Date(periodo.dataInicio).toLocaleDateString('pt-BR')}</p>
+                                        <p><strong>Fim:</strong> {new Date(periodo.dataFim).toLocaleDateString('pt-BR')}</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => handleEdit(periodo)}
+                                        className="bg-yellow-500 text-white p-2 rounded hover:bg-yellow-600"
+                                        title="Editar"
+                                    >
+                                        <Edit size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(periodo.id)}
+                                        className="bg-red-500 text-white p-2 rounded hover:bg-red-600"
+                                        title="Excluir"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleEdit(periodo)}
-                    className="bg-yellow-500 text-white p-2 rounded hover:bg-yellow-600"
-                    title="Editar"
-                  >
-                    <Edit size={16} />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(periodo.id)}
-                    className="bg-red-500 text-white p-2 rounded hover:bg-red-600"
-                    title="Excluir"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
 
-        {periodos.length === 0 && (
-          <div className="text-center py-8">
-            <Calendar className="mx-auto text-gray-400 mb-4" size={48} />
-            <p className="text-gray-600">Nenhum período letivo cadastrado ainda.</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+                {periodos.length === 0 && (
+                    <div className="text-center py-8">
+                        <Calendar className="mx-auto text-gray-400 mb-4" size={48} />
+                        <p className="text-gray-600">Nenhum período letivo cadastrado ainda.</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
 };
 
 export default Periodos;

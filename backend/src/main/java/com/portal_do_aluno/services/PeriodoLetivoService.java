@@ -4,6 +4,7 @@ import com.portal_do_aluno.domain.PeriodoLetivo;
 import com.portal_do_aluno.dtos.requests.CreatePeriodoLetivoRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdatePeriodoLetivoRequestDTO;
 import com.portal_do_aluno.dtos.responses.PeriodoLetivoResponseDTO;
+import com.portal_do_aluno.exceptions.GlobalExceptionHandler;
 import com.portal_do_aluno.exceptions.InvalidDateRangeException;
 import com.portal_do_aluno.mappers.PeriodoLetivoMapper;
 import com.portal_do_aluno.repositories.PeriodoLetivoRepository;

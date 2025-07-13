@@ -1,4 +1,5 @@
 package com.portal_do_aluno.dtos.requests;
+import jakarta.validation.constraints.NotBlank;
 
 import jakarta.validation.constraints.NotBlank; // Importar para validar que a string não está vazia ou contém apenas espaços em branco
 
@@ -10,3 +11,4 @@ public record UpdateComunicadoRequestDTO(
         String mensagem
 ) {
 }
+

@@ -19,6 +19,7 @@ interface TurmaServ {
   disciplina: Disciplina;
 }
 
+
 interface Professor {
   id: number;
   nome: string;
