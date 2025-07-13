@@ -10,8 +10,8 @@ public class Presenca {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Integer horasRegistradas = 0;
-
+    @Column(nullable = true)
+    private Integer horasRegistradas;
     @ManyToOne
     @JoinColumn(name = "aluno_id")
     private Aluno aluno;

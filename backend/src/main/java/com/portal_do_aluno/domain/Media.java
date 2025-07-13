@@ -10,7 +10,8 @@ public class Media {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Double valor = 0.0;
+    @Column(nullable = true)
+    private Double valor;
 
     @ManyToOne
     @JoinColumn(name = "aluno_id")
