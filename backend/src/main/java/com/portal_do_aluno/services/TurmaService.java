@@ -4,6 +4,7 @@ import com.portal_do_aluno.domain.*;
 import com.portal_do_aluno.dtos.requests.CreateTurmaRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateDesempenhoRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateTurmaRequestDTO;
+import com.portal_do_aluno.dtos.responses.AlunoTurmaResponseDTO;
 import com.portal_do_aluno.dtos.responses.DashboardAdminResponseDTO;
 import com.portal_do_aluno.dtos.responses.TurmaResponseDTO;
 import com.portal_do_aluno.exceptions.TurmaEncerradaException;
@@ -156,5 +157,16 @@ public class TurmaService {
         Long numAlunosAltoDesempenho = alunoService.countHighPerformanceStudents();
         Integer periodoMaisComum = alunoService.findMostCommonPeriod();
         return new DashboardAdminResponseDTO(totalAlunos, crMedio, numAlunosAltoDesempenho, periodoMaisComum);
+    }
+
+    public List<AlunoTurmaResponseDTO> getAllStudentsByClass(Long idTurma) {
+        Turma turma = repository.findById(idTurma).orElseThrow(() -> new EntityNotFoundException("Turma não encontrada!"));
+        return turma.getAlunos().stream()
+                .map(aluno -> {
+                    Usuario usuario = aluno.getUsuario();
+                    return new AlunoTurmaResponseDTO(aluno.getId(), usuario.getNome(), usuario.getCpf(),
+                            usuario.getEmailPessoal(), usuario.getEmailInstitucional(), aluno.getMatricula(),
+                            usuario.getTelefone(), aluno.getPeriodoAtual(), aluno.getPeriodoIngresso());
+                }).toList();
     }
 }

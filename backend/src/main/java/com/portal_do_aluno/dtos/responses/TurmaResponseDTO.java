@@ -9,7 +9,6 @@ public record TurmaResponseDTO(
         int vagasTotais,
         String horario,
         DisciplinaResponseDTO disciplina,
-        ProfessorResponseDTO professor,
-        List<AlunoResponseDTO> alunos
+        ProfessorResponseDTO professor
 ) {
 }
