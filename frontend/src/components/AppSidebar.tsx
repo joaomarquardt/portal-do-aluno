@@ -1,43 +1,21 @@
-
-import { Users, BookOpen, GraduationCap, Calendar, LogOut } from "lucide-react";
+import { LogOut, User as UserIcon } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
-const menuItems = [
-  {
-    title: "Gestão de Alunos",
-    url: "/",
-    icon: Users
-  },
-  {
-    title: "Gestão de Professores",
-    url: "/professores",
-    icon: GraduationCap
-  },
-  {
-    title: "Gestão de Turmas",
-    url: "/turmas",
-    icon: BookOpen
-  },
-  {
-    title: "Períodos Letivos",
-    url: "/periodos",
-    icon: Calendar
-  },
-    {
-    title: "Cursos",
-    url: "/cursos",
-    icon: Calendar
-  },
-    {
-    title: "Disciplinas",
-    url: "/disciplinas",
-    icon: BookOpen
-  },
-];
+interface MenuItem {
+  title: string;
+  url: string;
+  icon: React.ElementType;
+}
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  menuItems: MenuItem[];
+}
+
+export function AppSidebar({ menuItems }: AppSidebarProps) {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="w-60 bg-white border-r-2 border-gray-300 h-full shadow-md">
@@ -68,6 +46,14 @@ export function AppSidebar() {
         </nav>
 
         <div className="mt-8 pt-4 border-t border-gray-200">
+          <button
+            onClick={() => navigate('/meu-perfil/editar')}
+            className="flex items-center gap-3 p-3 w-full text-left rounded transition-colors hover:bg-blue-50 text-blue-600 mb-2"
+          >
+            <UserIcon size={20} />
+            <span>Meu Perfil</span>
+          </button>
+
           <button
             onClick={logout}
             className="flex items-center gap-3 p-3 w-full text-left rounded transition-colors hover:bg-red-50 text-red-600"
