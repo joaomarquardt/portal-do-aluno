@@ -145,7 +145,7 @@ const Professores = () => {
       },
       body: JSON.stringify(bodyData)
     });
-    
+
     let responseData: any = {};
     const contentType = res.headers.get('content-type');
     if (res.status !== 204 && contentType && contentType.includes('application/json')) {
@@ -155,7 +155,7 @@ const Professores = () => {
             console.warn("Aviso: Falha ao parsear JSON, mas o Content-Type indicava JSON. Corpo pode estar vazio ou malformado.", jsonParseError);
             responseData = { message: await res.text().catch(() => 'Corpo vazio ou ilegível.') };
         }
-    } else if (res.status === 201 || res.status === 204) { // Adicionado 201 Created aqui!
+    } else if (res.status === 201 || res.status === 204) {
         responseData = { message: 'Operação realizada com sucesso (sem conteúdo de resposta).' };
     } else {
         responseData = { message: await res.text().catch(() => 'Corpo vazio ou ilegível.') };
@@ -237,21 +237,15 @@ const Professores = () => {
       </div>
     );
   }
+  const isEditing = !!editingProfessor;
 
-  // Lógica para desabilitar e estilizar campos
-  const isEditing = !!editingProfessor; // true se estiver editando, false se adicionando
-
-  // Função auxiliar para classes CSS de campos desabilitados
   const getDisabledClass = (fieldToExclude: string) => {
     return isEditing && !['emailPessoal', 'departamento'].includes(fieldToExclude) ? 'bg-gray-100 cursor-not-allowed' : '';
   };
-  // Função auxiliar para o atributo disabled
   const getDisabledAttr = (fieldToExclude: string) => {
     return isEditing && !['emailPessoal', 'departamento'].includes(fieldToExclude);
   };
-  // Função auxiliar para o atributo required
   const getRequiredAttr = (fieldToExclude: string, isOptional: boolean = false) => {
-      // Se não estiver editando E o campo não for opcional, então é required
       return !isEditing && !isOptional;
   };
 
@@ -369,7 +363,7 @@ const Professores = () => {
                 placeholder="Ex: 000.000.000-00"
                 maxLength={14}
                 required={getRequiredAttr('cpf')}
-                disabled={getDisabledAttr('cpf')} // Desabilita CPF se estiver editando
+                disabled={getDisabledAttr('cpf')}
               />
             </div>
             {formError && (

@@ -45,7 +45,7 @@
         }
 
         const data: Disciplina[] = await response.json();
-        setDisciplinas(data); // ✅ armazena exatamente como a API envia
+        setDisciplinas(data);
         } catch (error) {
         console.error("Erro ao buscar os Disciplinas:", error);
         }
@@ -93,7 +93,7 @@
     setEditingDisciplina(null);
   };
 
-  
+
   return (
     <div className="p-6">
       <div className="mb-6">
@@ -164,12 +164,12 @@
                 value={formData.periodo}
                 onChange={(e) => setFormData({...formData, periodo: e.target.value})}
                 className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-purple-500"
-                
+
                 required
               />
             </div>
 
-        
+
             <div className="md:col-span-2 flex gap-2">
               <button
                 type="submit"
@@ -194,7 +194,7 @@
         <h2 className="text-xl font-bold text-gray-800 mb-4">
           Lista de Disciplinas ({Disciplinas.length})
         </h2>
-        
+
         {Disciplinas.length === 0 ? (
           <div className="text-center py-8">
             <BookOpen className="mx-auto text-gray-400 mb-4" size={48} />
@@ -210,7 +210,7 @@
                     <h3 className="text-lg font-bold text-gray-800">{Disciplina.nome}</h3>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2 text-sm">
                   <div className="mt-2">
                     <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-medium">

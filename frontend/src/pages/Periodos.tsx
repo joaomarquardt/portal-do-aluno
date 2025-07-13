@@ -30,7 +30,6 @@ const Periodos = () => {
 
   try {
     if (editingPeriodo) {
-      // Atualização futura: PUT para editar
       const updatedPeriodo = { ...editingPeriodo, ...formData };
       setPeriodos(prev =>
         prev.map(p => (p.id === editingPeriodo.id ? updatedPeriodo : p))
@@ -38,7 +37,6 @@ const Periodos = () => {
       setEditingPeriodo(null);
       alert('Período atualizado localmente!');
     } else {
-      // Criar novo período via POST
       const response = await fetch(`${apiUrl}/periodos-letivos`, {
         method: "POST",
         headers: {
@@ -112,7 +110,7 @@ const Periodos = () => {
         const response = await fetch(`${apiUrl}/periodos-letivos`,{
           headers:{
             "Content-type":"application/json",
-            "Authorization":`Bearer ${localStorage.getItem("token")}` 
+            "Authorization":`Bearer ${localStorage.getItem("token")}`
           }
         });
         const data:Periodo[] = await response.json();
@@ -166,7 +164,7 @@ const Periodos = () => {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Data de Início *
@@ -179,7 +177,7 @@ const Periodos = () => {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Data de Fim *
@@ -192,7 +190,7 @@ const Periodos = () => {
                     required
                   />
                 </div>
-                
+
                 <div className="flex items-center">
                   <label className="flex items-center gap-2">
                     <input
@@ -205,7 +203,7 @@ const Periodos = () => {
                   </label>
                 </div>
               </div>
-              
+
               <div className="flex gap-2">
                 <button
                   type="submit"

@@ -46,7 +46,7 @@
         }
 
         const data: Curso[] = await response.json();
-        setCursos(data); // ✅ armazena exatamente como a API envia
+        setCursos(data);
         } catch (error) {
         console.error("Erro ao buscar os Cursos:", error);
         }
@@ -58,7 +58,6 @@
     e.preventDefault();
 
     if (editingCurso) {
-        // Aqui você pode implementar um PUT futuramente para edição
         setCursos(Cursos.map(c =>
         c.id === editingCurso.id ? { ...c, ...formData } : c
         ));
@@ -198,7 +197,7 @@
               />
             </div>
 
-        
+
             <div className="md:col-span-2 flex gap-2">
               <button
                 type="submit"
@@ -223,7 +222,7 @@
         <h2 className="text-xl font-bold text-gray-800 mb-4">
           Lista de Cursos ({Cursos.length})
         </h2>
-        
+
         {Cursos.length === 0 ? (
           <div className="text-center py-8">
             <BookOpen className="mx-auto text-gray-400 mb-4" size={48} />
@@ -253,7 +252,7 @@
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2 text-sm">
                   <div className="mt-2">
                     <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-medium">

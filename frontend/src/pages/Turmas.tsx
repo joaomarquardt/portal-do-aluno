@@ -40,7 +40,6 @@ const Turmas = () => {
     horario: '',
   });
 
-  // === API Calls ===
   const fetchProfessores = async () => {
     try {
       const res = await fetch(`${apiUrl}/professores/select`, {
@@ -129,11 +128,9 @@ const Turmas = () => {
   const handleDelete = (id: number) => {
     if (window.confirm("Tem certeza que deseja excluir esta turma?")) {
       setTurmas(turmas.filter(t => t.id !== id));
-      // Aqui seria o ideal fazer um DELETE na API também
     }
   };
 
-  // === Render ===
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -224,7 +221,6 @@ const Turmas = () => {
   );
 };
 
-// === Componentes auxiliares ===
 const SelectInput = ({
   label, value, onChange, options
 }: {

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Mantenha useNavigate aqui
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Users, GraduationCap } from 'lucide-react';
 
@@ -7,11 +7,11 @@ const Login = () => {
   const [cpf, setCpf] = useState('');
   const [cpfView, setCpfView] = useState("");
   const [senha, setSenha] = useState('');
-  const [tipoUsuario, setTipoUsuario] = useState<'PROFESSOR' | 'ALUNO'>('ALUNO'); // Este estado não é usado na chamada de login do AuthContext
+  const [tipoUsuario, setTipoUsuario] = useState<'PROFESSOR' | 'ALUNO'>('ALUNO');
   const [error, setError] = useState<string | null>(null);
 
   const { login: authLogin, loading: authLoading } = useAuth();
-  const navigate = useNavigate(); // Mantenha useNavigate aqui
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,20 +23,14 @@ const Login = () => {
     }
 
     try {
-      // A função login agora retorna um objeto com 'success' e 'message' (se houver)
-      const result = await authLogin(cpf, senha);
+      const result = await authLogin(cpf, senha, tipoUsuario);
 
       if (result.success) {
-        // Redireciona para a rota raiz.
-        // O RoleBasedRedirect em App.tsx vai interceptar e redirecionar para o dashboard correto.
         navigate('/');
       } else {
-        // Exibe a mensagem de erro que veio do AuthContext ou uma padrão
         setError(result.message || 'CPF ou senha incorretos.');
       }
     } catch (err) {
-      // Este catch é para erros inesperados que o AuthContext não tratou e lançou.
-      // Com as mudanças no AuthContext, este catch deve ser menos acionado.
       console.error("Erro inesperado durante o login:", err);
       setError("Ocorreu um erro inesperado. Tente novamente mais tarde.");
     }
