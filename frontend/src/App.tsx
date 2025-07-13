@@ -12,12 +12,9 @@ import Professores from "./pages/Professores";
 import Turmas from "./pages/Turmas";
 import Periodos from "./pages/Periodos";
 import Cursos from "./pages/Cursos";
-<<<<<<< HEAD
-import Disciplinas from "./pages/Disciplina";
-=======
 import NotFound from "./pages/NotFound";
 import UserProfileEditForm from "./pages/PerfilUsuarioForm";
->>>>>>> ae3c29b54b7c6735e2e76d5cfa3f9bdceb622fcc
+import Disciplinas from "./pages/Disciplina";
 
 const queryClient = new QueryClient();
 
@@ -39,71 +36,6 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             </div>
         </div>
     );
-<<<<<<< HEAD
-  }
-
-  if (!user) {
-    return <Login />;
-  }
-
-  if (user.role === "PROFESSOR") {
-    return <DashboardProfessor />;
-  }
-
-  if (user.role === 'ALUNO') {
-    return <DashboardAluno />;
-  }
-
-  return (
-    <div className="min-h-screen flex w-full">
-      <AppSidebar />
-      <div className="flex-1 flex flex-col">
-        <header className="h-12 flex items-center border-b bg-white px-4">
-          <h1 className="text-lg font-semibold text-gray-800">
-            Sistema de Gestão Acadêmica
-          </h1>
-        </header>
-        <main className="flex-1 bg-gray-100">
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/" element={
-              <ProtectedRoute allowedRoles={['ADMIN']}>
-                <Index />
-              </ProtectedRoute>
-            } />
-            <Route path="/professores" element={
-              <ProtectedRoute allowedRoles={['ADMIN']}>
-                <Professores />
-              </ProtectedRoute>
-            } />
-            <Route path="/turmas" element={
-              <ProtectedRoute allowedRoles={['ADMIN']}>
-                <Turmas />
-              </ProtectedRoute>
-            } />
-            <Route path="/periodos" element={
-              <ProtectedRoute allowedRoles={['ADMIN']}>
-                <Periodos />
-              </ProtectedRoute>
-            } />
-            <Route path="/disciplinas" element={
-              <ProtectedRoute allowedRoles={['ADMIN']}>
-                <Disciplinas />
-              </ProtectedRoute>
-            } />
-             <Route path="/cursos" element={
-              <ProtectedRoute allowedRoles={['ADMIN']}>
-                <Cursos />
-              </ProtectedRoute>
-            } />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </main>
-      </div>
-    </div>
-  );
-=======
->>>>>>> ae3c29b54b7c6735e2e76d5cfa3f9bdceb622fcc
 };
 
 
@@ -171,6 +103,13 @@ const AppContent = () => {
                     <ProtectedRoute allowedRoles={['ADMIN']}>
                         <AdminLayout>
                             <Cursos />
+                        </AdminLayout>
+                    </ProtectedRoute>
+                } />
+                  <Route path="/disciplinas" element={
+                    <ProtectedRoute allowedRoles={['ADMIN']}>
+                        <AdminLayout>
+                            <Disciplinas />
                         </AdminLayout>
                     </ProtectedRoute>
                 } />

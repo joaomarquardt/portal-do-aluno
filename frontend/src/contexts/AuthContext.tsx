@@ -2,10 +2,11 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 
 interface User {
+  
   nome: string;
   cpf: string;
   idUsuario: number;
-  idAluno?: number;
+  idAluno: number;
   idProfessor?: number;
   role: 'ADMIN' | 'PROFESSOR' | 'ALUNO';
 }
@@ -59,26 +60,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cpf, senha })
       });
-<<<<<<< HEAD
       console.log(cpf)
       
       console.log(senha)
       const userData = await response.json();
-=======
-
-      const userData = await response.json(); // Sempre tente ler o JSON
-
-      if (!response.ok) {
-        const errorMessage = userData?.message || `Erro ${response.status}: Falha na autenticação.`;
-        return { success: false, needsPasswordChange: false, message: errorMessage };
-      }
->>>>>>> ae3c29b54b7c6735e2e76d5cfa3f9bdceb622fcc
 
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       if (userData?.token) {
         const decoded: any = jwtDecode(userData.token);
-
+        console.log(decoded)
         const payload: User = {
           cpf: decoded.sub,
           nome: decoded.nome,

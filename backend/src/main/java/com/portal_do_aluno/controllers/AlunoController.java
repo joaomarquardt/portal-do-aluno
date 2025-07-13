@@ -70,7 +70,7 @@ public class AlunoController {
     @GetMapping(value = "/total-alunos")
     public ResponseEntity<Long> getNumberOfStudents(@RequestParam(required = false) Boolean matriculado) {
         Long totalAlunosAtivos = service.getNumberOfStudents(matriculado);
-        return new ResponseEntity<>(totalAlunosAtivos, HttpStatus.OK);
+        return new ResponseEntity<>(totalAlunosAtivos   , HttpStatus.OK);
     }
 
     @GetMapping(value = "/{id}/disciplinas-ativas")
