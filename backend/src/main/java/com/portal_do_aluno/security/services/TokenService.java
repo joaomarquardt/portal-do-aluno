@@ -14,7 +14,7 @@ import java.util.List;
 
 @Service
 public class TokenService {
-    @Value("secret")
+    @Value("${api.security.token.secret}")
     private String secret;
 
     public String generateToken(Usuario usuario) {
