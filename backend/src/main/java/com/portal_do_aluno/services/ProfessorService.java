@@ -1,11 +1,17 @@
 package com.portal_do_aluno.services;
 
+import com.portal_do_aluno.domain.Media;
 import com.portal_do_aluno.domain.Professor;
+import com.portal_do_aluno.domain.Turma;
+import com.portal_do_aluno.domain.TurmaStatus;
 import com.portal_do_aluno.dtos.requests.CreateProfessorRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateProfessorRequestDTO;
+import com.portal_do_aluno.dtos.responses.DashboardProfessorResponseDTO;
 import com.portal_do_aluno.dtos.responses.ProfessorResponseDTO;
 import com.portal_do_aluno.dtos.responses.ProfessorSelectResponseDTO;
+import com.portal_do_aluno.dtos.responses.TurmaNotasResponseDTO;
 import com.portal_do_aluno.mappers.ProfessorMapper;
+import com.portal_do_aluno.repositories.MediaRepository;
 import com.portal_do_aluno.repositories.ProfessorRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +24,9 @@ import java.util.List;
 public class ProfessorService {
     @Autowired
     private ProfessorRepository repository;
+
+    @Autowired
+    private MediaRepository mediaRepository;
 
     @Qualifier("professorMapperImpl")
     @Autowired
@@ -58,5 +67,39 @@ public class ProfessorService {
 
     public void delete(Long id) {
         repository.deleteById(id);
+    }
+
+    public DashboardProfessorResponseDTO getProfessorDashboardSummary(Long idProfessor) {
+        Professor professor = findByIdOrThrowEntity(idProfessor);
+        List<Turma> turmas = professor.getTurmas();
+        Integer numTurmasAtivas = turmas.stream()
+                .filter(turma -> turma.getStatus() == TurmaStatus.ATIVA).toList()
+                .size();
+        Long totalAlunosGerenciados = turmas.stream()
+                .filter(turma -> turma.getStatus() == TurmaStatus.ATIVA)
+                .mapToLong(turma -> turma.getAlunos().size())
+                .sum();
+        List<Long> idsTurmas = turmas.stream()
+                .map(Turma::getId)
+                .toList();
+        List<Media> medias = mediaRepository.findByTurmaIdIn(idsTurmas);
+        Double mediaAlunosGerenciados = medias.stream()
+                .filter(m -> m.getValor() != null)
+                .mapToDouble(Media::getValor)
+                .average()
+                .orElse(0.0);
+        return new DashboardProfessorResponseDTO(numTurmasAtivas, totalAlunosGerenciados, mediaAlunosGerenciados);
+    }
+
+    public List<TurmaNotasResponseDTO> getActiveClassesByProfessor(Long id) {
+        Professor professor = findByIdOrThrowEntity(id);
+        return professor.getTurmas().stream()
+                .filter(turma -> turma.getStatus() == TurmaStatus.ATIVA)
+                .map(turma -> {
+                        Long idTurma = turma.getId();
+                        String nomeDisciplina = turma.getDisciplina().getNome();
+                        String codigoTurma = turma.getCodigo();
+                        return new TurmaNotasResponseDTO(idTurma, nomeDisciplina, codigoTurma);
+                }).toList();
     }
 }

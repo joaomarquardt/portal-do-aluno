@@ -97,7 +97,7 @@ public class TurmaService {
     }
 
     public void updateStudentPerformance(Long idTurma, Long idAluno, UpdateDesempenhoRequestDTO desempenhoDTO) {
-        if (desempenhoDTO.presenca() < 0 || desempenhoDTO.valor() < 0) {
+        if (desempenhoDTO.horasRegistradas() < 0 || desempenhoDTO.valor() < 0) {
             throw new IllegalArgumentException("Presença e média não podem ser negativas.");
         }
         if (desempenhoDTO.valor() > 10) {
@@ -107,13 +107,13 @@ public class TurmaService {
         if (turma.getStatus() == TurmaStatus.ENCERRADA) {
             throw new TurmaEncerradaException("A turma com código '" + turma.getCodigo() + "' não está mais ativa!");
         }
-        if (!turma.isValidAttendanceHours(desempenhoDTO.presenca())) {
+        if (!turma.isValidAttendanceHours(desempenhoDTO.horasRegistradas())) {
             throw new IllegalArgumentException("Presença não pode ultrapassar a carga horária total da disciplina!");
         }
         Aluno aluno = alunoService.findByIdOrThrowEntity(idAluno);
         Media media = mediaRepository.findByAlunoAndTurma(aluno, turma).orElseThrow(() -> new EntityNotFoundException("Não há media associada a este aluno nesta turma!"));
         Presenca presenca = presencaRepository.findByAlunoAndTurma(aluno, turma).orElseThrow(() -> new EntityNotFoundException("Não há presença associada a este aluno nesta turma!"));
-        presenca.setHorasRegistradas(desempenhoDTO.presenca());
+        presenca.setHorasRegistradas(desempenhoDTO.horasRegistradas());
         media.setValor(desempenhoDTO.valor());
         presencaRepository.save(presenca);
         mediaRepository.save(media);

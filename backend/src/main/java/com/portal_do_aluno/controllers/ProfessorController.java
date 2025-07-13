@@ -2,8 +2,10 @@ package com.portal_do_aluno.controllers;
 
 import com.portal_do_aluno.dtos.requests.CreateProfessorRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateProfessorRequestDTO;
+import com.portal_do_aluno.dtos.responses.DashboardProfessorResponseDTO;
 import com.portal_do_aluno.dtos.responses.ProfessorResponseDTO;
 import com.portal_do_aluno.dtos.responses.ProfessorSelectResponseDTO;
+import com.portal_do_aluno.dtos.responses.TurmaNotasResponseDTO;
 import com.portal_do_aluno.services.ProfessorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -52,5 +54,17 @@ public class ProfessorController {
     public ResponseEntity<Void> delete(@PathVariable(value = "id") Long id) {
         service.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping(value = "/{id}/sumario-dashboard")
+    public ResponseEntity<DashboardProfessorResponseDTO> getProfessorDashboardSummary(@PathVariable(value = "id") Long id) {
+        DashboardProfessorResponseDTO dashboardProfessorDTO = service.getProfessorDashboardSummary(id);
+        return new ResponseEntity<>(dashboardProfessorDTO, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/{id}/turmas-ativas")
+    public ResponseEntity<List<TurmaNotasResponseDTO>> getActiveClassesByProfessor(@PathVariable(value = "id") Long id) {
+        List<TurmaNotasResponseDTO> turmasAtivasProfessorDTO = service.getActiveClassesByProfessor(id);
+        return new ResponseEntity<>(turmasAtivasProfessorDTO, HttpStatus.OK);
     }
 }
