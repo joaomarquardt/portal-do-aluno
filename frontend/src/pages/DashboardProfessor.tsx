@@ -13,7 +13,7 @@ interface ComunicadoServ {
 interface ProfessorSummaryDTO {
   numTurmasAtivas: number;
   totalAlunosGerenciados: number;
-  mediaGeralProfessor: number;
+  mediaAlunosGerenciados: number;
 }
 
 const apiUrl = import.meta.env.VITE_URL_API;
@@ -23,7 +23,7 @@ const DashboardProfessor = () => {
 
   const [numTurmasAtivas, setNumTurmasAtivas] = useState<number | null>(null);
   const [totalAlunosGerenciados, setTotalAlunosGerenciados] = useState<number | null>(null);
-  const [mediaGeralProfessor, setMediaGeralProfessor] = useState<number | null>(null);
+  const [mediaAlunosGerenciados, setMediaAlunosGerenciados] = useState<number | null>(null);
 
   const [loadingSummary, setLoadingSummary] = useState(true);
   const [errorSummary, setErrorSummary] = useState<string | null>(null);
@@ -50,7 +50,8 @@ const DashboardProfessor = () => {
       });
       setNumTurmasAtivas(response.data.numTurmasAtivas);
       setTotalAlunosGerenciados(response.data.totalAlunosGerenciados);
-      setMediaGeralProfessor(response.data.mediaGeralProfessor);
+      debugger;
+      setMediaAlunosGerenciados(response.data.mediaAlunosGerenciados);
     } catch (err) {
       console.error('Erro ao buscar sumário do professor:', err);
       if (axios.isAxiosError(err)) {
@@ -60,7 +61,7 @@ const DashboardProfessor = () => {
       }
       setNumTurmasAtivas(null);
       setTotalAlunosGerenciados(null);
-      setMediaGeralProfessor(null);
+      setMediaAlunosGerenciados(null);
     } finally {
       setLoadingSummary(false);
     }
@@ -161,7 +162,7 @@ const DashboardProfessor = () => {
             <h3 className="text-lg font-semibold text-gray-800">Média Geral Alunos</h3>
           </div>
           <p className="text-2xl font-bold text-purple-600">
-            {mediaGeralProfessor !== null ? mediaGeralProfessor.toFixed(2) : 'N/A'}
+            {mediaAlunosGerenciados !== null ? mediaAlunosGerenciados.toFixed(2) : 'N/A'}
           </p>
           <p className="text-gray-600 text-sm">Notas nas suas turmas</p>
         </div>
