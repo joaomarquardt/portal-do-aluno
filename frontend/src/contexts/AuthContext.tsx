@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import axios from 'axios';
 
 interface User {
   nome: string;
@@ -110,12 +111,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    setChangePassword(false);
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    localStorage.removeItem('changePassword');
+  const logout = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        await axios.delete(`${apiUrl}/auth/logout`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        console.log('Logout no backend realizado com sucesso (se o endpoint respondeu).');
+      }
+    } catch (error) {
+      console.error('Erro ao fazer logout no backend:', error);
+    } finally {
+      setUser(null);
+      setChangePassword(false);
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      localStorage.removeItem('changePassword');
+      window.location.href = '/login'
+    }
   };
 
   return (
