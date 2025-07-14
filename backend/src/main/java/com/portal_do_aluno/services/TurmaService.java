@@ -163,10 +163,12 @@ public class TurmaService {
         Turma turma = repository.findById(idTurma).orElseThrow(() -> new EntityNotFoundException("Turma não encontrada!"));
         return turma.getAlunos().stream()
                 .map(aluno -> {
+                    Media media = mediaRepository.findByAlunoAndTurma(aluno, turma).orElseThrow(() -> new EntityNotFoundException("Media do aluno não encontrada!"));
+                    Presenca presenca = presencaRepository.findByAlunoAndTurma(aluno, turma).orElseThrow(() -> new EntityNotFoundException("Presença do aluno não encontrada!"));
                     Usuario usuario = aluno.getUsuario();
                     return new AlunoTurmaResponseDTO(aluno.getId(), usuario.getNome(), usuario.getCpf(),
                             usuario.getEmailPessoal(), usuario.getEmailInstitucional(), aluno.getMatricula(),
-                            usuario.getTelefone(), aluno.getPeriodoAtual(), aluno.getPeriodoIngresso());
+                            usuario.getTelefone(), aluno.getPeriodoAtual(), aluno.getPeriodoIngresso(), media.getValor(), presenca.getHorasRegistradas());
                 }).toList();
     }
 }

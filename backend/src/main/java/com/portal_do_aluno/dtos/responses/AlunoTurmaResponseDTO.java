@@ -9,6 +9,8 @@ public record AlunoTurmaResponseDTO(
         String matricula,
         String telefone,
         int periodoAtual,
-        String periodoIngresso
+        String periodoIngresso,
+        Double media,
+        Integer horasRegistradas
 ) {
 }
