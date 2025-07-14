@@ -41,7 +41,6 @@ const adminMenuItems: MenuItem[] = [
 const alunoMenuItems: MenuItem[] = [
   { title: "Meu Dashboard", url: "/dashboard/aluno", icon: Users },
   { title: "Minhas Turmas", url: "/minhas-turmas", icon: BookOpen },
-  { title: "Meus Comunicados", url: "/meus-comunicados", icon: MessageSquare },
 ];
 
 const professorMenuItems: MenuItem[] = [
@@ -163,13 +162,6 @@ const AppContent = () => {
             <ProtectedRoute allowedRoles={['ALUNO']}>
               <DashboardLayout menuItems={alunoMenuItems} user={user} logout={logout} navigate={navigate}>
                 <AcompanharDesempenho/>
-              </DashboardLayout> 
-            </ProtectedRoute>
-          } />
-          <Route path="/meus-comunicados" element={
-            <ProtectedRoute allowedRoles={['ALUNO']}>
-              <DashboardLayout menuItems={alunoMenuItems} user={user} logout={logout} navigate={navigate}>
-                <p>Página Meus Comunicados do Aluno</p>
               </DashboardLayout>
             </ProtectedRoute>
           } />
