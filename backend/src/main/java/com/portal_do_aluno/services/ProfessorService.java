@@ -94,13 +94,14 @@ public class ProfessorService {
                 .filter(turma -> turma.getStatus() == TurmaStatus.ATIVA)
                 .map(turma -> {
                         Long idTurma = turma.getId();
+                        TurmaStatus status = turma.getStatus();
                         String codigoTurma = turma.getCodigo();
                         String nomeDisciplina = turma.getDisciplina().getNome();
                         String periodo = turma.getPeriodo();
                         String horario = turma.getHorario();
                         String nomeProfessor = turma.getProfessor().getUsuario().getNome();
                         Integer cargaHoraria = turma.getDisciplina().getCargaHoraria();
-                        return new TurmaDesempenhoResponseDTO(idTurma, codigoTurma,
+                        return new TurmaDesempenhoResponseDTO(idTurma, status, codigoTurma,
                                 nomeDisciplina, periodo, horario, nomeProfessor, cargaHoraria);
                 }).toList();
     }
