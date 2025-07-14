@@ -93,13 +93,13 @@ const DashboardProfessor = () => {
     }
   }, [apiUrl]);
 
-  // useEffect(() => {
-  //   fetchProfessorSummary();
-  // }, [fetchProfessorSummary]);
+  useEffect(() => {
+    fetchProfessorSummary();
+  }, [fetchProfessorSummary]);
 
-  // useEffect(() => {
-  //   fetchComunicados();
-  // }, [fetchComunicados]);
+  useEffect(() => {
+    fetchComunicados();
+  }, [fetchComunicados]);
 
   if (!user) {
     return (
