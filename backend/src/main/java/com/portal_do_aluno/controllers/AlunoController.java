@@ -7,6 +7,7 @@ import com.portal_do_aluno.dtos.responses.DashboardAlunoResponseDTO;
 import com.portal_do_aluno.dtos.responses.DesempenhoResponseDTO;
 import com.portal_do_aluno.services.AlunoService;
 import jakarta.annotation.Nullable;
+import jakarta.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -73,9 +74,9 @@ public class AlunoController {
         return new ResponseEntity<>(totalAlunosAtivos   , HttpStatus.OK);
     }
 
-    @GetMapping(value = "/{id}/disciplinas-ativas")
-    public ResponseEntity<List<DesempenhoResponseDTO>> getActiveStudentSubjects(@PathVariable(value = "id") Long id) {
-        List<DesempenhoResponseDTO> desempenhosDTO = service.getActiveStudentSubjects(id);
+    @GetMapping(value = "/{id}/turmas")
+    public ResponseEntity<List<DesempenhoResponseDTO>> getStudentClasses(@PathVariable(value = "id") Long id, @RequestParam(required = false) Boolean turmaAtiva) {
+        List<DesempenhoResponseDTO> desempenhosDTO = service.getStudentClasses(id, turmaAtiva);
         return new ResponseEntity<>(desempenhosDTO, HttpStatus.OK);
     }
 
