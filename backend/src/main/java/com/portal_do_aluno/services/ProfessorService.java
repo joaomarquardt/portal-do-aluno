@@ -6,10 +6,7 @@ import com.portal_do_aluno.domain.Turma;
 import com.portal_do_aluno.domain.TurmaStatus;
 import com.portal_do_aluno.dtos.requests.CreateProfessorRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateProfessorRequestDTO;
-import com.portal_do_aluno.dtos.responses.DashboardProfessorResponseDTO;
-import com.portal_do_aluno.dtos.responses.ProfessorResponseDTO;
-import com.portal_do_aluno.dtos.responses.ProfessorSelectResponseDTO;
-import com.portal_do_aluno.dtos.responses.TurmaNotasResponseDTO;
+import com.portal_do_aluno.dtos.responses.*;
 import com.portal_do_aluno.mappers.ProfessorMapper;
 import com.portal_do_aluno.repositories.MediaRepository;
 import com.portal_do_aluno.repositories.ProfessorRepository;
@@ -91,15 +88,20 @@ public class ProfessorService {
         return new DashboardProfessorResponseDTO(numTurmasAtivas, totalAlunosGerenciados, mediaAlunosGerenciados);
     }
 
-    public List<TurmaNotasResponseDTO> getActiveClassesByProfessor(Long id) {
+    public List<TurmaDesempenhoResponseDTO> getActiveClassesByProfessor(Long id) {
         Professor professor = findByIdOrThrowEntity(id);
         return professor.getTurmas().stream()
                 .filter(turma -> turma.getStatus() == TurmaStatus.ATIVA)
                 .map(turma -> {
                         Long idTurma = turma.getId();
-                        String nomeDisciplina = turma.getDisciplina().getNome();
                         String codigoTurma = turma.getCodigo();
-                        return new TurmaNotasResponseDTO(idTurma, nomeDisciplina, codigoTurma);
+                        String nomeDisciplina = turma.getDisciplina().getNome();
+                        String periodo = turma.getPeriodo();
+                        String horario = turma.getHorario();
+                        String nomeProfessor = turma.getProfessor().getUsuario().getNome();
+                        Integer cargaHoraria = turma.getDisciplina().getCargaHoraria();
+                        return new TurmaNotasResponseDTO(idTurma, codigoTurma,
+                                nomeDisciplina, periodo, horario, nomeProfessor, cargaHoraria);
                 }).toList();
     }
 }

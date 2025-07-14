@@ -1,7 +1,8 @@
 package com.portal_do_aluno.dtos.responses;
 
 public record TurmaDesempenhoResponseDTO(
-        String codigo,
+        Long id,
+        String codigoTurma,
         String nomeDisciplina,
         String periodo,
         String horario,
