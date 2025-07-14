@@ -129,7 +129,7 @@ const AppContent = () => {
           <Route path="/lancar-notas" element={
             <ProtectedRoute allowedRoles={['PROFESSOR']}>
               <DashboardLayout menuItems={professorMenuItems} user={user} logout={logout} navigate={navigate}>
-                <CadastrarNotaDisc></CadastrarNotaDisc>
+                <CadastrarNotaDisc professorId={0}></CadastrarNotaDisc>
               </DashboardLayout>
             </ProtectedRoute>
           } />
@@ -163,7 +163,7 @@ const AppContent = () => {
             <ProtectedRoute allowedRoles={['ALUNO']}>
               <DashboardLayout menuItems={alunoMenuItems} user={user} logout={logout} navigate={navigate}>
                 <AcompanharDesempenho/>
-              </DashboardLayout>
+              </DashboardLayout> 
             </ProtectedRoute>
           } />
           <Route path="/meus-comunicados" element={

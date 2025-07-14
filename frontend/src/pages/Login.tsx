@@ -16,6 +16,7 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    
 
     if (!cpf || !senha) {
       setError('Por favor, preencha todos os campos.');
