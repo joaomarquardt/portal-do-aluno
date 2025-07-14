@@ -104,6 +104,7 @@ public class AlunoService {
                             Presenca presenca = presencaRepository.findByAlunoAndTurma(aluno, turma).orElseThrow(() -> new EntityNotFoundException("Não há presença registrada para o aluno nesta turma!"));
                             TurmaDesempenhoResponseDTO turmaDesempenhoResponseDTO = new TurmaDesempenhoResponseDTO(
                                     turma.getId(),
+                                    turma.getStatus(),
                                     turma.getCodigo(),
                                     turma.getDisciplina().getNome(),
                                     turma.getPeriodo(),
@@ -130,16 +131,22 @@ public class AlunoService {
         return periodos.isEmpty() ? null : periodos.getFirst();
     }
 
-    public List<DesempenhoResponseDTO> getActiveStudentSubjects(Long id) {
+    public List<DesempenhoResponseDTO> getStudentClasses(Long id, Boolean turmaAtiva) {
         Aluno aluno = findByIdOrThrowEntity(id);
         return aluno.getTurmas().stream()
-                .filter(turma -> turma.getStatus() == TurmaStatus.ATIVA)
+                .filter(turma -> {
+                    if (turmaAtiva == null) return true;
+                    return turmaAtiva
+                            ? turma.getStatus() == TurmaStatus.ATIVA
+                            : turma.getStatus() == TurmaStatus.ENCERRADA;
+                })
                 .map(
                         turma -> {
                             Media media = mediaRepository.findByAlunoAndTurma(aluno, turma).orElseThrow(() -> new EntityNotFoundException("Não há média registrada para o aluno nesta turma!"));
                             Presenca presenca = presencaRepository.findByAlunoAndTurma(aluno, turma).orElseThrow(() -> new EntityNotFoundException("Não há presença registrada para o aluno nesta turma!"));
                             TurmaDesempenhoResponseDTO turmaDesempenhoResponseDTO = new TurmaDesempenhoResponseDTO(
                                     turma.getId(),
+                                    turma.getStatus(),
                                     turma.getCodigo(),
                                     turma.getDisciplina().getNome(),
                                     turma.getPeriodo(),
