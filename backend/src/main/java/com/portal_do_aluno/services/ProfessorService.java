@@ -100,7 +100,7 @@ public class ProfessorService {
                         String horario = turma.getHorario();
                         String nomeProfessor = turma.getProfessor().getUsuario().getNome();
                         Integer cargaHoraria = turma.getDisciplina().getCargaHoraria();
-                        return new TurmaNotasResponseDTO(idTurma, codigoTurma,
+                        return new TurmaDesempenhoResponseDTO(idTurma, codigoTurma,
                                 nomeDisciplina, periodo, horario, nomeProfessor, cargaHoraria);
                 }).toList();
     }
