@@ -18,7 +18,6 @@ Esta é a API backend do projeto **Portal do Aluno**, desenvolvida em Java com S
   * [Períodos Letivos](#períodos-letivos)
   * [Turmas](#turmas)
   * [Comunicados](#comunicados)
-  * [Desempenho Escolar](#desempenho-escolar)
 * [Controle de Acesso](#controle-de-acesso)
 
 ---
@@ -84,26 +83,31 @@ A API utiliza **JWT** para autenticação. O fluxo é:
 
 ### Alunos
 
-| Verbo  | Endpoint       | Descrição            |
-| ------ | -------------- | -------------------- |
-| GET    | `/alunos`      | Lista alunos         |
-| GET    | `/alunos/{id}` | Detalhes de um aluno |
-| POST   | `/alunos`      | Cadastra aluno       |
-| PUT    | `/alunos/{id}` | Atualiza aluno       |
-| DELETE | `/alunos/{id}` | Remove aluno         |
+| Verbo  | Endpoint                         | Descrição                           |
+| ------ | -------------------------------- | ----------------------------------- |
+| GET    | `/alunos`                        | Lista todos os alunos               |
+| GET    | `/alunos/paginacao`              | Lista todos os alunos com paginação |
+| GET    | `/alunos/{id}`                   | Detalhes de um aluno                |
+| GET    | `/alunos/{id}/desempenho-geral`  | Detalhes do desempenho do aluno     |
+| GET    | `/alunos/total-alunos`           | Número de alunos cadastrados        |
+| GET    | `/alunos/{id}/turmas`            | Lista as turmas do aluno            |
+| GET    | `/alunos/{id}/sumario-dashboard` | Informações para interface do aluno |
+| POST   | `/alunos`                        | Cadastra aluno                      |
+| PUT    | `/alunos/{id}`                   | Atualiza aluno                      |
+| DELETE | `/alunos/{id}`                   | Remove aluno                        |
 
 ### Professores
 
-| Verbo  | Endpoint                              | Descrição                     |
-| ------ | ------------------------------------- | ----------------------------- |
-| GET    | `/professores`                        | Lista professores             |
-| GET    | `/professores/{id}`                   | Detalhes de um professor      |
-| GET    | `/professores/select`                 | Lista para seleção (dropdown) |
-| POST   | `/professores`                        | Cadastra professor            |
-| PUT    | `/professores/{id}`                   | Atualiza professor            |
-| DELETE | `/professores/{id}`                   | Remove professor              |
-| GET    | `/professores/{id}/sumario-dashboard` | Dashboard resumido            |
-| GET    | `/professores/{id}/turmas-ativas`     | Turmas ativas do professor    |
+| Verbo  | Endpoint                              | Descrição                               |
+| ------ | ------------------------------------- | --------------------------------------- |
+| GET    | `/professores`                        | Lista professores                       |
+| GET    | `/professores/{id}`                   | Detalhes de um professor                |
+| GET    | `/professores/select`                 | Lista para seleção (dropdown)           |
+| POST   | `/professores`                        | Cadastra professor                      |
+| PUT    | `/professores/{id}`                   | Atualiza professor                      |
+| DELETE | `/professores/{id}`                   | Remove professor                        |
+| GET    | `/professores/{id}/sumario-dashboard` | Informações para interface do professor |
+| GET    | `/professores/{id}/turmas-ativas`     | Turmas ativas do professor              |
 
 ### Cursos
 
@@ -137,18 +141,18 @@ A API utiliza **JWT** para autenticação. O fluxo é:
 
 ### Turmas
 
-| Verbo  | Endpoint                             | Descrição                      |
-| ------ | ------------------------------------ | ------------------------------ |
-| GET    | `/turmas`                            | Lista turmas                   |
-| GET    | `/turmas/{id}`                       | Detalhes de uma turma          |
-| POST   | `/turmas`                            | Cadastra turma                 |
-| POST   | `/turmas/{idTurma}/alunos`           | Adiciona alunos a turma        |
-| GET    | `/turmas/{idTurma}/alunos`           | Lista alunos de uma turma      |
-| PUT    | `/turmas/{idTurma}/alunos/{idAluno}` | Atualiza desempenho de aluno   |
-| PUT    | `/turmas/{id}`                       | Atualiza turma                 |
-| DELETE | `/turmas/{id}`                       | Remove turma                   |
-| GET    | `/turmas/media-geral`                | Média geral de todas as turmas |
-| GET    | `/turmas/sumario-dashboard`          | Dashboard admin resumido       |
+| Verbo  | Endpoint                             | Descrição                                   |
+| ------ | ------------------------------------ | ------------------------------------------- |
+| GET    | `/turmas`                            | Lista turmas                                |
+| GET    | `/turmas/{id}`                       | Detalhes de uma turma                       |
+| POST   | `/turmas`                            | Cadastra turma                              |
+| POST   | `/turmas/{idTurma}/alunos`           | Adiciona alunos a turma                     |
+| GET    | `/turmas/{idTurma}/alunos`           | Lista alunos de uma turma                   |
+| PUT    | `/turmas/{idTurma}/alunos/{idAluno}` | Atualiza desempenho de aluno                |
+| PUT    | `/turmas/{id}`                       | Atualiza turma                              |
+| DELETE | `/turmas/{id}`                       | Remove turma                                |
+| GET    | `/turmas/media-geral`                | Média geral de todas as turmas              |
+| GET    | `/turmas/sumario-dashboard`          | Informações para interface do administrador |
 
 ### Comunicados
 
@@ -159,12 +163,6 @@ A API utiliza **JWT** para autenticação. O fluxo é:
 | POST   | `/comunicados`      | Cria comunicado        |
 | PUT    | `/comunicados/{id}` | Atualiza comunicado    |
 | DELETE | `/comunicados/{id}` | Remove comunicado      |
-
-### Desempenho Escolar
-
-| Verbo | Endpoint              | Descrição                             |
-| ----- | --------------------- | ------------------------------------- |
-| GET   | `/desempenho-escolar` | Lista desempenho do aluno autenticado |
 
 ---
 
