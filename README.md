@@ -64,7 +64,7 @@
 - [Redis](https://redis.io/docs/latest/operate/oss_and_stack/install/archive/install-redis/install-redis-on-windows/)
 - [Node](https://nodejs.org/pt)
 
-### 🔧 Backend
+### 🔧 Backend e Frontend
 
 ```bash
 # Clone o repositório
