@@ -140,7 +140,6 @@ const Periodos = () => {
           </button>
         </div>
 
-        {/* Formulário */}
         {showForm && (
           <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-6">
             <h3 className="text-lg font-bold text-gray-800 mb-4">
@@ -223,7 +222,6 @@ const Periodos = () => {
           </div>
         )}
 
-        {/* Lista de Períodos */}
         <div className="space-y-3">
           {periodos.map((periodo) => (
             <div key={periodo.id} className="bg-gray-50 border-2 border-gray-200 rounded-lg p-4">

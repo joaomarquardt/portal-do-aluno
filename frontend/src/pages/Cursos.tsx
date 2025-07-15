@@ -133,7 +133,6 @@
         </div>
       </div>
 
-      {/* Formulário */}
       {showForm && (
         <div className="bg-white border-2 border-purple-300 rounded-lg p-4 mb-6 shadow-md">
           <h2 className="text-xl font-bold text-gray-800 mb-4">
@@ -217,7 +216,6 @@
         </div>
       )}
 
-      {/* Lista de Cursos */}
       <div className="bg-white border-2 border-gray-300 rounded-lg p-4 shadow-md">
         <h2 className="text-xl font-bold text-gray-800 mb-4">
           Lista de Cursos ({Cursos.length})

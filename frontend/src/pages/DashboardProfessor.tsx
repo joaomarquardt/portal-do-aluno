@@ -168,7 +168,6 @@ const DashboardProfessor = () => {
         </div>
       </div>
 
-      {/* SEÇÃO DE COMUNICADOS */}
       <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-lg font-bold text-gray-800 mb-4">Comunicados</h2>
 

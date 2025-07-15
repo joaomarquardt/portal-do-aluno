@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { ChevronDown, ChevronUp, Save } from 'lucide-react';
@@ -8,27 +7,33 @@ interface TurmaAtiva {
   id: number;
   nomeDisciplina: string;
   codigoTurma: string;
+  cargaHoraria: number;
 }
 
-interface Aluno {
+interface AlunoTurmaDetalhe {
   id: number;
   nome: string;
   matricula: string;
+  cpf: string;
+  emailPessoal: string;
+  emailInstitucional: string;
+  telefone: string;
+  periodoAtual: number;
+  periodoIngresso: string;
+  media: number;
+  horasRegistradas: number;
 }
-
-
 
 const CadastroNotasPresencas = ({ professorId }: { professorId: number }) => {
   const apiUrl = import.meta.env.VITE_URL_API;
-  const {user} = useAuth()
+  const { user } = useAuth();
   const [turmas, setTurmas] = useState<TurmaAtiva[]>([]);
   const [expandedTurmas, setExpandedTurmas] = useState<number[]>([]);
-  const [alunosPorTurma, setAlunosPorTurma] = useState<Record<number, Aluno[]>>({});
+  const [alunosPorTurma, setAlunosPorTurma] = useState<Record<number, AlunoTurmaDetalhe[]>>({});
   const [notasPresencas, setNotasPresencas] = useState<Record<string, { media: string; horas: string }>>({});
 
   useEffect(() => {
     const fetchTurmas = async () => {
-
       try {
         const token = localStorage.getItem('token');
         if (!token) throw new Error('Token não encontrado');
@@ -38,7 +43,6 @@ const CadastroNotasPresencas = ({ professorId }: { professorId: number }) => {
         setTurmas(response.data);
       } catch (error) {
         console.error("Erro ao buscar turmas ativas:", error);
-
       }
     };
 
@@ -51,21 +55,29 @@ const CadastroNotasPresencas = ({ professorId }: { professorId: number }) => {
     if (expandedTurmas.includes(turmaId)) {
       setExpandedTurmas((prev) => prev.filter((id) => id !== turmaId));
     } else {
-      if (!alunosPorTurma[turmaId]) {
+      if (!alunosPorTurma[turmaId] || alunosPorTurma[turmaId].length === 0) {
         try {
           const token = localStorage.getItem('token');
           if (!token) throw new Error('Token não encontrado');
-          const response = await axios.get(`${apiUrl}/turmas/${turmaId}/alunos`, {
+          const response = await axios.get<AlunoTurmaDetalhe[]>(`${apiUrl}/turmas/${turmaId}/alunos`, {
             headers: { Authorization: `Bearer ${token}` },
           });
-          
-    
-          setAlunosPorTurma((prev) => ({ ...prev, [turmaId]: response.data })); 
-    
-          
+          debugger;
+          const fetchedAlunos: AlunoTurmaDetalhe[] = response.data;
+          setAlunosPorTurma((prev) => ({ ...prev, [turmaId]: fetchedAlunos }));
+
+          const initialNotasPresencasForTurma: Record<string, { media: string; horas: string }> = {};
+          fetchedAlunos.forEach(aluno => {
+            const key = `${turmaId}-${aluno.id}`;
+            initialNotasPresencasForTurma[key] = {
+              media: aluno.media !== null && aluno.media !== undefined ? String(aluno.media) : '',
+              horas: aluno.horasRegistradas !== null && aluno.horasRegistradas !== undefined ? String(aluno.horasRegistradas) : '',
+            };
+          });
+          setNotasPresencas(prev => ({ ...prev, ...initialNotasPresencasForTurma }));
+
         } catch (error) {
           console.error(`Erro ao buscar alunos da turma ${turmaId}:`, error);
-  
           setAlunosPorTurma((prev) => ({ ...prev, [turmaId]: [] }));
         }
       }
@@ -92,24 +104,23 @@ const CadastroNotasPresencas = ({ professorId }: { professorId: number }) => {
   const handleSalvar = async (turmaId: number) => {
     const token = localStorage.getItem('token');
     if (!token) {
-        alert('Token de autenticação não encontrado. Faça login novamente.');
-        return;
+      alert('Token de autenticação não encontrado. Faça login novamente.');
+      return;
     }
     const alunos = alunosPorTurma[turmaId];
 
     if (!alunos || alunos.length === 0) {
-        alert('Nenhum aluno para salvar nesta turma.');
-        return;
+      alert('Nenhum aluno para salvar nesta turma.');
+      return;
     }
 
     let successCount = 0;
     let errorMessages: string[] = [];
-
     for (const aluno of alunos) {
       const key = `${turmaId}-${aluno.id}`;
       const dados = notasPresencas[key];
-     
-      if (dados && (dados.media || dados.horas)) { 
+
+      if (dados && (dados.media !== '' || dados.horas !== '')) {
         try {
           const res = await fetch(`${apiUrl}/turmas/${turmaId}/alunos/${aluno.id}`, {
             method: "PUT",
@@ -118,8 +129,8 @@ const CadastroNotasPresencas = ({ professorId }: { professorId: number }) => {
               "Authorization": `Bearer ${token}`
             },
             body: JSON.stringify({
-              valor: dados.media ? parseFloat(dados.media) : null, 
-              horasRegistradas: dados.horas ? parseInt(dados.horas) : null 
+              valor: dados.media !== '' ? parseFloat(dados.media) : null,
+              horasRegistradas: dados.horas !== '' ? parseInt(dados.horas) : null
             })
           });
 
@@ -128,6 +139,21 @@ const CadastroNotasPresencas = ({ professorId }: { professorId: number }) => {
             errorMessages.push(`Falha ao salvar ${aluno.nome}: ${errorBody.message || res.statusText}`);
           } else {
             successCount++;
+            setAlunosPorTurma(prev => {
+                const updatedTurmaAlunos = prev[turmaId].map(a =>
+                    a.id === aluno.id ? {
+                        ...a,
+                        media: dados.media !== '' ? parseFloat(dados.media) : null,
+                        horasRegistradas: dados.horas !== '' ? parseInt(dados.horas) : null
+                    } : a
+                );
+                return {...prev, [turmaId]: updatedTurmaAlunos};
+            });
+            setNotasPresencas(prev => {
+                const newPrev = {...prev};
+                delete newPrev[key];
+                return newPrev;
+            });
           }
         } catch (fetchError: any) {
           console.error(`Erro de rede/conexão ao salvar ${aluno.nome}:`, fetchError);
@@ -172,10 +198,13 @@ const CadastroNotasPresencas = ({ professorId }: { professorId: number }) => {
                 ) : (
                   alunosPorTurma[turma.id]?.map((aluno) => {
                     const key = `${turma.id}-${aluno.id}`;
+                    const currentMedia = notasPresencas[key]?.media ?? (aluno.media !== null && aluno.media !== undefined ? String(aluno.media) : '');
+                    const currentHoras = notasPresencas[key]?.horas ?? (aluno.horasRegistradas !== null && aluno.horasRegistradas !== undefined ? String(aluno.horasRegistradas) : '');
+
                     return (
                       <div
                         key={aluno.id}
-                        className="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-gray-200 py-2 last:border-b-0" // last:border-b-0 para remover a última borda
+                        className="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-gray-200 py-2 last:border-b-0"
                       >
                         <div className="flex-1">
                           <p className="font-medium text-gray-800">{aluno.nome}</p>
@@ -187,9 +216,9 @@ const CadastroNotasPresencas = ({ professorId }: { professorId: number }) => {
                             <input
                               id={`media-${key}`}
                               type="number"
-                              step="0.1" 
+                              step="0.1"
                               min="0" max="10"
-                              value={notasPresencas[key]?.media || ''}
+                              value={currentMedia}
                               onChange={(e) => handleInputChange(turma.id, aluno.id, 'media', e.target.value)}
                               className="px-3 py-2 border rounded w-24"
                             />
@@ -199,8 +228,8 @@ const CadastroNotasPresencas = ({ professorId }: { professorId: number }) => {
                             <input
                               id={`horas-${key}`}
                               type="number"
-                              min="0" 
-                              value={notasPresencas[key]?.horas || ''}
+                              min="0" max={turma.cargaHoraria}
+                              value={currentHoras}
                               onChange={(e) => handleInputChange(turma.id, aluno.id, 'horas', e.target.value)}
                               className="px-3 py-2 border rounded w-24"
                             />
