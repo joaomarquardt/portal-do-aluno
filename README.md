@@ -45,7 +45,6 @@
   - API RESTful desenvolvida em Spring Boot
   - Segurança com Spring Security e JWT
   - Redis utilizado para cache durante login
-  - [Documentação API](https://nodejs.org/pt)
 
 - **💻 Frontend**
   - Interface moderna, responsiva e desacoplada via React
@@ -88,5 +87,5 @@ npm install
 npm run dev
 ````
 
-# Acesse todo o relatório da aplicação aqui
+# Acesse todo a documentação da aplicação aqui
 [relatório](https://docs.google.com/document/d/1ZuvFB5Qbj2wro9bED8D5XLHCjNCJR7u5hFR4zn-WgbM/edit?usp=sharing)
