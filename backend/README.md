@@ -35,8 +35,8 @@ Esta é a API backend do projeto **Portal do Aluno**, desenvolvida em Java com S
 
 ```bash
 # Clone o repositório
-$ git clone https://github.com/seu-usuario/portal-do-aluno-api.git
-$ cd portal-do-aluno-api
+$ git clone https://github.com/joaomarquardt/portal-do-aluno.git
+$ cd portal-do-aluno
 
 # Configure o application.properties com as credenciais do MySQL e Redis
 
