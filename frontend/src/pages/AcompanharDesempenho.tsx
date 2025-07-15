@@ -190,7 +190,7 @@ const TurmasAluno = () => {
                             <span>
                               <strong>Frequência:</strong>{' '}
                               {desempenho.horasRegistradas !== null
-                                ? `${(desempenho.horasRegistradas / desempenho.turma.cargaHoraria) * 100}%`
+                                ? `${((desempenho.horasRegistradas / desempenho.turma.cargaHoraria) * 100).toFixed(1)}%`
                                 : 'N/A'}
                             </span>
                           </div>
@@ -270,7 +270,7 @@ const TurmasAluno = () => {
                             <span>
                               <strong>Frequência:</strong>{' '}
                               {desempenho.horasRegistradas !== null
-                                ? `${(desempenho.horasRegistradas / desempenho.turma.cargaHoraria) * 100}%`
+                                ? `${((desempenho.horasRegistradas / desempenho.turma.cargaHoraria) * 100).toFixed(1)}%`
                                 : 'N/A'}
                             </span>
                           </div>
