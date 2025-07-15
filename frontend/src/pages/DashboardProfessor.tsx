@@ -50,7 +50,6 @@ const DashboardProfessor = () => {
       });
       setNumTurmasAtivas(response.data.numTurmasAtivas);
       setTotalAlunosGerenciados(response.data.totalAlunosGerenciados);
-      debugger;
       setMediaAlunosGerenciados(response.data.mediaAlunosGerenciados);
     } catch (err) {
       console.error('Erro ao buscar sumário do professor:', err);

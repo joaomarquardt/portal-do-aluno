@@ -62,7 +62,6 @@ const CadastroNotasPresencas = ({ professorId }: { professorId: number }) => {
           const response = await axios.get<AlunoTurmaDetalhe[]>(`${apiUrl}/turmas/${turmaId}/alunos`, {
             headers: { Authorization: `Bearer ${token}` },
           });
-          debugger;
           const fetchedAlunos: AlunoTurmaDetalhe[] = response.data;
           setAlunosPorTurma((prev) => ({ ...prev, [turmaId]: fetchedAlunos }));
 
