@@ -24,7 +24,7 @@ Esta é a API backend do projeto **Portal do Aluno**, desenvolvida em Java com S
 
 ## Tecnologias Utilizadas
 
-* Java 17
+* Java 21
 * Spring Boot 3.x
 * Spring Security com JWT
 * MySQL
@@ -175,9 +175,3 @@ O controle de acesso é baseado em **Roles**. Cada token JWT contém os papéis 
 * `ROLE_PROFESSOR`: Acesso às turmas e desempenho de seus alunos
 
 As regras estão definidas no `SecurityFilterChain` do Spring Security.
-
----
-
-## Licença
-
-Este projeto está licenciado sob a MIT License.
