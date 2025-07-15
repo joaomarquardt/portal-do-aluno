@@ -93,6 +93,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(payload);
         localStorage.setItem('user', JSON.stringify(payload));
         localStorage.setItem('token', userData.token);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
 
         const precisaRedefinirSenha = userData.precisaRedefinirSenha === true;
 
@@ -126,6 +127,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.error('Erro ao fazer logout no backend:', error);
     } finally {
       setUser(null);
+      delete axios.defaults.headers.common['Authorization'];
       setChangePassword(false);
       localStorage.removeItem('user');
       localStorage.removeItem('token');
