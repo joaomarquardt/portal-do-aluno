@@ -15,8 +15,8 @@ const Periodos = () => {
   ]);
 
   const [editingPeriodo, setEditingPeriodo] = useState<Periodo | null>(null);
-  const [year, setYear] = useState<Number>(2025)
-  const [period,setPeriod] = useState<Number>(1)
+  const [year, setYear] = useState<string>('')
+  const [period,setPeriod] = useState<string>('')
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     nome: '',
@@ -44,8 +44,8 @@ const Periodos = () => {
           "Authorization": `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
-          ano: year,
-          semestre: period,
+          ano: Number(year),
+          semestre: Number(period),
           ativo: formData.ativo,
           dataInicio: formData.dataInicio,
           dataFim: formData.dataFim
@@ -92,8 +92,8 @@ const Periodos = () => {
       const regex = /^\d{4}\.(1|2)$/;
       const test =  regex.test(name);
       if (test){
-        setYear(Number.parseInt(name.substring(0,3)))
-        setPeriod(Number.parseInt(name[5]))
+        setYear(name.substring(0,3))
+        setPeriod(name[5])
       }
   }
   const cancelForm = () => {
@@ -153,7 +153,7 @@ const Periodos = () => {
                   </label>
                   <input
                     type="text"
-                    value={year +'.'+ period}
+                  
                     onChange={(e) => {
                       validateName(e.target.value)
                       setFormData({...formData, nome:e.target.value })

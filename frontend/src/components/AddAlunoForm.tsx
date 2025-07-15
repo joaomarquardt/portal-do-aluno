@@ -44,7 +44,8 @@ const AddAlunoForm = ({
 }: AddAlunoFormProps) => {
   const [formData, setFormData] = useState<Omit<Aluno, 'id'>>(initialFormState);
   const [cursos, setCursos] = useState<Curso[]>([]);
-
+  const [cpfFormated, setCpfFormated] = useState('');
+  const [cellphoneFormated, setCellphoneFormated] = useState('');
 
   useEffect(() => {
     if (editingAluno) {
@@ -112,6 +113,32 @@ const AddAlunoForm = ({
 
     setFormData(initialFormState);
   };
+  const formatCPF = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+  };
+    const formatCellphone = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    return numbers.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+  };
+
+  const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 11) {
+      setCpfFormated(formatCPF(numbers));
+      setFormData(prev => ({ ...prev, cpf: numbers }));
+    }
+  };
+
+    const handleCellphoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 11) {
+      setCellphoneFormated(formatCellphone(numbers));
+      setFormData(prev => ({ ...prev, telefone: numbers }));
+    }
+  };
 
   return (
     <div className="bg-white border-2 border-gray-300 rounded-lg p-6 mb-6 shadow-md">
@@ -121,27 +148,58 @@ const AddAlunoForm = ({
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[
-            { name: 'cpf', label: 'CPF *', type: 'text', placeholder: '000.000.000-00' },
-            { name: 'nome', label: 'Nome completo *', type: 'text', placeholder: 'Nome do aluno' },
-            { name: 'email', label: 'Email Pessoal *', type: 'email', placeholder: 'email@gmail.com' },
-            { name: 'emailInstitucional', label: 'Email Institucional *', type: 'email', placeholder: 'aluno@universidade.edu' },
-            { name: 'telefone', label: 'Telefone *', type: 'text', placeholder: '(00) 00000-0000' },
-            { name: 'senha', label: 'Senha *', type: 'password', placeholder: 'Senha' }
-          ].map(({ name, label, type, placeholder }) => (
-            <div key={name}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-              <input
-                type={type}
-                name={name}
-                value={(formData as any)[name]}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-blue-500 focus:outline-none"
-                placeholder={placeholder}
-              />
-            </div>
-          ))}
+        {[
+        {
+          name: 'cpf',
+          label: 'CPF *',
+          type: 'text',
+          placeholder: '000.000.000-00',
+          value: cpfFormated,
+          onChange: handleCPFChange,
+        },
+        {
+          name: 'nome',
+          label: 'Nome completo *',
+          type: 'text',
+          placeholder: 'Nome do aluno',
+          value: formData.nome,
+        },
+        {
+          name: 'email',
+          label: 'Email Pessoal *',
+          type: 'email',
+          placeholder: 'email@gmail.com',
+          value: formData.email,
+        },
+        {
+          name: 'emailInstitucional',
+          label: 'Email Institucional *',
+          type: 'email',
+          placeholder: 'aluno@universidade.edu',
+          value: formData.emailInstitucional,
+        },
+        {
+          name: 'telefone',
+          label: 'Telefone *',
+          type: 'text',
+          placeholder: '(00) 00000-0000',
+          value: cellphoneFormated,
+          onChange: handleCellphoneChange,
+        }
+      ].map(({ name, label, type, placeholder, value, onChange }) => (
+        <div key={name}>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+          <input
+            type={type}
+            name={name}
+            value={value}
+            onChange={onChange || handleChange}
+            required
+            className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-blue-500 focus:outline-none"
+            placeholder={placeholder}
+          />
+        </div>
+      ))}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Curso *</label>

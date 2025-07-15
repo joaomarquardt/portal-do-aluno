@@ -45,6 +45,8 @@ const Professores = () => {
   const [error, setError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [cpfFormated, setCpfFormated] = useState('');
+  const [cellphoneFormated, setCellphoneFormated] = useState('');
+  const [siapeFormated, setSiapeFormated] = useState('');
 
   const fetchProfessores = useCallback(async () => {
     setLoading(true);
@@ -81,6 +83,10 @@ const Professores = () => {
     const numbers = value.replace(/\D/g, '');
     return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
+    const formatCellphone = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    return numbers.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+  };
 
   const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -90,6 +96,30 @@ const Professores = () => {
       setFormData(prev => ({ ...prev, cpf: numbers }));
     }
   };
+
+    const handleCellphoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 11) {
+      setCellphoneFormated(formatCellphone(numbers));
+      setFormData(prev => ({ ...prev, telefone: numbers }));
+    }
+  };
+
+    const handleSiapeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 6) {
+      setSiapeFormated(formatSiape(numbers));
+      setFormData(prev => ({ ...prev, siape: numbers }));
+    }
+  };
+
+  const formatSiape = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    return numbers.replace(/(\d{4})(\d{2})/, '$1-$2');
+  };
+
 
   const resetForm = () => {
     setFormData(initialFormData);
@@ -335,8 +365,8 @@ const Professores = () => {
               <input
                 type="text"
                 name="siape"
-                value={formData.siape}
-                onChange={(e) => setFormData(prev => ({...prev, siape: e.target.value}))}
+                value={siapeFormated}
+                onChange={handleSiapeChange}
                 className={`w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500 ${getDisabledClass('siape')}`}
                 required={getRequiredAttr('siape')}
                 disabled={getDisabledAttr('siape')}
@@ -347,8 +377,8 @@ const Professores = () => {
               <input
                 type="tel"
                 name="telefone"
-                value={formData.telefone}
-                onChange={(e) => setFormData(prev => ({...prev, telefone: e.target.value}))}
+                value={cellphoneFormated}
+                onChange={handleCellphoneChange}
                 className={`w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-green-500`}
               />
             </div>
