@@ -71,7 +71,6 @@ const DashboardLayout = ({ children, menuItems, user, logout, navigate }: {
           <div className="flex items-center justify-between px-6 py-4">
             <div>
               <h1 className="text-xl font-bold text-gray-800">{getHeaderTitle()}</h1>
-              <p className="text-gray-600">Bem-vindo, {user?.nome || 'Usuário'}</p>
             </div>
           </div>
         </header>
