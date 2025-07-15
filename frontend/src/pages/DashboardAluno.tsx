@@ -44,7 +44,7 @@ interface Disciplina {
 const DashboardAluno = () => {
   const { user, logout, changePassword } = useAuth();
   const navigate = useNavigate();
-  const [novaSenha, setNovaSenha] = useState('');
+  const [senhaNova, setSenhaNova] = useState('');
   const [trocaSucesso, setTrocaSucesso] = useState(false);
   const [erroTrocaSenha, setErroTrocaSenha] = useState('');
   const [senhaAtual, setSenhaAtual] = useState('')
@@ -139,7 +139,7 @@ const DashboardAluno = () => {
 
 
   const handleTrocarSenha = async () => {
-    if (!novaSenha.trim()) {
+    if (!senhaNova.trim()) {
       setErroTrocaSenha('Digite uma nova senha.');
       return;
     }
@@ -150,18 +150,17 @@ const DashboardAluno = () => {
     }
 
     try {
-      const response = await fetch(`${apiUrl}/auth/${user.idAluno}/senha`, {
-        method: 'POST',
+      const response = await fetch(`${apiUrl}/auth/${user.idUsuario}/senha`, {
+        method: 'PUT',
         headers: {
           "Content-type": "application/json",
           "Authorization": `Bearer ${localStorage.getItem("token")}`
         },
         body: JSON.stringify({
           senhaAtual: senhaAtual,
-          novaSenha: novaSenha,
+          senhaNova: senhaNova,
         }),
       });
-
       if (response.ok) {
         setTrocaSucesso(true);
         setErroTrocaSenha('');
@@ -254,8 +253,8 @@ return (
               type="password"
               placeholder="Nova senha"
               className="w-full p-2 border rounded mb-2"
-              value={novaSenha}
-              onChange={(e) => setNovaSenha(e.target.value)}
+              value={senhaNova}
+              onChange={(e) => setSenhaNova(e.target.value)}
             />
             {erroTrocaSenha && <p className="text-red-600 text-sm mb-2">{erroTrocaSenha}</p>}
             {trocaSucesso && <p className="text-green-600 text-sm mb-2">Senha alterada com sucesso!</p>}
