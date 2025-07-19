@@ -1,6 +1,9 @@
 package com.portal_do_aluno.services;
 
+import com.alibaba.excel.EasyExcel;
 import com.portal_do_aluno.domain.Aluno;
+import com.portal_do_aluno.dtos.excel.AlunoExcelDTO;
+import com.portal_do_aluno.utils.AlunoListener;
 import com.portal_do_aluno.domain.Professor;
 import com.portal_do_aluno.domain.Usuario;
 import com.portal_do_aluno.dtos.requests.UpdateUsuarioRequestDTO;
@@ -23,7 +26,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 @Service
@@ -112,5 +118,18 @@ public class UsuarioService {
         usuario.setSenha(passwordEncoder.encode(atualizarSenhaRequestDTO.senhaNova()));
         usuario.setPrecisaRedefinirSenha(false);
         repository.save(usuario);
+    }
+
+    public void createStudentsFromFile(MultipartFile arquivo) throws IOException {
+        String nomeArquivo = arquivo.getOriginalFilename();
+        if (!arquivo.getContentType().equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
+            throw new IllegalArgumentException("Tipo de arquivo inválido. Apenas arquivos .xlsx são permitidos.");
+        }
+        try (InputStream inputStream = arquivo.getInputStream()) {
+            EasyExcel.read(inputStream, AlunoExcelDTO.class, new AlunoListener(this))
+                    .sheet()
+                    .headRowNumber(1)
+                    .doRead();
+        }
     }
 }
