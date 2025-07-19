@@ -20,6 +20,7 @@ import UserProfileEditForm from "./pages/PerfilUsuarioForm";
 import MinhasDisciplinas from "./pages/MinhasDisciplinas";
 import CadastrarNotaDisc from "./pages/CadastrarNotaDisc";
 import AcompanharDesempenho from "./pages/AcompanharDesempenho";
+import InscricaoAlunoDisciplina from "./pages/InscricaoAlunoDisciplina";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const adminMenuItems: MenuItem[] = [
 const alunoMenuItems: MenuItem[] = [
   { title: "Meu Dashboard", url: "/dashboard/aluno", icon: Users },
   { title: "Minhas Turmas", url: "/minhas-turmas", icon: BookOpen },
+  { title: "Inscrever-se em disciplina", url: "/dashboard/inscricao-disciplina", icon: GraduationCap },
 ];
 
 const professorMenuItems: MenuItem[] = [
@@ -161,6 +163,13 @@ const AppContent = () => {
             <ProtectedRoute allowedRoles={['ALUNO']}>
               <DashboardLayout menuItems={alunoMenuItems} user={user} logout={logout} navigate={navigate}>
                 <AcompanharDesempenho/>
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard/inscricao-disciplina" element={
+            <ProtectedRoute allowedRoles={['ALUNO']}>
+              <DashboardLayout menuItems={alunoMenuItems} user={user} logout={logout} navigate={navigate}>
+                <InscricaoAlunoDisciplina/>
               </DashboardLayout>
             </ProtectedRoute>
           } />

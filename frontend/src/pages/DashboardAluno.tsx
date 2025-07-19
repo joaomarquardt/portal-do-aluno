@@ -23,23 +23,23 @@ interface Turma {
   sala: string;
 }
 
-interface TurmaServ {
-  id: number;
-  codigo: string;
-  horario: string;
-  periodo: string;
-  vagasTotais: number;
-  professor: string;
-  disciplina: Disciplina;
-}
+// interface TurmaServ {
+//   id: number;
+//   codigo: string;
+//   horario: string;
+//   periodo: string;
+//   vagasTotais: number;
+//   professor: string;
+//   disciplina: Disciplina;
+// }
 
-interface Disciplina {
-  id: number;
-  codigo: string;
-  nome: string;
-  periodo: number;
-  cargaHoraria: number;
-}
+// interface Disciplina {
+//   id: number;
+//   codigo: string;
+//   nome: string;
+//   periodo: number;
+//   cargaHoraria: number;
+// }
 
 const DashboardAluno = () => {
   const { user, logout, changePassword } = useAuth();
@@ -55,7 +55,7 @@ const DashboardAluno = () => {
   const [comunicados, setComunicados] = useState<ComunicadoServ[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorDashboard, setErrorDashboard] = useState<string | null>(null);
-  const [turmas, setTurmas] = useState<TurmaServ[]>([])
+  // const [turmas, setTurmas] = useState<TurmaServ[]>([])
   const [turmasInscritas, setTurmasInscritas] = useState<Set<number>>(new Set());
   const apiUrl = import.meta.env.VITE_URL_API;
 
@@ -111,31 +111,10 @@ const DashboardAluno = () => {
     }
   }, [user, apiUrl])
 
-  const fetchTurmas = useCallback(async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error("Token de autenticação não encontrado.");
-
-      const res = await axios.get(`${apiUrl}/turmas`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const turmasTratadas = res.data.map((turma: any) => ({
-        ...turma,
-        professor: turma.professor?.nome || 'Desconhecido'
-      }));
-      setTurmas(turmasTratadas);
-    } catch (err) {
-      console.error('Erro ao buscar turmas:', err);
-    }
-  }, [apiUrl]);
 
   useEffect(() => {
     fetchDashboardData();
   }, [fetchDashboardData]);
-
-  useEffect(() => {
-    fetchTurmas();
-  }, [fetchTurmas]);
 
 
   const handleTrocarSenha = async () => {
@@ -181,36 +160,6 @@ const DashboardAluno = () => {
     }
   };
 
-  const handleInscrever = async (turmaId: number) => {
-    if (!user?.idUsuario) {
-      alert("Usuário não autenticado.");
-      return;
-    }
-
-    try {
-      const response = await fetch(`${apiUrl}/turmas/${turmaId}/alunos`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`
-        },
-        body: JSON.stringify({ idAlunos: [user.idAluno] })
-      });
-      if (!response.ok) {
-        const erro = await response.json();
-        alert(`Erro ao se inscrever: ${erro?.mensagem || "erro desconhecido"}`);
-        return;
-      }
-
-      alert("Inscrição realizada com sucesso!");
-
-      setTurmasInscritas(prev => new Set(prev).add(turmaId));
-
-    } catch (err) {
-      console.error("Erro ao se inscrever:", err);
-      alert("Erro de conexão ao tentar se inscrever.");
-    }
-  };
 
   if (loading) {
     return (
@@ -324,59 +273,6 @@ return (
             )}
           </div>
         </div>
-      <section className="p-6">
-          <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center">
-            <BookOpen className="text-purple-600 mr-3" size={32} />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">Inscrição em turmas</h1>
-              <p className="text-sm text-gray-600">Inscreva-se em alguma disciplina</p>
-            </div>
-          </div>
-          <button onClick={() => setMostrarDisciplina(!mostrarDisciplina)} className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
-              {mostrarDisciplina ? "Ocultar" : "Entrar em disciplina"}
-            </button>
-        </div>
-          {mostrarDisciplina && (
-            turmas.length === 0 ? (
-              <div className="text-center text-gray-600 py-8">Nenhuma turma disponível.</div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {turmas.map((turma) => (
-                  <div key={turma.id} className="bg-white border-2 border-purple-200 rounded-lg p-4 shadow-md">
-                    <h3 className="text-lg font-bold mb-1">
-                      TURMA {turma.codigo} - {turma.disciplina.nome}
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-1">
-                      <Clock className="inline mr-1" size={14} />
-                      Horário das aulas: {turma.horario}
-                    </p>
-                     <p className="text-sm text-gray-600 mb-1">
-
-                       Periodo minimo para se inscrever: {turma.disciplina.periodo}º
-                    </p>
-                    {turmasInscritas.has(turma.id) ? (
-                      <button
-                        disabled
-                        className="mt-3 bg-green-500 text-white px-4 py-2 rounded cursor-not-allowed opacity-70"
-                      >
-                        Inscrito
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleInscrever(turma.id)}
-                        className="mt-3 bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
-                      >
-                        Inscrever-se
-                      </button>
-                    )}
-                  </div>
-
-                ))}
-              </div>
-            )
-          )}
-        </section>
       </main>
   );
 };
