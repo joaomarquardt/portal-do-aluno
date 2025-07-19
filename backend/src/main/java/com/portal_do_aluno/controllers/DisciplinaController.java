@@ -4,6 +4,7 @@ import com.portal_do_aluno.dtos.requests.CreateDisciplinaRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateDisciplinaRequestDTO;
 import com.portal_do_aluno.dtos.responses.DisciplinaResponseDTO;
 import com.portal_do_aluno.services.DisciplinaService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,13 +31,13 @@ public class DisciplinaController {
     }
 
     @PostMapping
-    public ResponseEntity<DisciplinaResponseDTO> create(@RequestBody CreateDisciplinaRequestDTO disciplinaDTO) {
+    public ResponseEntity<DisciplinaResponseDTO> create(@Valid @RequestBody CreateDisciplinaRequestDTO disciplinaDTO) {
         DisciplinaResponseDTO disciplinaCriadoDTO = service.create(disciplinaDTO);
         return new ResponseEntity<>(disciplinaCriadoDTO, HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<DisciplinaResponseDTO> update(@PathVariable(value = "id") Long id, @RequestBody UpdateDisciplinaRequestDTO disciplinaDTO) {
+    public ResponseEntity<DisciplinaResponseDTO> update(@PathVariable(value = "id") Long id, @Valid @RequestBody UpdateDisciplinaRequestDTO disciplinaDTO) {
         DisciplinaResponseDTO disciplinaAtualizadoDTO = service.update(id, disciplinaDTO);
         return new ResponseEntity<>(disciplinaAtualizadoDTO, HttpStatus.OK);
     }

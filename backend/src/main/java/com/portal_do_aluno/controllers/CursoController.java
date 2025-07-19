@@ -4,6 +4,7 @@ import com.portal_do_aluno.dtos.requests.CreateCursoRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateCursoRequestDTO;
 import com.portal_do_aluno.dtos.responses.CursoResponseDTO;
 import com.portal_do_aluno.services.CursoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,13 +31,13 @@ public class CursoController {
     }
 
     @PostMapping
-    public ResponseEntity<CursoResponseDTO> create(@RequestBody CreateCursoRequestDTO cursoDTO) {
+    public ResponseEntity<CursoResponseDTO> create(@Valid @RequestBody CreateCursoRequestDTO cursoDTO) {
         CursoResponseDTO cursoCriadoDTO = service.create(cursoDTO);
         return new ResponseEntity<>(cursoCriadoDTO, HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<CursoResponseDTO> update(@PathVariable(value = "id") Long id, @RequestBody UpdateCursoRequestDTO cursoDTO) {
+    public ResponseEntity<CursoResponseDTO> update(@PathVariable(value = "id") Long id, @Valid @RequestBody UpdateCursoRequestDTO cursoDTO) {
         CursoResponseDTO cursoAtualizadoDTO = service.update(id, cursoDTO);
         return new ResponseEntity<>(cursoAtualizadoDTO, HttpStatus.OK);
     }

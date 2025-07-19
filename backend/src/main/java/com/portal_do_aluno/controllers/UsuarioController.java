@@ -3,13 +3,12 @@ package com.portal_do_aluno.controllers;
 import com.portal_do_aluno.dtos.requests.UpdateUsuarioRequestDTO;
 import com.portal_do_aluno.dtos.responses.UsuarioResponseDTO;
 import com.portal_do_aluno.services.UsuarioService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -31,7 +30,7 @@ public class UsuarioController {
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<UsuarioResponseDTO> update(@PathVariable(value = "id") Long id, @RequestBody UpdateUsuarioRequestDTO usuarioDTO) {
+    public ResponseEntity<UsuarioResponseDTO> update(@PathVariable(value = "id") Long id, @Valid @RequestBody UpdateUsuarioRequestDTO usuarioDTO) {
         UsuarioResponseDTO usuarioAtualizadoDTO = service.update(id, usuarioDTO);
         return new ResponseEntity<>(usuarioAtualizadoDTO, HttpStatus.OK);
     }
@@ -40,15 +39,5 @@ public class UsuarioController {
     public ResponseEntity<Void> delete(@PathVariable(value = "id") Long id) {
         service.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    @PostMapping(value = "/importar-alunos")
-    public ResponseEntity<?> importStudents(@RequestParam("arquivo") MultipartFile arquivo) {
-        try {
-            service.createStudentsFromFile(arquivo);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (IOException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
     }
 }

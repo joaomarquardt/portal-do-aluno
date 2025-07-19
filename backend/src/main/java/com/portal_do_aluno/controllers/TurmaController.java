@@ -8,6 +8,7 @@ import com.portal_do_aluno.dtos.responses.AlunoTurmaResponseDTO;
 import com.portal_do_aluno.dtos.responses.DashboardAdminResponseDTO;
 import com.portal_do_aluno.dtos.responses.TurmaResponseDTO;
 import com.portal_do_aluno.services.TurmaService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ public class TurmaController {
 
     @GetMapping
     public ResponseEntity<List<TurmaResponseDTO>> findAll() {
-        List<TurmaResponseDTO> turmasDTO = service.findAll();   
+        List<TurmaResponseDTO> turmasDTO = service.findAll();
         return new ResponseEntity<>(turmasDTO, HttpStatus.OK);
     }
 
@@ -34,13 +35,13 @@ public class TurmaController {
     }
 
     @PostMapping
-    public ResponseEntity<TurmaResponseDTO> create(@RequestBody CreateTurmaRequestDTO turmaDTO) {
+    public ResponseEntity<TurmaResponseDTO> create(@Valid @RequestBody CreateTurmaRequestDTO turmaDTO) {
         TurmaResponseDTO turmaCriadoDTO = service.create(turmaDTO);
         return new ResponseEntity<>(turmaCriadoDTO, HttpStatus.CREATED);
     }
 
     @PostMapping(value = "/{idTurma}/alunos")
-    public ResponseEntity<TurmaResponseDTO> addStudentsToTheClass(@PathVariable(value = "idTurma") Long idTurma, @RequestBody AddAlunosTurmaDTO idAlunosDTO) {
+    public ResponseEntity<TurmaResponseDTO> addStudentsToTheClass(@PathVariable(value = "idTurma") Long idTurma, @Valid @RequestBody AddAlunosTurmaDTO idAlunosDTO) {
         TurmaResponseDTO turmaDTO = service.addStudentsToTheClass(idTurma, idAlunosDTO.idAlunos());
         return new ResponseEntity<>(turmaDTO, HttpStatus.OK);
     }
@@ -52,13 +53,13 @@ public class TurmaController {
     }
 
     @PutMapping(value = "/{idTurma}/alunos/{idAluno}")
-    public ResponseEntity<Void> updateStudentPerformance(@PathVariable(value = "idTurma") Long idTurma, @PathVariable(value = "idAluno") Long idAluno, @RequestBody UpdateDesempenhoRequestDTO desempenhoDTO) {
+    public ResponseEntity<Void> updateStudentPerformance(@PathVariable(value = "idTurma") Long idTurma, @PathVariable(value = "idAluno") Long idAluno, @Valid @RequestBody UpdateDesempenhoRequestDTO desempenhoDTO) {
         service.updateStudentPerformance(idTurma, idAluno, desempenhoDTO);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<TurmaResponseDTO> update(@PathVariable(value = "id") Long id, @RequestBody UpdateTurmaRequestDTO turmaDTO) {
+    public ResponseEntity<TurmaResponseDTO> update(@PathVariable(value = "id") Long id, @Valid @RequestBody UpdateTurmaRequestDTO turmaDTO) {
         TurmaResponseDTO turmaAtualizadoDTO = service.update(id, turmaDTO);
         return new ResponseEntity<>(turmaAtualizadoDTO, HttpStatus.OK);
     }
@@ -71,8 +72,8 @@ public class TurmaController {
 
     @GetMapping(value = "/media-geral")
     public ResponseEntity<Double> generalAverageAllClasses() {
-         Double mediaGeral = service.generalAverageAllClasses();
-         return new ResponseEntity<>(mediaGeral, HttpStatus.OK);
+        Double mediaGeral = service.generalAverageAllClasses();
+        return new ResponseEntity<>(mediaGeral, HttpStatus.OK);
     }
 
     @GetMapping(value = "/sumario-dashboard")
@@ -81,4 +82,3 @@ public class TurmaController {
         return new ResponseEntity<>(dashboardAdminDTO, HttpStatus.OK);
     }
 }
-

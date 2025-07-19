@@ -4,6 +4,7 @@ import com.portal_do_aluno.dtos.requests.CreatePeriodoLetivoRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdatePeriodoLetivoRequestDTO;
 import com.portal_do_aluno.dtos.responses.PeriodoLetivoResponseDTO;
 import com.portal_do_aluno.services.PeriodoLetivoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,13 +31,13 @@ public class PeriodoLetivoController {
     }
 
     @PostMapping
-    public ResponseEntity<PeriodoLetivoResponseDTO> create(@RequestBody CreatePeriodoLetivoRequestDTO periodoLetivoDTO) {
+    public ResponseEntity<PeriodoLetivoResponseDTO> create(@Valid @RequestBody CreatePeriodoLetivoRequestDTO periodoLetivoDTO) {
         PeriodoLetivoResponseDTO periodoLetivoCriadoDTO = service.create(periodoLetivoDTO);
         return new ResponseEntity<>(periodoLetivoCriadoDTO, HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<PeriodoLetivoResponseDTO> update(@PathVariable(value = "id") Long id, @RequestBody UpdatePeriodoLetivoRequestDTO periodoLetivoDTO) {
+    public ResponseEntity<PeriodoLetivoResponseDTO> update(@PathVariable(value = "id") Long id, @Valid @RequestBody UpdatePeriodoLetivoRequestDTO periodoLetivoDTO) {
         PeriodoLetivoResponseDTO periodoLetivoAtualizadoDTO = service.update(id, periodoLetivoDTO);
         return new ResponseEntity<>(periodoLetivoAtualizadoDTO, HttpStatus.OK);
     }

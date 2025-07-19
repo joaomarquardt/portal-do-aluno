@@ -7,6 +7,7 @@ import com.portal_do_aluno.dtos.responses.DashboardAlunoResponseDTO;
 import com.portal_do_aluno.dtos.responses.DesempenhoResponseDTO;
 import com.portal_do_aluno.services.AlunoService;
 import jakarta.annotation.Nullable;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,13 +45,13 @@ public class AlunoController {
     }
 
     @PostMapping
-    public ResponseEntity<AlunoResponseDTO> create(@RequestBody CreateAlunoRequestDTO alunoDTO) {
+    public ResponseEntity<AlunoResponseDTO> create(@Valid @RequestBody CreateAlunoRequestDTO alunoDTO) {
         AlunoResponseDTO alunoCriadoDTO = service.create(alunoDTO);
         return new ResponseEntity<>(alunoCriadoDTO, HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<AlunoResponseDTO> update(@PathVariable(value = "id") Long id, @RequestBody UpdateAlunoRequestDTO alunoDTO) {
+    public ResponseEntity<AlunoResponseDTO> update(@PathVariable(value = "id") Long id, @Valid @RequestBody UpdateAlunoRequestDTO alunoDTO) {
         AlunoResponseDTO alunoAtualizadoDTO = service.update(id, alunoDTO);
         return new ResponseEntity<>(alunoAtualizadoDTO, HttpStatus.OK);
     }

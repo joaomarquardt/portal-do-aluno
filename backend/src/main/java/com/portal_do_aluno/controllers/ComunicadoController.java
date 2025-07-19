@@ -4,6 +4,7 @@ import com.portal_do_aluno.dtos.requests.CreateComunicadoRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateComunicadoRequestDTO;
 import com.portal_do_aluno.dtos.responses.ComunicadoResponseDTO;
 import com.portal_do_aluno.services.ComunicadoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,13 +31,13 @@ public class ComunicadoController {
     }
 
     @PostMapping
-    public ResponseEntity<ComunicadoResponseDTO> create(@RequestBody CreateComunicadoRequestDTO comunicadoDTO) {
+    public ResponseEntity<ComunicadoResponseDTO> create(@Valid @RequestBody CreateComunicadoRequestDTO comunicadoDTO) {
         ComunicadoResponseDTO comunicadoCriadoDTO = service.create(comunicadoDTO);
         return new ResponseEntity<>(comunicadoCriadoDTO, HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<ComunicadoResponseDTO> update(@PathVariable(value = "id") Long id, @RequestBody UpdateComunicadoRequestDTO comunicadoDTO) {
+    public ResponseEntity<ComunicadoResponseDTO> update(@PathVariable(value = "id") Long id, @Valid @RequestBody UpdateComunicadoRequestDTO comunicadoDTO) {
         ComunicadoResponseDTO comunicadoAtualizadoDTO = service.update(id, comunicadoDTO);
         return new ResponseEntity<>(comunicadoAtualizadoDTO, HttpStatus.OK);
     }

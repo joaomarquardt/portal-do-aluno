@@ -4,6 +4,7 @@ import com.portal_do_aluno.dtos.requests.CreateProfessorRequestDTO;
 import com.portal_do_aluno.dtos.requests.UpdateProfessorRequestDTO;
 import com.portal_do_aluno.dtos.responses.*;
 import com.portal_do_aluno.services.ProfessorService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,13 +37,13 @@ public class ProfessorController {
     }
 
     @PostMapping
-    public ResponseEntity<ProfessorResponseDTO> create(@RequestBody CreateProfessorRequestDTO professorDTO) {
+    public ResponseEntity<ProfessorResponseDTO> create(@Valid @RequestBody CreateProfessorRequestDTO professorDTO) {
         ProfessorResponseDTO professorCriadoDTO = service.create(professorDTO);
         return new ResponseEntity<>(professorCriadoDTO, HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<ProfessorResponseDTO> update(@PathVariable(value = "id") Long id, @RequestBody UpdateProfessorRequestDTO professorDTO) {
+    public ResponseEntity<ProfessorResponseDTO> update(@PathVariable(value = "id") Long id, @Valid @RequestBody UpdateProfessorRequestDTO professorDTO) {
         ProfessorResponseDTO professorAtualizadoDTO = service.update(id, professorDTO);
         return new ResponseEntity<>(professorAtualizadoDTO, HttpStatus.OK);
     }
