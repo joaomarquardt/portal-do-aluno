@@ -7,7 +7,6 @@ import com.portal_do_aluno.dtos.responses.DashboardAlunoResponseDTO;
 import com.portal_do_aluno.dtos.responses.DesempenhoResponseDTO;
 import com.portal_do_aluno.services.AlunoService;
 import jakarta.annotation.Nullable;
-import jakarta.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

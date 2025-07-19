@@ -25,7 +25,6 @@ public class TokenService {
                     .map(PapelUsuario::name)
                     .toList();
             Long idAluno = usuario.getAluno() != null ? usuario.getAluno().getId() : null;
-            System.out.println(usuario.getAluno());
             Long idProfessor = usuario.getProfessor() != null ? usuario.getProfessor().getId() : null;
             return JWT.create()
                     .withIssuer("portal-do-aluno")
