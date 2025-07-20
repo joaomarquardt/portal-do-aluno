@@ -121,7 +121,6 @@ public class UsuarioService {
     }
 
     public void createStudentsFromFile(MultipartFile arquivo) throws IOException {
-        String nomeArquivo = arquivo.getOriginalFilename();
         if (!arquivo.getContentType().equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
             throw new IllegalArgumentException("Tipo de arquivo inválido. Apenas arquivos .xlsx são permitidos.");
         }
