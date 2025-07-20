@@ -77,7 +77,7 @@
 
         const DisciplinaSalvo: Disciplina = await response.json();
         setDisciplinas(prev => [...prev, DisciplinaSalvo]);
-        alert("Disciplina cadastrado com sucesso!");
+        alert("Disciplina cadastrada com sucesso!");
         } catch (error) {
         console.error("Erro ao cadastrar Disciplina:", error);
         alert("Erro ao cadastrar Disciplina. Tente novamente.");
@@ -157,7 +157,7 @@
             </div>
           </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Periodo minimo na qual essa disicplina estará disponivel *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Período mínimo na qual essa disciplina estará disponível *</label>
               <input
                 type="text"
                 value={formData.periodo}

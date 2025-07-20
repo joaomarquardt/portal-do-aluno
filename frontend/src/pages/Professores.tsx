@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { GraduationCap, Edit, Trash2, Plus, User, Mail, BookOpen, X } from "lucide-react";
-import test from 'node:test';
 
 interface Professor {
   id: number;
@@ -109,7 +108,7 @@ const Professores = () => {
     const handleSiapeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const numbers = value.replace(/\D/g, '');
-    if (numbers.length <= 6) {
+    if (numbers.length <= 7) {
       setSiapeFormated(formatSiape(numbers));
       setFormData(prev => ({ ...prev, siape: numbers }));
     }
@@ -117,7 +116,7 @@ const Professores = () => {
 
   const formatSiape = (value: string) => {
     const numbers = value.replace(/\D/g, '');
-    return numbers.replace(/(\d{4})(\d{2})/, '$1-$2');
+    return numbers.replace(/(\d{4})(\d{2})/, '$1$2');
   };
 
 

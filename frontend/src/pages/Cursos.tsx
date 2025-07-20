@@ -157,7 +157,7 @@
                 value={formData.tipo}
                 onChange={(e) => setFormData({...formData, tipo: e.target.value})}
                 className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-purple-500"
-                placeholder=' Presencial, a distância...'
+                placeholder='Bacharelado, Licenciatura...'
                 required
               />
             </div>
