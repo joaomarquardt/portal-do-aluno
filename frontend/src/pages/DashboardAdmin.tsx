@@ -1,8 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Users, MessageSquarePlus, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Users, MessageSquarePlus, X, ChevronLeft, ChevronRight, UploadCloud } from 'lucide-react';
+import { useAuth } from "../contexts/AuthContext";
 import AlunoCard from '../components/AlunoCard';
 import AddAlunoForm from '../components/AddAlunoForm';
 import Stats from '../components/Stats';
+import axios from 'axios';
 
 interface Aluno {
   id: number;
@@ -31,7 +33,8 @@ interface PaginatedResponse<T> {
 
 const apiUrl = import.meta.env.VITE_URL_API;
 
-const Index = () => {
+const DashboardAdmin = () => {
+  const { user } = useAuth();
   const [alunos, setAlunos] = useState<Aluno[]>([]);
   const [comunicados, setComunicados] = useState<Comunicado[]>([]);
   const [editingAluno, setEditingAluno] = useState<Aluno | null>(null);
@@ -43,6 +46,10 @@ const Index = () => {
   const [numAlunosAltoDesempenho, setNumAlunosAltoDesempenho] = useState(0);
   const [periodoMaisComum, setPeriodoMaisComum] = useState(0);
   const [errorDashboard, setErrorDashboard] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize] = useState(9);
@@ -332,6 +339,68 @@ const Index = () => {
 
   const paginationButtons = getPaginationButtons();
 
+    if (!user) {
+    return null;
+  }
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      setSelectedFile(event.target.files[0]);
+      setUploadMessage(null);
+      setUploadError(null);
+    } else {
+      setSelectedFile(null);
+    }
+  };
+
+  const handleFileUpload = async () => {
+    if (!selectedFile) {
+      setUploadError("Por favor, selecione um arquivo Excel para importar.");
+      return;
+    }
+
+    setUploading(true);
+    setUploadMessage(null);
+    setUploadError(null);
+
+    const formData = new FormData();
+    formData.append("arquivo", selectedFile);
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error("Token de autenticação não encontrado.");
+      }
+
+      const response = await axios.post(`${apiUrl}/usuarios/importar-alunos`, formData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        setUploadMessage(response.data.message || "Alunos importados com sucesso!");
+        setSelectedFile(null);
+        fetchAlunos();
+      } else {
+        setUploadMessage("Importação concluída, mas sem mensagem de sucesso específica.");
+        setSelectedFile(null);
+        fetchAlunos();
+      }
+
+    } catch (error: any) {
+      console.error('Erro ao importar alunos:', error);
+      if (axios.isAxiosError(error)) {
+        setUploadError(error.response?.data?.message || `Erro ${error.response?.status}: Falha na importação.`);
+      } else {
+        setUploadError('Um erro inesperado ocorreu durante a importação.');
+      }
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div className="p-6">
       <Stats totalAlunosGlobal={totalAlunos} alunosNaPagina={alunos} crMedio={crMedio} numAlunosAltoDesempenho={numAlunosAltoDesempenho} periodoMaisComum={periodoMaisComum} />
@@ -410,6 +479,32 @@ const Index = () => {
             ))
           )}
         </div>
+      </section>
+
+      <section className="bg-white border-2 border-gray-300 rounded-lg p-4 mb-6 shadow-md">
+        <h2 className="text-xl font-bold text-gray-800 mb-4">Importar Alunos em Massa</h2>
+        <div className="flex items-center gap-4">
+          <input
+            type="file"
+            id="excelFileInput"
+            accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+          <label htmlFor="excelFileInput" className="cursor-pointer bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 flex items-center gap-2">
+            <UploadCloud size={16} />
+            {selectedFile ? selectedFile.name : 'Escolher arquivo Excel'}
+          </label>
+          <button
+            onClick={handleFileUpload}
+            disabled={!selectedFile || uploading}
+            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {uploading ? 'Importando...' : 'Importar Alunos'}
+          </button>
+        </div>
+        {uploadMessage && <p className="text-green-600 text-sm mt-2">{uploadMessage}</p>}
+        {uploadError && <p className="text-red-600 text-sm mt-2">{uploadError}</p>}
       </section>
 
       <AddAlunoForm
@@ -499,4 +594,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default DashboardAdmin;
