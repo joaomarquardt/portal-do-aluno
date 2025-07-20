@@ -46,13 +46,15 @@ export function AppSidebar({ menuItems }: AppSidebarProps) {
         </nav>
 
         <div className="mt-8 pt-4 border-t border-gray-200">
-          <button
-            onClick={() => navigate('/meu-perfil/editar')}
-            className="flex items-center gap-3 p-3 w-full text-left rounded transition-colors hover:bg-blue-50 text-blue-600 mb-2"
-          >
-            <UserIcon size={20} />
-            <span>Meu Perfil</span>
-          </button>
+          {user?.role === 'ALUNO' && (
+            <button
+              onClick={() => navigate('/meu-perfil/editar')}
+              className="flex items-center gap-3 p-3 w-full text-left rounded transition-colors hover:bg-blue-50 text-blue-600 mb-2"
+            >
+              <UserIcon size={20} />
+              <span>Meu Perfil</span>
+            </button>
+          )}
 
           <button
             onClick={logout}
