@@ -92,7 +92,7 @@ const Periodos = () => {
       const regex = /^\d{4}\.(1|2)$/;
       const test =  regex.test(name);
       if (test){
-        setYear(name.substring(0,3))
+        setYear(name.substring(0,4))
         setPeriod(name[5])
       }
   }
