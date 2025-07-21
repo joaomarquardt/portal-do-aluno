@@ -136,7 +136,7 @@
       {showForm && (
         <div className="bg-white border-2 border-purple-300 rounded-lg p-4 mb-6 shadow-md">
           <h2 className="text-xl font-bold text-gray-800 mb-4">
-            {editingCurso ? 'Editar Curso' : 'Adicionar Nova Curso'}
+            {editingCurso ? 'Editar Curso' : 'Adicionar Novo Curso'}
           </h2>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
