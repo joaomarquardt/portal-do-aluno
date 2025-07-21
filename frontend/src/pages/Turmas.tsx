@@ -42,7 +42,7 @@ const Turmas = () => {
 
   const fetchProfessores = async () => {
     try {
-      const res = await fetch(`${apiUrl}/professores/select`, {
+      const res = await fetch(`${apiUrl}  `, {
         headers: authHeaders()
       });
       const data = await res.json();
@@ -120,9 +120,11 @@ const Turmas = () => {
       const novaTurma = await res.json();
       setTurmas([...turmas, novaTurma]);
       resetForm();
+      window.location.reload()
     } catch (err) {
       console.error("Erro ao salvar turma:", err);
     }
+  
   };
 
   const handleDelete = (id: number) => {
@@ -205,6 +207,7 @@ const Turmas = () => {
                 <div className="flex justify-between items-start mb-3">
                   <h3 className="text-lg font-bold">TURMA {turma.codigo} - {turma.disciplina.nome}</h3>
                   <button onClick={() => handleDelete(turma.id)} className="text-red-500 hover:text-red-700">
+                    
                     <Trash2 size={16} />
                   </button>
                 </div>
