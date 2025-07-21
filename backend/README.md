@@ -74,12 +74,13 @@ A API utiliza **JWT** para autenticação. O fluxo é:
 
 ### Usuários
 
-| Verbo  | Endpoint         | Descrição                 |
-| ------ | ---------------- | ------------------------- |
-| GET    | `/usuarios`      | Lista todos os usuários   |
-| GET    | `/usuarios/{id}` | Detalhes de um usuário    |
-| PUT    | `/usuarios/{id}` | Atualiza dados de contato |
-| DELETE | `/usuarios/{id}` | Deleta usuário            |
+| Verbo  | Endpoint                    | Descrição                        |
+| ------ | --------------------------- | -------------------------------- |
+| GET    | `/usuarios`                 | Lista todos os usuários          |
+| GET    | `/usuarios/{id}`            | Detalhes de um usuário           |
+| PUT    | `/usuarios/{id}`            | Atualiza dados de contato        |
+| DELETE | `/usuarios/{id}`            | Deleta usuário                   |
+| POST   | `/usuarios/importar-alunos` | Importa alunos com arquivo .xlsx |
 
 ### Alunos
 
