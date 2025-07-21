@@ -19,6 +19,9 @@ public record CreateDisciplinaRequestDTO(
 
         @NotNull(message = "A carga horária não pode ser nula")
         @Positive(message = "A carga horária deve ser um número positivo")
-        int cargaHoraria
+        int cargaHoraria,
+
+        @NotNull(message = "O ID do curso não pode ser nulo")
+        Long cursoID
 ) {
 }

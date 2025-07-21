@@ -17,7 +17,7 @@ public class Curso {
     private String turno;
     private String departamento;
 
-    @ManyToMany(mappedBy = "cursos")
+    @OneToMany(mappedBy = "curso")
     private List<Disciplina> disciplinas;
 
     @OneToMany(mappedBy = "curso")

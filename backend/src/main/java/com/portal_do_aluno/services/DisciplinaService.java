@@ -18,6 +18,9 @@ public class DisciplinaService {
     @Autowired
     private DisciplinaRepository repository;
 
+    @Autowired
+    private CursoService cursoService;
+
     @Qualifier("disciplinaMapperImpl")
     @Autowired
     private DisciplinaMapper mapper;
@@ -36,8 +39,9 @@ public class DisciplinaService {
     }
 
     public DisciplinaResponseDTO create(CreateDisciplinaRequestDTO disciplinaDTO) {
-
-        Disciplina entidadeCriada = repository.save(mapper.toEntity(disciplinaDTO));
+        Disciplina entidade = mapper.toEntity(disciplinaDTO);
+        entidade.setCurso(cursoService.findByIdOrThrowEntity(disciplinaDTO.cursoID()));
+        Disciplina entidadeCriada = repository.save(entidade);
         return mapper.toResponseDTO(entidadeCriada);
     }
 

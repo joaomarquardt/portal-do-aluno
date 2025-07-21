@@ -24,23 +24,18 @@ public class Disciplina {
             inverseJoinColumns = @JoinColumn(name = "pre_requisito_id")
     )
     private List<Disciplina> preRequisitos;
-
-    @ManyToMany
-    @JoinTable(
-            name = "disciplinas_cursos",
-            joinColumns = @JoinColumn(name = "curso_id"),
-            inverseJoinColumns = @JoinColumn(name = "disciplina_id")
-    )
-    private List<Curso> cursos;
+    @ManyToOne
+    @JoinColumn(name = "curso_id", nullable = false)
+    private Curso curso;
 
     private int periodo;
     private int cargaHoraria;
 
-    public Disciplina(String codigo, String nome, List<Disciplina> preRequisitos, List<Curso> cursos, int periodo, int cargaHoraria) {
+    public Disciplina(String codigo, String nome, List<Disciplina> preRequisitos, Curso curso, int periodo, int cargaHoraria) {
         this.codigo = codigo;
         this.nome = nome;
         this.preRequisitos = preRequisitos;
-        this.cursos = cursos;
+        this.curso = curso;
         this.periodo = periodo;
         this.cargaHoraria = cargaHoraria;
     }
@@ -48,12 +43,12 @@ public class Disciplina {
     public Disciplina() {
     }
 
-    public Disciplina(Long id, String codigo, String nome, List<Disciplina> preRequisitos, List<Curso> cursos, int periodo, int cargaHoraria) {
+    public Disciplina(Long id, String codigo, String nome, List<Disciplina> preRequisitos, Curso curso, int periodo, int cargaHoraria) {
         this.id = id;
         this.codigo = codigo;
         this.nome = nome;
         this.preRequisitos = preRequisitos;
-        this.cursos = cursos;
+        this.curso = curso;
         this.periodo = periodo;
         this.cargaHoraria = cargaHoraria;
     }
@@ -90,12 +85,12 @@ public class Disciplina {
         this.preRequisitos = preRequisitos;
     }
 
-    public List<Curso> getCursos() {
-        return cursos;
+    public Curso getCurso() {
+        return curso;
     }
 
-    public void setCursos(List<Curso> cursos) {
-        this.cursos = cursos;
+    public void setCurso(Curso curso) {
+        this.curso = curso;
     }
 
     public int getPeriodo() {

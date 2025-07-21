@@ -5,6 +5,7 @@ public record DisciplinaResponseDTO(
         String codigo,
         String nome,
         int periodo,
-        int cargaHoraria
+        int cargaHoraria,
+        CursoResponseDTO cursoResponseDTO
 ) {
 }
