@@ -31,8 +31,8 @@ public class ProfessorController {
     }
 
     @GetMapping("/select")
-    public ResponseEntity<List<ProfessorSelectResponseDTO>> listAllToSelect() {
-        List<ProfessorSelectResponseDTO> professoresDTO = service.listAllToSelect();
+    public ResponseEntity<List<ProfessorResponseDTO>> listAllToSelect() {
+        List<ProfessorResponseDTO> professoresDTO = service.listAllToSelect();
         return new ResponseEntity<>(professoresDTO, HttpStatus.OK);
     }
 

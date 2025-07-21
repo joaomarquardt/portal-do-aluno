@@ -46,8 +46,8 @@ public class ProfessorService {
         return repository.findBySiape(siape).orElseThrow(() -> new EntityNotFoundException("Professor não encontrado!"));
     }
 
-    public List<ProfessorSelectResponseDTO> listAllToSelect() {
-        return mapper.toDTOSelectResponseList(repository.findAll());
+    public List<ProfessorResponseDTO> listAllToSelect() {
+        return mapper.toDTOResponseList(repository.findAll());
     }
 
     public ProfessorResponseDTO create(CreateProfessorRequestDTO professorDTO) {
