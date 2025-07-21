@@ -142,7 +142,7 @@ const Disciplinas = () => {
           nome: formData.nome,
           periodo: Number(formData.periodo),
           cargaHoraria: Number(formData.cargaHoraria),
-          cursoId: Number(formData.cursoId),
+          cursoID: Number(formData.cursoId),
         };
       }
 
